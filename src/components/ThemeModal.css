@@ -1,0 +1,177 @@
+/* Overlay escurecido e com transição suave */
+.theme-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+/* Modal centralizado, com sombra, responsivo e visual moderno */
+.theme-modal {
+  background: linear-gradient(135deg, #fff 80%, #f3f6fa 100%);
+  border-radius: 18px;
+  padding: 2.2rem 1.8rem 1.7rem 1.8rem;
+  min-width: 320px;
+  max-width: 98vw;
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18), 0 1.5px 8px 0 rgba(0,0,0,0.08);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  animation: modalIn 0.25s cubic-bezier(.4,1.4,.6,1) both;
+}
+
+@keyframes modalIn {
+  0% { opacity: 0; transform: translateY(40px) scale(0.98); }
+  100% { opacity: 1; transform: none; }
+}
+.theme-options {
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.3rem;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #1e293b;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(.4,1.4,.6,1);
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04);
+  outline: none;
+}
+.theme-btn:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 2px #3b82f655;
+}
+.theme-btn.active, .theme-btn:hover {
+  background: #3B82F6;
+  color: #fff;
+  border-color: #3B82F6;
+  box-shadow: 0 2px 8px 0 #3b82f633;
+}
+.theme-btn.danger {
+  background: #EF4444;
+  color: #fff;
+  border-color: #EF4444;
+  box-shadow: 0 2px 8px 0 #ef444433;
+}
+.theme-bg-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  background: #f6f8fa;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-top: 0.5rem;
+}
+.opacity-control {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.opacity-control label {
+  font-size: 1rem;
+  color: #64748b;
+}
+.opacity-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  min-width: 40px;
+}
+.theme-modal-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  color: #3B82F6;
+  font-size: 1.5rem;
+  cursor: pointer;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s;
+}
+.theme-modal-close:hover, .theme-modal-close:focus {
+  background: #e0e7ef;
+  color: #1e293b;
+}
+
+.theme-modal-header {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--primary-color, #3B82F6);
+  margin-bottom: 0.2rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.theme-modal-desc {
+  color: #64748b;
+  font-size: 1.05rem;
+  text-align: center;
+  margin-bottom: 0.7rem;
+}
+
+.theme-bg-instructions {
+  color: #64748b;
+  font-size: 0.98rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.theme-upload-feedback {
+  color: #3B82F6;
+  font-size: 0.98rem;
+  margin: 0.5rem 0 0.2rem 0;
+  text-align: center;
+}
+.theme-upload-error {
+  color: #EF4444;
+  font-size: 0.98rem;
+  margin: 0.5rem 0 0.2rem 0;
+  text-align: center;
+}
+
+.theme-bg-preview {
+  margin: 14px 0 0 0;
+  text-align: center;
+}
+.theme-bg-preview-label {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+@media (max-width: 480px) {
+  .theme-modal {
+    min-width: 90vw;
+    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+    border-radius: 12px;
+  }
+  .theme-bg-section {
+    padding: 0.7rem 0.5rem;
+  }
+  .theme-btn {
+    padding: 0.6rem 0.7rem;
+    font-size: 0.98rem;
+  }
+}

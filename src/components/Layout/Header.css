@@ -1,0 +1,44 @@
+.main-header {
+  width: 100%;
+  background: var(--secondary);
+  color: var(--color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1em 2em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-left: 180px;
+}
+.tenant-info span {
+  margin-right: 1.5em;
+  font-weight: 500;
+}
+.actions {
+  display: flex;
+  align-items: center;
+}
+.theme-name {
+  margin-right: 1em;
+  color: var(--primary);
+}
+button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+button:hover {
+  background: var(--accent);
+}
+@media (max-width: 700px) {
+  .main-header {
+    margin-left: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1em 0.5em;
+  }
+}

@@ -1,0 +1,101 @@
+/* Adaptável a temas e responsivo */
+.title-serv {
+  display: flex;
+  color: var(--primary);
+}
+
+.container-serv {
+  width: 100%;
+  max-width: 700px;
+  min-height: 60vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  border-radius: 8px;
+  box-shadow: 1px 10px 20px 10px rgba(2, 2, 2, 0.2);
+  padding: 2em 1em;
+  margin-top: 10px;
+  background: var(--secondary);
+}
+
+.serv {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 220px;
+  min-width: 180px;
+  max-width: 240px;
+  padding: 12px;
+  margin: 10px;
+  border-radius: 10px;
+  box-shadow: 1px 5px 8px 3px rgba(2, 2, 2, 0.1);
+  background: var(--background);
+  color: var(--color);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.serv.selected, .serv:hover {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.serv h3, .serv p {
+  margin-top: .4em;
+}
+
+@media (max-width: 600px) {
+  .container-serv {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1em 0.5em;
+  }
+  .serv {
+    min-width: 100%;
+    max-width: 100%;
+    margin: 8px 0;
+  }
+}
+
+
+.serv:hover {
+  background-color: #1d1d1d;
+}
+
+.serv.selected {
+  background-color: #3e4095;
+  color: white;
+  border-color:  #3e4095;
+}
+
+.btn-serv {
+  width: 12em;
+  height: 2.5em;
+  margin: 2em 3.5em 0;
+  border: none;
+  background-color: #f10404;
+  color: #ffff;
+  font-weight: 600;
+  box-shadow: 1px 5px 8px 3px rgba(2, 2, 2, 0.5);
+  border-radius: 5px;
+  font-size: 12pt;
+}
+
+.btn-serv:hover {
+  background-color: #a70202;
+  box-shadow: 1px 5px 8px 3px rgba(36, 35, 35, 0.5)
+}
+
+.btn-serv:active {
+  background-color: #530202;
+}
+
+.summary-serv {
+  margin-top: 20px;
+}
+
+.summary-serv p {
+  font-size: 18px;
+  font-weight: bold;
+}

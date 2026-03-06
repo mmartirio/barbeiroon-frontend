@@ -1,0 +1,70 @@
+.grupo-management {
+  min-height: 100vh;
+  background: none;
+  padding: 48px 0;
+}
+
+.grupo-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  min-height: unset;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.grupo-container h2 {
+  margin: 0;
+  font-weight: 800;
+  font-size: 32px;
+  color: #fff;
+  letter-spacing: -1px;
+  text-align: center;
+}
+
+.grupo-container p {
+  margin-bottom: 24px;
+  color: #dbeafe;
+  text-align: center;
+}
+
+.grupo-perms-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #0001;
+  padding: 24px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 18px auto;
+}
+
+.grupo-perms-cat {
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 6px;
+}
+
+.grupo-perms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.grupo-perms-list label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.grupo-perms-list input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}

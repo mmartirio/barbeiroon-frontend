@@ -1,0 +1,113 @@
+
+
+.ui-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--neutral-200);
+  transition: all var(--transition-base);
+  overflow: hidden;
+}
+
+.ui-card--default {
+  background: white;
+}
+
+.ui-card--gradient {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+}
+
+.ui-card--outlined {
+  background: transparent;
+  border: 2px solid var(--primary-200);
+}
+
+.ui-card--hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-300);
+}
+
+.ui-card--padding-none {
+  padding: 0;
+}
+
+.ui-card--padding-sm {
+  padding: var(--space-3);
+}
+
+.ui-card--padding-md {
+  padding: var(--space-6);
+}
+
+.ui-card--padding-lg {
+  padding: var(--space-8);
+}
+
+.ui-card__header {
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--neutral-200);
+  overflow: visible;
+  min-height: fit-content;
+}
+
+.ui-card__body {
+  padding: var(--space-6);
+  padding-top: var(--space-4);
+  overflow: visible;
+}
+
+.ui-card__footer {
+  padding: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--neutral-200);
+  background: var(--neutral-50);
+}
+
+.ui-card__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.5;
+  display: block;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ui-card--gradient .ui-card__title {
+  color: white;
+}
+
+.ui-card__description {
+  font-size: var(--text-sm);
+  color: var(--neutral-600);
+  margin: var(--space-2) 0 0 0;
+  line-height: 1.6;
+}
+
+.ui-card--gradient .ui-card__description {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Animação de entrada */
+.ui-card {
+  animation: fadeIn var(--transition-base);
+}
+
+@media (max-width: 768px) {
+  .ui-card--padding-md {
+    padding: var(--space-4);
+  }
+  
+  .ui-card__header,
+  .ui-card__body,
+  .ui-card__footer {
+    padding: var(--space-4);
+  }
+}

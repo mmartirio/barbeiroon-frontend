@@ -1,0 +1,43 @@
+/* Variáveis Globais CSS */
+:root {
+    /* Cores de fundo */
+    --background: #252525;
+    --background-light: #2d2d2d;
+    --background-dark: #1a1a1a;
+    
+    /* Cores de texto */
+    --color: #fff;
+    --color-muted: #b0b0b0;
+    
+    /* Cores primárias */
+    --primary: #ee4c02;
+    --primary-hover: #ff5c12;
+    --primary-light: rgba(238, 76, 2, 0.1);
+    
+    /* Cores secundárias */
+    --secondary: #1d1d1d;
+    --secondary-hover: #2a2a2a;
+    
+    /* Cores de destaque */
+    --accent: #0078d7;
+    --accent-hover: #1081e0;
+    
+    /* Cores de status */
+    --success: #2ecc71;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+    
+    /* Bordas */
+    --border-color: #404040;
+    
+    /* Sombras */
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.15);
+    
+    /* Raios de borda */
+    --radius: 8px;
+    --radius-sm: 4px;
+    
+    /* Transições */
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

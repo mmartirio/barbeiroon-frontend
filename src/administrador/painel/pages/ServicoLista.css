@@ -1,0 +1,93 @@
+/* Estilos para a tabela de lista de serviços */
+.servico-lista-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #23272f;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  padding: 0;
+  min-height: unset;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.servico-lista-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px #007aff11;
+}
+
+.servico-lista-table th {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 16px 10px;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.servico-lista-table th:first-child {
+  border-top-left-radius: 12px;
+}
+.servico-lista-table th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.servico-lista-table td {
+  padding: 14px 10px;
+  border-bottom: 1px solid #e3eaf7;
+  font-size: 1rem;
+  background: #f7fafd;
+  color: #222;
+}
+
+.servico-lista-table tr:last-child td {
+  border-bottom: none;
+}
+
+.servico-lista-acoes {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.servico-lista-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.servico-lista-btn.edit {
+  color: #007aff;
+}
+.servico-lista-btn.edit:hover {
+  background: #e3eaf7;
+}
+.servico-lista-btn.delete {
+  color: #e74c3c;
+}
+.servico-lista-btn.delete:hover {
+  background: #ffeaea;
+}
+
+@media (max-width: 700px) {
+  .servico-lista-container {
+    padding: 12px 2px;
+  }
+  .servico-lista-table th, .servico-lista-table td {
+    padding: 8px 4px;
+    font-size: 0.95rem;
+  }
+}

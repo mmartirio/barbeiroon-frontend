@@ -1,0 +1,140 @@
+/* SettingsModal.css - layout moderno, responsivo e amigável para o modal de configurações */
+
+.settings-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.settings-modal {
+  background: linear-gradient(135deg, #fff 80%, #f3f6fa 100%);
+  border-radius: 18px;
+  padding: 2.2rem 1.8rem 1.7rem 1.8rem;
+  min-width: 320px;
+  max-width: 98vw;
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18), 0 1.5px 8px 0 rgba(0,0,0,0.08);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  animation: modalIn 0.25s cubic-bezier(.4,1.4,.6,1) both;
+}
+
+@keyframes modalIn {
+  0% { opacity: 0; transform: translateY(40px) scale(0.98); }
+  100% { opacity: 1; transform: none; }
+}
+
+.settings-modal-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  color: #3B82F6;
+  font-size: 1.5rem;
+  cursor: pointer;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s;
+}
+.settings-modal-close:hover, .settings-modal-close:focus {
+  background: #e0e7ef;
+  color: #1e293b;
+}
+
+.settings-modal h3 {
+  margin: 0 0 0.7rem 0;
+  color: var(--primary-color, #3B82F6);
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.settings-modal label {
+  display: block;
+  margin-bottom: 1.1rem;
+  font-size: 1rem;
+  color: #222;
+  font-weight: 500;
+}
+
+.settings-modal select, .settings-modal input[type="file"] + button {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #1e293b;
+  font-size: 1rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.2rem;
+  transition: border 0.18s;
+}
+.settings-modal select:focus, .settings-modal input[type="file"] + button:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 2px #3b82f655;
+}
+
+.settings-modal .bg-preview {
+  margin: 12px 0 0 0;
+  text-align: center;
+}
+.settings-modal .bg-preview img {
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+  border: 1px solid #eee;
+  background: #fafafa;
+}
+.settings-modal .bg-preview .preview-label {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.settings-modal .bg-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+.settings-modal .bg-actions button {
+  flex: 1;
+  padding: 0.6rem 0;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #3B82F6;
+  color: #fff;
+  transition: background 0.18s;
+}
+.settings-modal .bg-actions button:last-child {
+  background: #EF4444;
+}
+.settings-modal .bg-actions button:hover {
+  filter: brightness(0.95);
+}
+
+@media (max-width: 480px) {
+  .settings-modal {
+    min-width: 90vw;
+    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+    border-radius: 12px;
+  }
+  .settings-modal label {
+    font-size: 0.98rem;
+  }
+}

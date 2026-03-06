@@ -1,0 +1,77 @@
+/* Modal base para todos os modais customizados do projeto */
+
+.custom-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.custom-modal {
+  background: #fff;
+  color: #222;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.18);
+  border: 2px solid var(--primary, #3B82F6);
+  min-width: 320px;
+  max-width: 95vw;
+  width: 100%;
+  padding: 2.2rem 1.7rem 1.7rem 1.7rem;
+  animation: modalIn 0.22s cubic-bezier(.4,1.6,.6,1) both;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  position: relative;
+}
+
+.custom-modal.dark {
+  background: #23272f;
+  color: #fff;
+  border-color: #6366F1;
+}
+
+.custom-modal-header {
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--primary, #3B82F6);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.custom-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: inherit;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.custom-modal-close:hover {
+  color: #EF4444;
+}
+
+.custom-modal-content {
+  margin-bottom: 1.2rem;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(40px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 480px) {
+  .custom-modal {
+    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+    min-width: 0;
+  }
+  .custom-modal-header {
+    font-size: 1.1rem;
+  }
+}

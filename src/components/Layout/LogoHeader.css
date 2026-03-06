@@ -1,0 +1,25 @@
+.logo-header {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  margin-right: 6%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 1000;
+}
+
+.logo-header-image {
+  width: 72px;
+  height: auto;
+  display: block;
+}
+
+.logo-header-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: #007aff;
+  letter-spacing: 0.4px;
+  text-align: center;
+}
