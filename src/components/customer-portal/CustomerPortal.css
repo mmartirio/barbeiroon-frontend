@@ -9,11 +9,12 @@
     margin: 32px 0 24px 0;
 }
 
-.service-dashboard-card {
-    background: #fff;
+.service-dashboard-card.ui-card {
+    background: #2563eb !important;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    border: 2px solid #e0e0e0;
+    border: 2px solid #1d4ed8;
+    color: #fff;
     min-width: 0;
     max-width: 220px;
     transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
@@ -25,10 +26,20 @@
     cursor: pointer;
 }
 
-.service-dashboard-card.selected {
-    border-color: #667eea;
-    box-shadow: 0 4px 16px rgba(102,126,234,0.10);
+.service-dashboard-card.ui-card.selected {
+    background: #ffffff !important;
+    border-color: #93c5fd;
+    box-shadow: 0 4px 16px rgba(37,99,235,0.2);
     transform: translateY(-2px) scale(1.03);
+}
+
+.service-advance-button {
+    background: #2563eb !important;
+    color: #fff !important;
+}
+
+.service-advance-button:hover:not(:disabled) {
+    background: #1d4ed8 !important;
 }
 
 /* Portal principal */
@@ -105,7 +116,7 @@
 .customer-portal-container {
     max-width: 600px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.95);
+
     backdrop-filter: blur(10px);
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -428,6 +439,60 @@ button[type="submit"] {
     font-size: 18px;
 }
 
+/* Lista de agendamentos do cliente */
+.customer-portal-page .appointments-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.customer-portal-page .appointment-item {
+    width: 100%;
+    background: #ffffff !important;
+    border: 1px solid #d8dee9;
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.customer-portal-page .appointment-item > div {
+    text-align: left;
+    color: #111827 !important;
+}
+
+.customer-portal-page .appointment-item > div strong {
+    display: block;
+    color: #0f172a !important;
+    margin-bottom: 4px;
+    text-shadow: none;
+}
+
+.customer-portal-page .appointment-item > div div {
+    color: #1f2937 !important;
+    line-height: 1.35;
+    text-shadow: none;
+}
+
+.customer-portal-page .appointment-item button {
+    width: auto !important;
+    min-width: 170px;
+    max-width: 170px;
+    padding: 10px 12px;
+    font-size: 14px;
+    background: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+.customer-portal-page .appointment-item button:hover:not(:disabled) {
+    background: #dc2626 !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
+}
+
 /* Confirmação */
 .confirmation {
     text-align: center;
@@ -455,6 +520,7 @@ button[type="submit"] {
 
 .confirmation-details p {
     font-size: 17px;
+    color: #333 !important;
 }
 
 /* Modal de confirmação - Corrigido */
@@ -503,9 +569,16 @@ button[type="submit"] {
 
 .confirm-btn {
     flex: 1 1 0;
-    min-width: 0;
-    width: auto;
-    padding: 12px 8px;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    padding: 15px 12px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.2;
     border-radius: 8px;
     font-size: 16px;
     font-weight: 600;
@@ -514,9 +587,16 @@ button[type="submit"] {
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.confirm-actions .confirm-btn {
+    flex: 1 1 0;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: calc(50% - 6px) !important;
 }
 
 .confirm-btn:hover:not(:disabled) {
@@ -640,6 +720,17 @@ button[type="submit"] {
     .form-group label {
         font-size: 16px;
     }
+
+    .customer-portal-page .appointment-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .customer-portal-page .appointment-item button {
+        width: 100% !important;
+        max-width: none;
+        min-width: 0;
+    }
 }
 
 @media (max-width: 480px) {
@@ -697,4 +788,75 @@ button[type="submit"] {
 
 .w-100 {
     width: 100%;
+}
+
+.professional-list-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.professional-item-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    background: rgba(37, 99, 235, 0.16);
+    border: 1px solid #60a5fa;
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.professional-item-card.selected {
+    background: #ffffff;
+    color: #1f2937;
+    border-color: #93c5fd;
+}
+
+.professional-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 17px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.professional-avatar-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    background: #1d4ed8;
+    color: #fff;
+}
+
+/* Sobrescrita final do modal de cancelamento (evita conflito com regras globais de button) */
+.confirm-modal .confirm-actions button .confirm-btn {
+    width: calc(50% - 6px) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    padding: 15px 12px !important;
+    min-height: 44px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: normal !important;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .confirm-modal .confirm-actions button.confirm-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+    }
 }

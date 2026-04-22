@@ -18,6 +18,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import './CustomerPortal.css';
 import { Card, CardTitle, CardDescription } from '../../components/ui/Card';
+import { FiScissors, FiClock, FiDollarSign } from 'react-icons/fi';
 
 /**
  * Portal do Cliente - Interface pública para agendamento
@@ -67,6 +68,34 @@ const CustomerPortal = () => {
     const [loadingTimes, setLoadingTimes] = useState(false);
     const [pendingRequest, setPendingRequest] = useState(null);
     const [pendingCountdown, setPendingCountdown] = useState(0);
+    // Promoções disponíveis para o cliente
+    const [availablePromotions, setAvailablePromotions] = useState([]);
+    // Estado para alertas de voucher
+    const [voucherAlert, setVoucherAlert] = useState('');
+    const [voucherAgendamento, setVoucherAgendamento] = useState('');
+        // Buscar promoções disponíveis para o cliente
+        const loadAvailablePromotions = async (phone) => {
+            if (!phone || !tenantData.id) return;
+            try {
+                const params = new URLSearchParams({
+                    customerPhone: phone,
+                    tenantId: tenantData.id
+                });
+                const response = await fetch(`/api/public/promotion/available?${params.toString()}`);
+                const data = await response.json();
+                setAvailablePromotions(data.promotions || []);
+                // Exibe alerta se houver voucher
+                const firstVoucher = (data.promotions || []).find(p => p.voucher);
+                if (firstVoucher) {
+                    setVoucherAlert(`Você ganhou um cupom promocional: ${firstVoucher.voucher}`);
+                } else {
+                    setVoucherAlert('');
+                }
+            } catch (error) {
+                setAvailablePromotions([]);
+                setVoucherAlert('');
+            }
+        };
     
     // API_URL removido - usando URLs relativas com proxy nginx
 
@@ -83,6 +112,20 @@ const CustomerPortal = () => {
         }
 
         return stringValue;
+    };
+
+    const formatDateBr = (value) => {
+        if (!value) return '';
+
+        const rawValue = String(value).split('T')[0];
+        if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) {
+            const [year, month, day] = rawValue.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return String(value);
+        return parsed.toLocaleDateString('pt-BR');
     };
 
 
@@ -254,6 +297,7 @@ const CustomerPortal = () => {
             }
             setCustomer(data.customer);
             await loadCustomerAppointments(data.customer.phone);
+            await loadAvailablePromotions(data.customer.phone);
         } catch (error) {
             console.error('Erro:', error);
             alert('😞 Não foi possível processar seus dados. Por favor, verifique as informações e tente novamente.');
@@ -347,9 +391,10 @@ const CustomerPortal = () => {
             const userResponse = await fetch(`/api/public/users/barbers/${tenantData.id}`);
             const userData = await userResponse.json();
             const users = (userData.users || []).map(u => ({
-                id: 'user-' + u.id,
+                id: u.id,
                 name: u.name,
-                isUser: true
+                isUser: true,
+                imageUrl: u.imageUrl || (u.profileImageId ? `/api/images/image/${u.profileImageId}` : null)
             }));
 
             // Junta profissionais e usuários (sem dedup por nome para nao ocultar barbeiros)
@@ -363,6 +408,12 @@ const CustomerPortal = () => {
     // Passo 2: Criar Agendamento
     const handleAppointmentSubmit = async (e) => {
         e.preventDefault();
+
+        if (!appointmentData.professionalId) {
+            alert('Selecione um profissional para continuar.');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -382,6 +433,13 @@ const CustomerPortal = () => {
 
             const data = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(data.message || 'Erro ao criar agendamento');
+
+            // Se vier voucher na resposta, exibe ao final
+            if (data.voucher) {
+                setVoucherAgendamento(data.voucher);
+            } else {
+                setVoucherAgendamento('');
+            }
 
             if (data.status === 'pending' && data.requestId) {
                 setPendingRequest({
@@ -533,14 +591,19 @@ const CustomerPortal = () => {
             ) : (
                 <div className="appointments-list">
                     {appointments.map((appt) => (
-                        <div key={appt.id} className="appointment-item">
-                            <div>
-                                <strong>{appt.service?.name || 'Servico'}</strong>
-                                <div>{appt.professionalName || appt.professional?.name || 'Profissional'}</div>
-                                <div>{appt.appointmentDate} {appt.appointmentTime}</div>
+                        <div
+                            key={appt.id}
+                            className="appointment-item"
+                            style={{ background: '#ffffff', color: '#111827', borderColor: '#d8dee9' }}
+                        >
+                            <div style={{ color: '#111827', textAlign: 'left' }}>
+                                <strong style={{ color: '#0f172a' }}>{appt.service?.name || 'Servico'}</strong>
+                                <div style={{ color: '#1f2937' }}>{appt.professionalName || appt.professional?.name || 'Profissional'}</div>
+                                <div style={{ color: '#1f2937' }}>{formatDateBr(appt.appointmentDate)} {appt.appointmentTime}</div>
                             </div>
                             <button
                                 type="button"
+                                style={{ background: '#ef4444', color: '#ffffff' }}
                                 onClick={async () => {
                                     setConfirmCancel({ open: true, appointment: appt });
                                 }}
@@ -562,8 +625,53 @@ const CustomerPortal = () => {
     // Passo 3: Seleção de Serviço (cards)
     const renderStepServiceSelection = () => (
         <div className="customer-portal-step">
+            {voucherAlert && (
+                <FeedbackMessage message={voucherAlert} type="success" onClose={() => setVoucherAlert('')} />
+            )}
             <h2>Escolha o Serviço</h2>
             <p>Olá, {customer?.name}! Selecione o serviço desejado:</p>
+            {/* Exibir promoções disponíveis */}
+            {availablePromotions.length > 0 && (
+                <div className="promotion-info-box" style={{ background: '#f1f5f9', color: '#0f172a', border: '1px solid #60a5fa', borderRadius: 8, padding: 12, marginBottom: 16 }}>
+                    <strong>Promoções disponíveis para você:</strong>
+                    <ul style={{ margin: 0, paddingLeft: 18 }}>
+                        {availablePromotions.map((promo, idx) => (
+                            <li key={promo.id || idx}>
+                                {promo.motivo === 'aniversariante' && (
+                                    <>
+                                        🎉 Parabéns! Promoção especial de aniversário: <b>{promo.name}</b> ({promo.priceType === 'percentual' ? `${promo.price}%` : `R$ ${promo.price}`})
+                                        {promo.voucher && (
+                                            <span style={{ color: '#2563eb', fontWeight: 600, marginLeft: 8 }}>
+                                                Cupom: <span style={{ background: '#e0e7ff', borderRadius: 4, padding: '2px 6px' }}>{promo.voucher}</span>
+                                            </span>
+                                        )}
+                                    </>
+                                )}
+                                {promo.motivo === 'fidelidade' && (
+                                    <>
+                                        🏅 Promoção de fidelidade: <b>{promo.name}</b> {promo.xCompras ? `(após ${promo.xCompras} retornos)` : ''} {promo.priceType === 'percentual' ? `${promo.price}%` : `R$ ${promo.price}`}
+                                        {promo.voucher && (
+                                            <span style={{ color: '#2563eb', fontWeight: 600, marginLeft: 8 }}>
+                                                Cupom: <span style={{ background: '#e0e7ff', borderRadius: 4, padding: '2px 6px' }}>{promo.voucher}</span>
+                                            </span>
+                                        )}
+                                    </>
+                                )}
+                                {!promo.motivo && (
+                                    <>
+                                        {promo.name} {promo.priceType === 'percentual' ? `${promo.price}%` : `R$ ${promo.price}`}
+                                        {promo.voucher && (
+                                            <span style={{ color: '#2563eb', fontWeight: 600, marginLeft: 8 }}>
+                                                Cupom: <span style={{ background: '#e0e7ff', borderRadius: 4, padding: '2px 6px' }}>{promo.voucher}</span>
+                                            </span>
+                                        )}
+                                    </>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
             <div className="service-cards-grid">
                 {services.map(service => (
                     <Card
@@ -578,21 +686,30 @@ const CustomerPortal = () => {
                             minWidth: 180,
                             maxWidth: 220,
                             margin: '0 auto',
-                            background: 'rgba(255,255,255,0.8)',
-                            color: '#23272f',
-                            border: '2px solid #e0e0e0',
+                            background: selectedServiceId === service.id ? '#ffffff' : '#2563eb',
+                            color: selectedServiceId === service.id ? '#1f2937' : '#fff',
+                            border: selectedServiceId === service.id ? '2px solid #93c5fd' : '2px solid #1d4ed8',
                         }}
                     >
-                        <CardTitle style={{ fontSize: '1.08rem', marginBottom: 8, color: '#23272f', fontWeight: 700 }}>{service.name}</CardTitle>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '0.98rem', marginBottom: 2, color: '#23272f' }}>
-                            <span>{service.duration ? service.duration + ' min' : 'N/A'}</span>
-                            <span>R$ {service.price?.toFixed ? service.price.toFixed(2) : service.price}</span>
+                        <CardTitle style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '1.08rem', marginBottom: 8, color: selectedServiceId === service.id ? '#1f2937' : '#fff', fontWeight: 700 }}>
+                            <FiScissors />
+                            <span>{service.name}</span>
+                        </CardTitle>
+                        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', fontSize: '0.98rem', marginBottom: 2, color: selectedServiceId === service.id ? '#1f2937' : '#fff', gap: 6 }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <FiClock />
+                                <span>{service.duration ? `${service.duration} min` : 'N/A'}</span>
+                            </span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <FiDollarSign />
+                                <span>R$ {service.price?.toFixed ? service.price.toFixed(2) : service.price}</span>
+                            </span>
                         </div>
                     </Card>
                 ))}
             </div>
             <div className="button-group">
-                <button type="button" disabled={!selectedServiceId} onClick={() => {
+                <button className="service-advance-button" type="button" disabled={!selectedServiceId} onClick={() => {
                     setAppointmentData({ ...appointmentData, serviceId: selectedServiceId });
                     setStep(4);
                 }}>
@@ -613,18 +730,28 @@ const CustomerPortal = () => {
             <form onSubmit={handleAppointmentSubmit}>
                 <div className="form-group">
                     <label>Profissional *</label>
-                    <select
-                        value={appointmentData.professionalId}
-                        onChange={(e) => setAppointmentData({...appointmentData, professionalId: e.target.value})}
-                        required
-                    >
-                        <option value="">Selecione um profissional</option>
-                        {professionals.map(prof => (
-                            <option key={prof.id} value={prof.id}>
-                                {prof.name}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="professional-list-grid">
+                        {professionals.map((prof) => {
+                            const selected = String(appointmentData.professionalId) === String(prof.id);
+                            return (
+                                <button
+                                    key={prof.isUser ? `user-${prof.id}` : `professional-${prof.id}`}
+                                    type="button"
+                                    className={`professional-item-card${selected ? ' selected' : ''}`}
+                                    onClick={() => setAppointmentData({ ...appointmentData, professionalId: prof.id })}
+                                >
+                                    {prof.imageUrl ? (
+                                        <img src={prof.imageUrl} alt={prof.name} className="professional-avatar" />
+                                    ) : (
+                                        <div className="professional-avatar professional-avatar-fallback">
+                                            {String(prof.name || '?').charAt(0).toUpperCase()}
+                                        </div>
+                                    )}
+                                    <span>{prof.name}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
                 <div className="form-group">
                     <label>Data *</label>
@@ -692,12 +819,33 @@ const CustomerPortal = () => {
         <div className="customer-portal-step confirmation">
             <h2>✓ Agendamento Confirmado!</h2>
             <p>Seu agendamento foi realizado com sucesso.</p>
+            {voucherAgendamento && (
+                <FeedbackMessage message={`Cupom aplicado nesta compra: ${voucherAgendamento}`} type="success" onClose={() => setVoucherAgendamento('')} />
+            )}
             <div className="confirmation-details">
                 <h3>Detalhes do Agendamento</h3>
                 <p><strong>Nome:</strong> {customer?.name}</p>
                 <p><strong>Telefone:</strong> {formatPhone(customer?.phone)}</p>
-                <p><strong>Data:</strong> {appointmentData.date}</p>
+                <p><strong>Data:</strong> {formatDateBr(appointmentData.date)}</p>
                 <p><strong>Horário:</strong> {appointmentData.time}</p>
+            </div>
+            <div className="button-group">
+                <button
+                    type="button"
+                    onClick={() => {
+                        setSelectedServiceId('');
+                        setAppointmentData({
+                            serviceId: '',
+                            professionalId: '',
+                            date: '',
+                            time: ''
+                        });
+                        setPendingRequest(null);
+                        setStep(1);
+                    }}
+                >
+                    Voltar
+                </button>
             </div>
         </div>
     );

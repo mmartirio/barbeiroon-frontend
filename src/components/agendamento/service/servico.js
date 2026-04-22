@@ -1,9 +1,27 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import './servico.css';
 import { useApi } from '../../../hooks/useApi';
+import { FiScissors, FiClock, FiDollarSign } from 'react-icons/fi';
 
 const Login = lazy(() => import('../../login/login'));
 const PDFGenerator = lazy(() => import('../PDF/pdfGenerator'));
+
+const formatDurationLabel = (duration) => {
+  const raw = String(duration ?? '').trim();
+  if (!raw) return '-';
+
+  if (/^\d+$/.test(raw)) {
+    return `${raw} min`;
+  }
+
+  const match = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (!match) return raw;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const totalMinutes = (hours * 60) + minutes;
+  return `${totalMinutes} min`;
+};
 
 const Servico = () => {
   const [selectedServices, setSelectedServices] = useState([]);
@@ -63,9 +81,18 @@ const Servico = () => {
             className={`serv ${selectedServices.includes(name) ? 'selected' : ''}`}
             onClick={() => toggleService(name)}
           >
-            <h3>{name}</h3>
-            <p>Duração: {duration} min</p>
-            <p>Valor: R$ {value},00</p>
+            <h3 className='serv-title'>
+              <FiScissors />
+              <span>{name}</span>
+            </h3>
+            <p className='serv-meta'>
+              <FiClock />
+              <span>Duração: {formatDurationLabel(duration)}</span>
+            </p>
+            <p className='serv-meta'>
+              <FiDollarSign />
+              <span>Valor: R$ {value},00</span>
+            </p>
           </div>
         ))
       )}

@@ -654,6 +654,84 @@
   font-weight: 500;
 }
 
+.birthday-card-clickable {
+  cursor: pointer;
+}
+
+.birthday-card-clickable:focus-visible {
+  outline: 2px solid #007aff;
+  outline-offset: 4px;
+  border-radius: 1.25rem;
+}
+
+.birthday-open-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  color: #007aff;
+  font-weight: 600;
+  text-align: center;
+}
+
+.birthday-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 1rem;
+}
+
+.birthday-modal {
+  width: min(560px, 100%);
+  max-height: 80vh;
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.birthday-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.birthday-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.birthday-modal-close {
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.birthday-modal-body {
+  padding: 1rem 1.25rem 1.25rem;
+  max-height: calc(80vh - 64px);
+  overflow-y: auto;
+}
+
+.birthday-item-modal {
+  margin-bottom: 0.5rem;
+}
+
+.birthday-item-modal:last-child {
+  margin-bottom: 0;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
