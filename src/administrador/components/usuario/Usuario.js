@@ -25,6 +25,7 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [planLimit, setPlanLimit] = useState(null);
   const [userType, setUserType] = useState('admin');
   const [perms, setPerms] = useState({});
   const [groups, setGroups] = useState([
@@ -111,6 +112,7 @@ const UserManagement = () => {
   const addUser = async () => {
     setErrorMsg('');
     setSuccessMsg('');
+    setPlanLimit(null);
     
     // Validações
     if (!userData.name || !userData.email || !userData.password) {
@@ -158,13 +160,23 @@ const UserManagement = () => {
       });
 
       if (response.status === 409) {
-        setErrorMsg(t('usuario.alreadyExists') || 'Usuário já cadastrado!');
+        setErrorMsg('Este e-mail já está cadastrado. Use um e-mail diferente.');
+        return;
+      }
+
+      if (response.status === 403) {
+        const data = await response.json().catch(() => ({}));
+        if (data.limitReached) {
+          setPlanLimit(data);
+        } else {
+          setErrorMsg(data.message || 'Você não tem permissão para realizar esta ação.');
+        }
         return;
       }
 
       if (!response.ok) {
-        const errorText = await response.text();
-        setErrorMsg(t('usuario.errorAdd') + `: ${response.status} - ${errorText}`);
+        const data = await response.json().catch(() => ({}));
+        setErrorMsg(data.message || 'Não foi possível cadastrar o usuário. Tente novamente.');
         return;
       }
 
@@ -173,8 +185,8 @@ const UserManagement = () => {
       setUsers((prevUsers) => [...prevUsers, data.user]);
       setUserData({ name: '', email: '', password: '', isAdmin: false, isBarber: false });
       
-    } catch (error) {
-      setErrorMsg(t('usuario.errorAdd') + `: ${error.message}`);
+    } catch {
+      setErrorMsg('Falha na conexão com o servidor. Verifique sua internet e tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -382,6 +394,25 @@ const UserManagement = () => {
               </h1>
             </div>
             <div className="portal-card-body">
+              {planLimit && (
+                <div role="alert" style={{
+                  background: '#422006', border: '1px solid #92400e', borderRadius: 8,
+                  padding: '14px 16px', marginBottom: 16, display: 'flex', gap: 12, alignItems: 'flex-start',
+                }}>
+                  <span style={{ fontSize: 22, lineHeight: 1 }}>📋</span>
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#fbbf24', marginBottom: 4, fontSize: 14 }}>
+                      Limite do plano atingido
+                    </div>
+                    <div style={{ color: '#fde68a', fontSize: 13, lineHeight: 1.5 }}>
+                      {planLimit.message}
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 12, color: '#f59e0b' }}>
+                      Usuários ativos: <strong>{planLimit.current}</strong> / <strong>{planLimit.limit}</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
               {errorMsg && <div className="alert-error" role="alert">{errorMsg}</div>}
               {successMsg && <div className="alert-success" role="status">{successMsg}</div>}
 

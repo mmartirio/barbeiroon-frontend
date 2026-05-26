@@ -58,14 +58,95 @@ export default function Promocoes() {
     setLoading(true);
     setErrorMsg('');
     setSuccessMsg('');
-    // Simulação de envio
-    setTimeout(() => {
-      setSuccessMsg('Promoção criada com sucesso!');
+
+    // Validações básicas
+    if (!form.nome.trim()) {
+      setErrorMsg('Informe o nome da promoção.');
       setLoading(false);
-      setForm({
-        nome: '', preco: '', tipoPreco: 'fixo', tipo: 'desconto_compra', validadeInicio: '', validadeFim: '', criterios: [], xCompras: '', servicoX: '', numClientes: ''
+      return;
+    }
+    const priceNum = Number(form.preco);
+    if (!form.preco || isNaN(priceNum) || priceNum < 0) {
+      setErrorMsg('Informe um preço válido.');
+      setLoading(false);
+      return;
+    }
+    if (form.tipoPreco === 'percentual' && (priceNum <= 0 || priceNum > 100)) {
+      setErrorMsg('Para desconto percentual, informe um valor entre 1 e 100.');
+      setLoading(false);
+      return;
+    }
+    if (!form.validadeInicio) {
+      setErrorMsg('Informe a data inicial de validade.');
+      setLoading(false);
+      return;
+    }
+    if (form.validadeFim && form.validadeFim < form.validadeInicio) {
+      setErrorMsg('A data final não pode ser menor que a data inicial.');
+      setLoading(false);
+      return;
+    }
+    // Validações de critérios
+    if (form.criterios.includes('prazo_estimado') && !form.validadeFim) {
+      setErrorMsg('Informe a data final de validade para o critério "Efetiva no prazo estimado".');
+      setLoading(false);
+      return;
+    }
+    if (form.criterios.includes('x_compras') && (!form.xCompras || Number(form.xCompras) < 1)) {
+      setErrorMsg('Informe a quantidade de compras para o critério selecionado.');
+      setLoading(false);
+      return;
+    }
+    if (form.criterios.includes('servico_x') && !form.servicoX.trim()) {
+      setErrorMsg('Informe o nome do serviço para o critério selecionado.');
+      setLoading(false);
+      return;
+    }
+    if (form.criterios.includes('num_clientes') && (!form.numClientes || Number(form.numClientes) < 1)) {
+      setErrorMsg('Informe o número de clientes para o critério selecionado.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const token = sessionStorage.getItem('token');
+      const payload = {
+        nome: form.nome.trim(),
+        preco: priceNum,
+        tipoPreco: form.tipoPreco,
+        tipo: form.tipo,
+        validadeInicio: form.validadeInicio,
+        validadeFim: form.validadeFim || null,
+        criterios: form.criterios,
+        xCompras: form.criterios.includes('x_compras') ? Number(form.xCompras) : null,
+        servicoX: form.criterios.includes('servico_x') ? form.servicoX.trim() : null,
+        numClientes: form.criterios.includes('num_clientes') ? Number(form.numClientes) : null,
+      };
+
+      const response = await fetch('/api/promotion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
       });
-    }, 1200);
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Não foi possível criar a promoção.');
+      }
+
+      setSuccessMsg('Promoção criada com sucesso!');
+      setForm({
+        nome: '', preco: '', tipoPreco: 'fixo', tipo: 'desconto_compra',
+        validadeInicio: '', validadeFim: '', criterios: [], xCompras: '', servicoX: '', numClientes: ''
+      });
+    } catch (error) {
+      setErrorMsg(error.message || 'Erro ao criar promoção. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,7 +168,7 @@ export default function Promocoes() {
               <div style={{ width: '100%', display: 'flex', gap: 12 }}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <label htmlFor="preco" style={{ width: '100%', fontWeight: 600, color: '#e5e7eb', textAlign: 'center', marginBottom: 4 }}>Preço:</label>
-                  <input id="preco" name="preco" type="number" min="0" value={form.preco} onChange={handleChange} required style={{ width: 'calc(50% - 4px)', padding: '10px 14px', borderRadius: 8, border: '1.5px solid #c7d0e1', fontSize: 16, background: '#f7fafd', boxShadow: '0 1px 6px #007aff11', outline: 'none', textAlign: 'center', marginBottom: 12 }} />
+                  <input id="preco" name="preco" type="number" min="0" max={form.tipoPreco === 'percentual' ? 100 : undefined} value={form.preco} onChange={handleChange} required placeholder={form.tipoPreco === 'percentual' ? '1–100' : '0.00'} style={{ width: 'calc(50% - 4px)', padding: '10px 14px', borderRadius: 8, border: '1.5px solid #c7d0e1', fontSize: 16, background: '#f7fafd', boxShadow: '0 1px 6px #007aff11', outline: 'none', textAlign: 'center', marginBottom: 12 }} />
                 </div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <label htmlFor="tipoPreco" style={{ width: '100%', fontWeight: 600, color: '#e5e7eb', textAlign: 'center', marginBottom: 4 }}>Tipo de Preço:</label>
@@ -107,7 +188,7 @@ export default function Promocoes() {
                   <label style={{ width: '100%', fontWeight: 600, color: '#e5e7eb', textAlign: 'center', marginBottom: 4 }}>Validade da Promoção:</label>
                   <div style={{ display: 'flex', gap: 8, width: '100%' }}>
                     <input id="validadeInicio" name="validadeInicio" type="date" value={form.validadeInicio} onChange={handleChange} required style={{ flex: 1, padding: '10px 14px', borderRadius: 8, border: '1.5px solid #c7d0e1', fontSize: 16, background: '#f7fafd', boxShadow: '0 1px 6px #007aff11', outline: 'none', textAlign: 'center', marginBottom: 12 }} placeholder="Início" />
-                    <input id="validadeFim" name="validadeFim" type="date" value={form.validadeFim} onChange={handleChange} required style={{ flex: 1, padding: '10px 14px', borderRadius: 8, border: '1.5px solid #c7d0e1', fontSize: 16, background: '#f7fafd', boxShadow: '0 1px 6px #007aff11', outline: 'none', textAlign: 'center', marginBottom: 12 }} placeholder="Fim" />
+                    <input id="validadeFim" name="validadeFim" type="date" value={form.validadeFim} onChange={handleChange} style={{ flex: 1, padding: '10px 14px', borderRadius: 8, border: '1.5px solid #c7d0e1', fontSize: 16, background: '#f7fafd', boxShadow: '0 1px 6px #007aff11', outline: 'none', textAlign: 'center', marginBottom: 12 }} placeholder="Fim (opcional)" />
                   </div>
                 </div>
               </div>

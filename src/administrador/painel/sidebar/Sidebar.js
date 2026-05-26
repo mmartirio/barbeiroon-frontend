@@ -1,11 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Sidebar.css';
-import { 
-  FiSettings, 
-  FiUsers, 
-  FiCalendar, 
-  FiScissors, 
+import {
+  FiSettings,
+  FiUsers,
+  FiCalendar,
+  FiScissors,
   FiBarChart2,
   FiChevronDown,
   FiChevronRight,
@@ -15,9 +15,11 @@ import {
   FiMonitor,
   FiBriefcase,
   FiTrash2,
-  FiPercent
+  FiPercent,
+  FiSmartphone
 } from 'react-icons/fi';
 import ThemeModal from '../../../components/ThemeModal';
+import WhatsAppModal from '../WhatsAppModal';
 import { AuthContext } from '../../../context/AuthContext';
 import { useTheme } from '../../../hooks/useTheme';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +27,7 @@ import defaultLogo from '../../../assets/user.png';
 
 const Sidebar = () => {
   const [themeModalOpen, setThemeModalOpen] = useState(false);
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   const [openMenus, setOpenMenus] = useState(() => {
     try {
       const stored = sessionStorage.getItem('sidebarOpenMenus');
@@ -191,10 +194,29 @@ const Sidebar = () => {
         
         <li><Link to="/perfil"><FiUser size={18} /> {t('sidebar.profile', 'Perfil')}</Link></li>
         {canSeeAccount && (
-          <li>
-            <Link to="/conta" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <FiBriefcase size={18} /> {t('sidebar.account', 'Conta')}
-            </Link>
+          <li className={`has-submenu ${openMenus.account ? 'open' : ''}`}>
+            <div className="menu-item-with-submenu" onClick={() => toggleMenu('account')}>
+              <span className="menu-item-content">
+                <FiBriefcase size={18} />
+                <span>{t('sidebar.account', 'Conta')}</span>
+              </span>
+              {openMenus.account ? <FiChevronDown size={16} /> : <FiChevronRight size={16} />}
+            </div>
+            <ul className="submenu">
+              <li>
+                <Link to="/conta"><FiBriefcase size={16} /> {t('sidebar.account', 'Conta')}</Link>
+              </li>
+              <li>
+                <button
+                  onClick={() => setWhatsappModalOpen(true)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', padding: '0.5rem 1rem 0.5rem 3rem', borderRadius: 8, display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', textAlign: 'left', transition: 'all 0.2s' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#007aff'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; e.currentTarget.style.transform = 'none'; }}
+                >
+                  <FiSmartphone size={16} /> QR Code WhatsApp
+                </button>
+              </li>
+            </ul>
           </li>
         )}
         <li style={{ marginBottom: 0 }}>
@@ -213,6 +235,7 @@ const Sidebar = () => {
         </button>
       </div>
       <ThemeModal isOpen={themeModalOpen} onClose={() => setThemeModalOpen(false)} />
+      {whatsappModalOpen && <WhatsAppModal onClose={() => setWhatsappModalOpen(false)} />}
     </div>
   );
 }

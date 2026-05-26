@@ -9,7 +9,7 @@
       "access": "Acessar",
       "success": "✅ Login realizado com sucesso! Redirecionando...",
       "error": "🔒 Não foi possível fazer login. Verifique suas credenciais e tente novamente.",
-      "welcome": "Bem-vindo ao Meu barbeiro",
+      "welcome": "Bem-vindo ao Barbeiro On",
       "schedule": "Agende seu horário",
       "name": "Seu nome",
       "phone": "Seu telefone",
@@ -31,7 +31,7 @@
     "error": "Erro ao carregar dados de serviços."
   },
     "sidebar": {
-      "title": "Meu Barbeiro",
+      "title": "Barbeiro On",
       "users": "Usuários",
       "services": "Serviços",
       "schedule": "Agenda",

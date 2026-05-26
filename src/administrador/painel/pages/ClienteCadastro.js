@@ -3,8 +3,10 @@ import React, { useState, useRef } from 'react';
 import Sidebar from '../sidebar/Sidebar';
 import '../AdminDashboard.css';
 import Button from '../../../components/Button';
+import { useAuth } from '../../../hooks/useAuth';
 
 export default function ClienteCadastro() {
+  const { token } = useAuth();
   const [form, setForm] = useState({ nome: '', telefone: '', aniversario: '' });
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -29,15 +31,25 @@ export default function ClienteCadastro() {
     }
     setLoading(true);
     try {
-      // Substitua a URL abaixo pela rota real de cadastro de cliente
-      const response = await fetch('/api/customer/register', {
+      const response = await fetch('/api/customer', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: form.nome,
+          phone: form.telefone.replace(/\D/g, ''),
+          birthDate: form.aniversario || undefined,
+        }),
       });
       if (!response.ok) {
-        const errorText = await response.text();
-        setErrorMsg(`Erro ao cadastrar cliente: ${response.status} - ${errorText}`);
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 400 && errorData.customer) {
+          setErrorMsg('Este número de telefone já está cadastrado no sistema. Verifique se o cliente já existe na lista.');
+        } else {
+          setErrorMsg(errorData.message || 'Erro ao cadastrar cliente. Tente novamente.');
+        }
         setLoading(false);
         return;
       }

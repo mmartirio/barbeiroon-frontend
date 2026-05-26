@@ -17,6 +17,7 @@ import LogoHeader from './components/Layout/LogoHeader';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useAuth } from './hooks/useAuth';
 import PendingRequestsNotifier from './administrador/components/servicos/PendingRequestsNotifier';
+import { OfflineBanner } from './components/OfflineBanner';
 
 // Error Boundary para capturar erros
 class ErrorBoundary extends Component {
@@ -55,6 +56,7 @@ class ErrorBoundary extends Component {
 function App() {
     return (
         <ErrorBoundary>
+            <OfflineBanner />
             <AuthProvider>
                 <ThemeProvider>
                     <Router>

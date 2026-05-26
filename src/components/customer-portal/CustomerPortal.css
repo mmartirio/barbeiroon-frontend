@@ -1,4 +1,4 @@
-/* customer-portal.css - Versão Completa Atualizada */
+/* customer-portal.css - Versão Completa com Cards de Barbeiro Ajustados */
 
 /* Cards de seleção de serviço */
 .service-cards-grid {
@@ -99,7 +99,6 @@
 .customer-portal-logo {
     text-align: center;
     padding: 30px 20px 20px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
 }
@@ -116,7 +115,6 @@
 .customer-portal-container {
     max-width: 600px;
     width: 100%;
-
     backdrop-filter: blur(10px);
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -155,7 +153,7 @@
     line-height: 1.5;
 }
 
-/* Progress Steps - Otimizado */
+/* Progress Steps */
 .portal-progress {
     display: flex;
     justify-content: center;
@@ -245,7 +243,6 @@
     margin-bottom: 0;
 }
 
-/* Label na mesma cor do placeholder (branco com opacidade 0.7) */
 .form-group label {
     display: block;
     margin-bottom: 8px;
@@ -256,7 +253,7 @@
     font-size: 17px;
 }
 
-/* TODOS OS INPUTS COM MESMO TAMANHO (220px) */
+/* Inputs */
 .form-group input,
 .form-group select {
     width: 220px !important;
@@ -269,8 +266,6 @@
     text-align: center;
     padding: 7px 3px;
     box-sizing: border-box;
-    
-    /* Fundo transparente com borda cinza 1px */
     background-color: transparent !important;
     color: #ffffff !important;
     caret-color: #ffffff;
@@ -278,7 +273,6 @@
     outline: none;
 }
 
-/* Quando o input está em foco - borda branca 2px */
 .form-group input:focus,
 .form-group select:focus {
     border: 2px solid #ffffff;
@@ -287,33 +281,29 @@
     box-shadow: none;
 }
 
-/* Placeholder branco com opacidade */
 .form-group input::placeholder,
 .form-group select::placeholder {
     color: rgba(255, 255, 255, 0.7);
     opacity: 1;
 }
 
-/* Para navegadores WebKit (Chrome, Safari) */
 .form-group input::-webkit-input-placeholder,
 .form-group select::-webkit-input-placeholder {
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* Para Firefox */
 .form-group input::-moz-placeholder,
 .form-group select::-moz-placeholder {
     color: rgba(255, 255, 255, 0.7);
     opacity: 1;
 }
 
-/* Para Internet Explorer */
 .form-group input:-ms-input-placeholder,
 .form-group select:-ms-input-placeholder {
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* Cor dos ícones nativos dos inputs (como calendário, relógio, etc) */
+/* Ícones de calendário */
 .form-group input[type="date"]::-webkit-calendar-picker-indicator,
 .form-group input[type="time"]::-webkit-calendar-picker-indicator,
 .form-group input[type="datetime-local"]::-webkit-calendar-picker-indicator {
@@ -327,7 +317,7 @@
     opacity: 1;
 }
 
-/* Para selects, a seta fica branca */
+/* Selects */
 .form-group select {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
     background-repeat: no-repeat;
@@ -340,12 +330,10 @@
     background-color: transparent !important;
 }
 
-/* Quando o select está em foco, a seta continua branca e a borda fica branca 2px */
 .form-group select:focus {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
 }
 
-/* Para Firefox, garantir que a seta seja branca */
 .form-group select {
     color: white;
     text-indent: 0.01px;
@@ -357,7 +345,7 @@
     color: white;
 }
 
-/* Remove qualquer background que possa vir de navegadores */
+/* Autofill */
 .form-group input:-webkit-autofill,
 .form-group input:-webkit-autofill:hover, 
 .form-group input:-webkit-autofill:focus, 
@@ -373,7 +361,7 @@
     border: 2px solid #ffffff;
 }
 
-/* Botões gerais - MESMO TAMANHO DOS INPUTS */
+/* Botões gerais */
 button {
     width: 220px !important;
     min-width: 220px;
@@ -429,7 +417,6 @@ button:disabled {
     background: #6c757d;
 }
 
-/* Botão de submit */
 button[type="submit"] {
     width: 220px !important;
     min-width: 220px;
@@ -439,7 +426,7 @@ button[type="submit"] {
     font-size: 18px;
 }
 
-/* Lista de agendamentos do cliente */
+/* Lista de agendamentos */
 .customer-portal-page .appointments-list {
     width: 100%;
     display: flex;
@@ -523,7 +510,7 @@ button[type="submit"] {
     color: #333 !important;
 }
 
-/* Modal de confirmação - Corrigido */
+/* Modal de confirmação */
 .confirm-modal-backdrop {
     position: fixed;
     inset: 0;
@@ -657,6 +644,79 @@ button[type="submit"] {
     color: #e74c3c;
 }
 
+/* ============================================ */
+/* CARDS DE BARBEIRO - VERSÃO COMPACTA         */
+/* ============================================ */
+.professional-list-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 120px));
+    gap: 12px;
+    margin-top: 8px;
+    justify-content: center;
+}
+
+.professional-item-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 120px !important;
+    background: rgba(37, 99, 235, 0.16);
+    border: 1px solid #60a5fa;
+    border-radius: 12px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.professional-item-card.selected {
+    background: #ffffff;
+    color: #1f2937;
+    border-color: #93c5fd;
+}
+
+.professional-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.professional-avatar-fallback {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 20px;
+    background: #1d4ed8;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.professional-item-card span {
+    font-size: 13px;
+    text-align: center;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.professional-item-card.selected span {
+    color: #1f2937;
+}
+
+/* ============================================ */
+/* FIM DOS CARDS DE BARBEIRO                    */
+/* ============================================ */
+
 /* Animações */
 @keyframes fadeIn {
     from {
@@ -731,6 +791,28 @@ button[type="submit"] {
         max-width: none;
         min-width: 0;
     }
+
+    /* Ajuste dos cards de barbeiro para tablet */
+    .professional-list-grid {
+        grid-template-columns: repeat(auto-fit, minmax(90px, 100px));
+        gap: 10px;
+    }
+    
+    .professional-item-card {
+        max-width: 100px !important;
+        padding: 10px 6px;
+    }
+    
+    .professional-avatar,
+    .professional-avatar-fallback {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+    
+    .professional-item-card span {
+        font-size: 11px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -771,6 +853,28 @@ button[type="submit"] {
     .confirm-btn {
         width: 100%;
     }
+
+    /* Ajuste dos cards de barbeiro para mobile */
+    .professional-list-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 90px));
+        gap: 8px;
+    }
+    
+    .professional-item-card {
+        max-width: 90px !important;
+        padding: 8px 5px;
+    }
+    
+    .professional-avatar,
+    .professional-avatar-fallback {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .professional-item-card span {
+        font-size: 10px;
+    }
 }
 
 /* Utilitários */
@@ -790,73 +894,48 @@ button[type="submit"] {
     width: 100%;
 }
 
-.professional-list-grid {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin-top: 8px;
-}
-
-.professional-item-card {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    background: rgba(37, 99, 235, 0.16);
-    border: 1px solid #60a5fa;
-    border-radius: 12px;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-    color: #ffffff;
-    cursor: pointer;
-}
-
-.professional-item-card.selected {
-    background: #ffffff;
-    color: #1f2937;
-    border-color: #93c5fd;
-}
-
-.professional-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 17px;
-    object-fit: cover;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-}
-
-.professional-avatar-fallback {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    background: #1d4ed8;
+/* Promoção info box */
+.promotion-info-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #22c55e;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    text-align: left;
     color: #fff;
 }
 
-/* Sobrescrita final do modal de cancelamento (evita conflito com regras globais de button) */
-.confirm-modal .confirm-actions button .confirm-btn {
-    width: calc(50% - 6px) !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    padding: 15px 12px !important;
-    min-height: 44px;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.2;
-    white-space: normal !important;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    text-align: center;
+.promotion-info-box strong {
+    display: block;
+    margin-bottom: 8px;
 }
 
-@media (max-width: 480px) {
-    .confirm-modal .confirm-actions button.confirm-btn {
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: none !important;
+.promotion-info-box ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.promotion-info-box li {
+    margin-bottom: 4px;
+}
+
+/* Feedback message */
+.feedback-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    min-width: 300px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
     }
 }

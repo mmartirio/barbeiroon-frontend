@@ -9,7 +9,7 @@
     "access": "Access",
     "success": "✅ Login successful! Redirecting...",
     "error": "🔒 Could not log in. Please check your credentials and try again.",
-    "welcome": "Welcome to Meu Barbeiro",
+    "welcome": "Welcome to Barbeiro On",
     "schedule": "Schedule your appointment",
     "name": "Your name",
     "phone": "Your phone",
@@ -31,7 +31,7 @@
     "error": "Error loading service data."
   },
     "sidebar": {
-      "title": "Meu Barbeiro",
+      "title": "Barbeiro On",
       "users": "Users",
       "services": "Services",
       "schedule": "Schedule",

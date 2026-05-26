@@ -25,6 +25,7 @@ const AdminAppointmentsPanel = () => {
   const [appointmentDate, setAppointmentDate] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState('agendado');
 
   useEffect(() => {
     if (!appointmentDate) {
@@ -82,45 +83,79 @@ const AdminAppointmentsPanel = () => {
         </div>
       </div>
 
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+        {[
+          { key: 'agendado',  label: 'Agendados',  color: '#2563eb' },
+          { key: 'concluido', label: 'Concluídos', color: '#16a34a' },
+          { key: 'cancelado', label: 'Cancelados', color: '#dc2626' },
+        ].map(({ key, label, color }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setStatusFilter(key)}
+            style={{
+              padding: '6px 18px', borderRadius: 20, border: `2px solid ${color}`,
+              background: statusFilter === key ? color : 'transparent',
+              color: statusFilter === key ? '#fff' : color,
+              fontWeight: 600, cursor: 'pointer', fontSize: 13, transition: 'all 0.15s',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {error && <div className="alert-error" role="alert">{error}</div>}
       {loading && <div className="barber-appointments-loading">Carregando agendamentos...</div>}
-      {!loading && groups.length === 0 && (
-        <div className="barber-appointments-empty">Nenhum agendamento encontrado para este dia.</div>
-      )}
 
-      {!loading && groups.length > 0 && (
-        <div>
-          {groups.map((group) => (
-            <div key={group.professionalId || group.professionalName} style={{ marginBottom: 24 }}>
-              <h4 className="admin-appointments-title">{group.professionalName || 'Profissional'}</h4>
-              <div style={{ overflowX: 'auto' }}>
-                <table className="client-list-table">
-                  <thead>
-                    <tr>
-                      <th>Cliente</th>
-                      <th>Data</th>
-                      <th>Horario</th>
-                      <th>Servico</th>
-                      <th>Valor</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.appointments.map((appt) => (
-                      <tr key={appt.id}>
-                        <td>{appt.customer?.name || 'Cliente'}</td>
-                        <td>{formatDate(appt.appointmentDate)}</td>
-                        <td>{appt.appointmentTime || '--:--'}</td>
-                        <td>{appt.service?.name || 'Servico'}</td>
-                        <td>{formatPrice(appt.service?.price)}</td>
+      {!loading && (() => {
+        const filteredGroups = groups
+          .map((group) => ({
+            ...group,
+            appointments: group.appointments.filter(
+              (a) => (a.status || 'agendado') === statusFilter
+            ),
+          }))
+          .filter((group) => group.appointments.length > 0);
+
+        if (filteredGroups.length === 0) {
+          return <div className="barber-appointments-empty">Nenhum agendamento com este status neste dia.</div>;
+        }
+
+        return (
+          <div>
+            {filteredGroups.map((group) => (
+              <div key={group.professionalId || group.professionalName} style={{ marginBottom: 24 }}>
+                <h4 className="admin-appointments-title">{group.professionalName || 'Profissional'}</h4>
+                <div style={{ overflowX: 'auto' }}>
+                  <table className="client-list-table">
+                    <thead>
+                      <tr>
+                        <th>Cliente</th>
+                        <th>Data</th>
+                        <th>Horario</th>
+                        <th>Servico</th>
+                        <th>Valor</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {group.appointments.map((appt) => (
+                        <tr key={appt.id}>
+                          <td>{appt.customer?.name || 'Cliente'}</td>
+                          <td>{formatDate(appt.appointmentDate)}</td>
+                          <td>{appt.appointmentTime || '--:--'}</td>
+                          <td>{appt.service?.name || 'Servico'}</td>
+                          <td>{formatPrice(appt.service?.price)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 };

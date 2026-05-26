@@ -23,12 +23,29 @@ const formatDurationLabel = (duration) => {
   return `${totalMinutes} min`;
 };
 
+
 const Servico = () => {
   const [selectedServices, setSelectedServices] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
   const [servicesData, setServicesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const { get } = useApi();
+
+  // Busca voucher de aniversariante ao montar o componente
+  useEffect(() => {
+    async function checkBirthdayVoucher() {
+      try {
+        // Ajuste o endpoint conforme sua API
+        const voucher = await get('/api/voucher/birthday');
+        if (voucher && voucher.valid) {
+          window.alert(`Parabéns! Você ganhou um voucher de aniversário: ${voucher.code}\n${voucher.description || ''}`);
+        }
+      } catch (e) {
+        // Silencia erro, pois não é obrigatório
+      }
+    }
+    checkBirthdayVoucher();
+  }, [get]);
 
   useEffect(() => {
     async function fetchServices() {
@@ -51,8 +68,15 @@ const Servico = () => {
   };
 
   const total = selectedServices.reduce((acc, name) => {
-    const { value = 0, duration = 0 } = servicesData.find(s => s.name === name) || {};
-    return { value: acc.value + value, duration: acc.duration + duration };
+    const svc = servicesData.find(s => s.name === name) || {};
+    const price = parseFloat(svc.price ?? svc.value ?? 0) || 0;
+    const rawDur = svc.duration ?? svc.duracao ?? 0;
+    const durStr = String(rawDur);
+    const parts = durStr.split(':');
+    const duration = parts.length >= 2
+      ? parseInt(parts[0]) * 60 + parseInt(parts[1])
+      : parseInt(durStr) || 0;
+    return { value: acc.value + price, duration: acc.duration + duration };
   }, { value: 0, duration: 0 });
 
   const handlePdfGenerated = () => {

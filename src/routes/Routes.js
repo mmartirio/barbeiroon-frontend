@@ -17,6 +17,17 @@ import CustomerPortal from '../components/customer-portal/CustomerPortal';
 import PrivateRoute from './PrivateRoute';
 import Grupo from '../administrador/components/usuario/Grupo';
 
+import GestorLogin from '../gestor/GestorLogin';
+import { GestorGuard } from '../gestor/GestorLayout';
+
+const GestorDashboard  = lazy(() => import('../gestor/dashboard/GestorDashboard'));
+const EmpresasList     = lazy(() => import('../gestor/empresas/EmpresasList'));
+const PlanosList       = lazy(() => import('../gestor/planos/PlanosList'));
+const PagamentosList   = lazy(() => import('../gestor/pagamentos/PagamentosList'));
+const Relatorios       = lazy(() => import('../gestor/relatorios/Relatorios'));
+const GestorSetup      = lazy(() => import('../gestor/setup/GestorSetup'));
+const AdminsList       = lazy(() => import('../gestor/admins/AdminsList'));
+
 const UsuarioLista = lazy(() => import('../administrador/painel/pages/UsuarioLista'));
 const ClienteCadastro = lazy(() => import('../administrador/painel/pages/ClienteCadastro'));
 const ClienteLista = lazy(() => import('../administrador/painel/pages/ClienteLista'));
@@ -52,6 +63,30 @@ const AppRoutes = () => {
       <Route path="/servico-lista" element={<PrivateRoute required="canViewServices"><Suspense fallback={<div>Carregando...</div>}><ServicoLista /></Suspense></PrivateRoute>} />
       <Route path="/promocoes" element={<PrivateRoute required="canManageServices"><Suspense fallback={<div>Carregando...</div>}><Promocoes /></Suspense></PrivateRoute>} />
       <Route path="/grupo" element={<PrivateRoute required="canManageGroups"><Grupo /></PrivateRoute>} />
+
+      {/* ── Painel Gestor ── */}
+      <Route path="/gestor" element={<GestorLogin />} />
+      <Route path="/gestor/setup" element={
+        <GestorGuard><Suspense fallback={<div>Carregando...</div>}><GestorSetup /></Suspense></GestorGuard>
+      } />
+      <Route path="/gestor/dashboard" element={
+        <GestorGuard><Suspense fallback={<div>Carregando...</div>}><GestorDashboard /></Suspense></GestorGuard>
+      } />
+      <Route path="/gestor/empresas" element={
+        <GestorGuard><Suspense fallback={<div>Carregando...</div>}><EmpresasList /></Suspense></GestorGuard>
+      } />
+      <Route path="/gestor/planos" element={
+        <GestorGuard><Suspense fallback={<div>Carregando...</div>}><PlanosList /></Suspense></GestorGuard>
+      } />
+      <Route path="/gestor/pagamentos" element={
+        <GestorGuard><Suspense fallback={<div>Carregando...</div>}><PagamentosList /></Suspense></GestorGuard>
+      } />
+      <Route path="/gestor/relatorios" element={
+        <GestorGuard><Suspense fallback={<div>Carregando...</div>}><Relatorios /></Suspense></GestorGuard>
+      } />
+      <Route path="/gestor/administradores" element={
+        <GestorGuard><Suspense fallback={<div>Carregando...</div>}><AdminsList /></Suspense></GestorGuard>
+      } />
     </Routes>
   );
 };
