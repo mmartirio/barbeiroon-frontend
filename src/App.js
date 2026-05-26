@@ -13,7 +13,6 @@ const AdminDashboard = lazy(() => import('./administrador/painel/AdminDashboard'
 
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
-import LogoHeader from './components/Layout/LogoHeader';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useAuth } from './hooks/useAuth';
 import PendingRequestsNotifier from './administrador/components/servicos/PendingRequestsNotifier';
@@ -72,7 +71,6 @@ function MainLayout() {
     const { user, authReady } = useAuth();
     const location = useLocation();
     const notifier = user ? <PendingRequestsNotifier /> : null;
-    const showPanelBrand = !!user && !location.pathname.startsWith('/agendar');
     const footer = (
         <footer className="app-footer">
             <div className="app-footer__inner">
@@ -122,7 +120,6 @@ function MainLayout() {
         return (
             <div className="app-container">
                 {notifier}
-                {showPanelBrand && <LogoHeader />}
                 <Suspense fallback={<div className="loading-container">Carregando Dashboard...</div>}>
                     <AdminDashboard />
                 </Suspense>
@@ -136,7 +133,6 @@ function MainLayout() {
         <div className="app-container">
             {/* Header e Sidebar devem ser gerenciados em cada rota ou no Routes */}
             {notifier}
-            {showPanelBrand && <LogoHeader />}
             <Suspense fallback={<div className="loading-container">Carregando...</div>}>
                 <AppRoutes />
             </Suspense>

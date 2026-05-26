@@ -12,10 +12,11 @@ import Sidebar from './sidebar/Sidebar';
 import BarChartCard from '../../components/ui/BarChartCard';
 
 // Ícones
-import { 
+import {
   FiPlus,
   FiBarChart2
 } from 'react-icons/fi';
+import LogoHeader from '../../components/Layout/LogoHeader';
 
 function AdminDashboard() {
   const { t } = useTranslation();
@@ -194,6 +195,7 @@ function AdminDashboard() {
             </p>
           </div>
           <div className="dashboard-actions">
+            <LogoHeader />
             <button className="btn btn--primary" onClick={() => navigate('/agenda')}>
               <FiPlus /> {t('dashboard.newAppointment', 'Novo Agendamento')}
             </button>
