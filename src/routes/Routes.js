@@ -33,6 +33,8 @@ const ClienteCadastro = lazy(() => import('../administrador/painel/pages/Cliente
 const ClienteLista = lazy(() => import('../administrador/painel/pages/ClienteLista'));
 const ServicoLista = lazy(() => import('../administrador/painel/pages/ServicoLista'));
 const Promocoes = lazy(() => import('../administrador/components/promocoes/Promocoes'));
+const NovoAgendamento = lazy(() => import('../administrador/painel/pages/NovoAgendamento'));
+const SolicitacoesPendentes = lazy(() => import('../administrador/painel/pages/SolicitacoesPendentes'));
 
 
 const AppRoutes = () => {
@@ -63,6 +65,8 @@ const AppRoutes = () => {
       <Route path="/servico-lista" element={<PrivateRoute required="canViewServices"><Suspense fallback={<div>Carregando...</div>}><ServicoLista /></Suspense></PrivateRoute>} />
       <Route path="/promocoes" element={<PrivateRoute required="canManageServices"><Suspense fallback={<div>Carregando...</div>}><Promocoes /></Suspense></PrivateRoute>} />
       <Route path="/grupo" element={<PrivateRoute required="canManageGroups"><Grupo /></PrivateRoute>} />
+      <Route path="/novo-agendamento" element={<PrivateRoute required="canViewAppointments"><Suspense fallback={<div>Carregando...</div>}><NovoAgendamento /></Suspense></PrivateRoute>} />
+      <Route path="/solicitacoes-pendentes" element={<PrivateRoute required="canViewAppointments"><Suspense fallback={<div>Carregando...</div>}><SolicitacoesPendentes /></Suspense></PrivateRoute>} />
 
       {/* ── Painel Gestor ── */}
       <Route path="/gestor" element={<GestorLogin />} />

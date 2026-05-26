@@ -18,7 +18,9 @@ import {
   FiPercent,
   FiSmartphone,
   FiMenu,
-  FiX
+  FiX,
+  FiPlusCircle,
+  FiAlertCircle
 } from 'react-icons/fi';
 import ThemeModal from '../../../components/ThemeModal';
 import WhatsAppModal from '../WhatsAppModal';
@@ -200,6 +202,12 @@ const Sidebar = () => {
             )}
             {can('canViewAppointments') && (
               <li><Link to="/servico-agendados"><FiCalendar size={16} /> Agendados</Link></li>
+            )}
+            {can('canViewAppointments') && (
+              <li><Link to="/novo-agendamento"><FiPlusCircle size={16} /> Novo Agendamento</Link></li>
+            )}
+            {can('canViewAppointments') && (
+              <li><Link to="/solicitacoes-pendentes"><FiAlertCircle size={16} /> Solicitações Pendentes</Link></li>
             )}
             {can('canManageServices') && (
               <li>

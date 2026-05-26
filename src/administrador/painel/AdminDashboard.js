@@ -196,7 +196,7 @@ function AdminDashboard() {
           </div>
           <div className="dashboard-actions">
             <LogoHeader />
-            <button className="btn btn--primary" onClick={() => navigate('/agenda')}>
+            <button className="btn btn--primary" onClick={() => navigate('/novo-agendamento')}>
               <FiPlus /> {t('dashboard.newAppointment', 'Novo Agendamento')}
             </button>
           </div>
