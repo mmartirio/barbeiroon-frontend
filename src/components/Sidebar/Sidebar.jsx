@@ -6,8 +6,7 @@ import { useTheme } from '../../hooks/useTheme';
 import {
   FiGrid, FiUsers, FiCalendar, FiScissors, FiBarChart2,
   FiUser, FiUserPlus, FiList, FiMonitor, FiBriefcase,
-  FiPercent, FiAlertCircle, FiPlusCircle, FiSettings,
-  FiLogOut, FiMenu, FiX, FiChevronDown, FiChevronRight,
+  FiSettings, FiLogOut, FiMenu, FiX, FiChevronDown, FiChevronRight,
   FiSmartphone, FiTag,
 } from 'react-icons/fi';
 import defaultAvatar from '../../assets/user.png';
@@ -107,16 +106,20 @@ export default function Sidebar() {
 
           {canServices && (
             <SubMenu icon={<FiScissors size={16} />} label="Serviços" menuKey="services" open={openMenus.services} onToggle={toggle}>
-              {p('canManageServices') && <SubItem to="/servico-cadastro"   icon={<FiUserPlus size={14} />} label="Cadastrar Serviço" />}
-              {p('canViewServices')   && <SubItem to="/servico-lista"      icon={<FiList size={14} />}     label="Lista de Serviços" />}
-              {p('canViewAppointments') && <SubItem to="/novo-agendamento" icon={<FiPlusCircle size={14} />} label="Novo Agendamento" />}
-              {p('canManageServices') && <SubItem to="/promocoes"          icon={<FiTag size={14} />}      label="Promoções" />}
+              {p('canManageServices') && <SubItem to="/servico-cadastro" icon={<FiUserPlus size={14} />} label="Cadastrar Serviço" />}
+              {p('canViewServices')   && <SubItem to="/servico-lista"    icon={<FiList size={14} />}     label="Lista de Serviços" />}
             </SubMenu>
           )}
 
-          {p('canViewAgenda')      && <NavItem to="/agenda"                 icon={<FiCalendar size={16} />}    label="Agenda" />}
-          {p('canViewReports')     && <NavItem to="/relatorios"             icon={<FiBarChart2 size={16} />}   label="Relatórios" />}
-          {p('canViewAppointments') && <NavItem to="/solicitacoes-pendentes" icon={<FiAlertCircle size={16} />} label="Solicitações Pendentes" />}
+          {p('canViewAgenda') && (
+            <SubMenu icon={<FiCalendar size={16} />} label="Agenda" menuKey="agenda" open={openMenus.agenda} onToggle={toggle}>
+              <SubItem to="/agenda"            icon={<FiSettings size={14} />}   label="Expediente" />
+              {p('canViewAppointments') && <SubItem to="/servico-agendados" icon={<FiCalendar size={14} />} label="Agendados" />}
+            </SubMenu>
+          )}
+
+          {p('canManageServices') && <NavItem to="/promocoes"  icon={<FiTag size={16} />}      label="Promoções" />}
+          {p('canViewReports')    && <NavItem to="/relatorios" icon={<FiBarChart2 size={16} />} label="Relatórios" />}
 
           <li className={s.divider} />
 
@@ -124,8 +127,7 @@ export default function Sidebar() {
 
           {p('canManageTenant') && (
             <SubMenu icon={<FiBriefcase size={16} />} label="Conta" menuKey="account" open={openMenus.account} onToggle={toggle}>
-              <SubItem to="/conta"         icon={<FiSettings size={14} />}   label="Configurações" />
-              <SubItem to="/tela-cliente"  icon={<FiMonitor size={14} />}    label="Tela do Cliente" />
+              <SubItem to="/conta" icon={<FiSettings size={14} />} label="Conta" />
               <li>
                 <button className={s.navBtn} onClick={() => setWhatsappOpen(true)}>
                   <FiSmartphone size={14} style={{ marginLeft: '1.5rem' }} /> QR Code WhatsApp
