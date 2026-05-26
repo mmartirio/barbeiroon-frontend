@@ -10,7 +10,7 @@
 }
 
 .service-dashboard-card.ui-card {
-    background: #2563eb !important;
+    background: #2563eb;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     border: 2px solid #1d4ed8;
@@ -27,19 +27,19 @@
 }
 
 .service-dashboard-card.ui-card.selected {
-    background: #ffffff !important;
+    background: #ffffff;
     border-color: #93c5fd;
     box-shadow: 0 4px 16px rgba(37,99,235,0.2);
     transform: translateY(-2px) scale(1.03);
 }
 
-.service-advance-button {
-    background: #2563eb !important;
-    color: #fff !important;
+.customer-portal .service-advance-button {
+    background: #2563eb;
+    color: #fff;
 }
 
-.service-advance-button:hover:not(:disabled) {
-    background: #1d4ed8 !important;
+.customer-portal .service-advance-button:hover:not(:disabled) {
+    background: #1d4ed8;
 }
 
 /* Portal principal */
@@ -254,9 +254,9 @@
 }
 
 /* Inputs */
-.form-group input,
-.form-group select {
-    width: 220px !important;
+.customer-portal .form-group input,
+.customer-portal .form-group select {
+    width: 220px;
     min-width: 220px;
     max-width: 220px;
     margin: 0 auto;
@@ -266,8 +266,8 @@
     text-align: center;
     padding: 7px 3px;
     box-sizing: border-box;
-    background-color: transparent !important;
-    color: #ffffff !important;
+    background-color: transparent;
+    color: #ffffff;
     caret-color: #ffffff;
     border: 1px solid #6c757d;
     outline: none;
@@ -318,7 +318,7 @@
 }
 
 /* Selects */
-.form-group select {
+.customer-portal .form-group select {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
     background-repeat: no-repeat;
     background-position: right 8px center;
@@ -327,7 +327,7 @@
     -moz-appearance: none;
     appearance: none;
     padding-right: 32px;
-    background-color: transparent !important;
+    background-color: transparent;
 }
 
 .form-group select:focus {
@@ -361,9 +361,9 @@
     border: 2px solid #ffffff;
 }
 
-/* Botões gerais */
-button {
-    width: 220px !important;
+/* Botões do portal — escopo restrito ao .customer-portal */
+.customer-portal button {
+    width: 220px;
     min-width: 220px;
     max-width: 220px;
     padding: 16px;
@@ -379,12 +379,12 @@ button {
     margin: 0 auto;
 }
 
-button:hover:not(:disabled) {
+.customer-portal button:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-button:disabled {
+.customer-portal button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
@@ -400,8 +400,8 @@ button:disabled {
     width: 100%;
 }
 
-.button-group button {
-    width: 220px !important;
+.customer-portal .button-group button {
+    width: 220px;
     min-width: 220px;
     max-width: 220px;
     flex: 0 1 auto;
@@ -413,12 +413,12 @@ button:disabled {
     font-size: 18px;
 }
 
-.button-group button:first-child {
+.customer-portal .button-group button:first-child {
     background: #6c757d;
 }
 
-button[type="submit"] {
-    width: 220px !important;
+.customer-portal button[type="submit"] {
+    width: 220px;
     min-width: 220px;
     max-width: 220px;
     margin: 12px auto 0;
@@ -437,7 +437,7 @@ button[type="submit"] {
 
 .customer-portal-page .appointment-item {
     width: 100%;
-    background: #ffffff !important;
+    background: #ffffff;
     border: 1px solid #d8dee9;
     border-radius: 12px;
     padding: 14px;
@@ -449,34 +449,34 @@ button[type="submit"] {
 
 .customer-portal-page .appointment-item > div {
     text-align: left;
-    color: #111827 !important;
+    color: #111827;
 }
 
 .customer-portal-page .appointment-item > div strong {
     display: block;
-    color: #0f172a !important;
+    color: #0f172a;
     margin-bottom: 4px;
     text-shadow: none;
 }
 
 .customer-portal-page .appointment-item > div div {
-    color: #1f2937 !important;
+    color: #1f2937;
     line-height: 1.35;
     text-shadow: none;
 }
 
 .customer-portal-page .appointment-item button {
-    width: auto !important;
+    width: auto;
     min-width: 170px;
     max-width: 170px;
     padding: 10px 12px;
     font-size: 14px;
-    background: #ef4444 !important;
-    color: #ffffff !important;
+    background: #ef4444;
+    color: #ffffff;
 }
 
 .customer-portal-page .appointment-item button:hover:not(:disabled) {
-    background: #dc2626 !important;
+    background: #dc2626;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
 }
 
@@ -507,7 +507,7 @@ button[type="submit"] {
 
 .confirmation-details p {
     font-size: 17px;
-    color: #333 !important;
+    color: #333;
 }
 
 /* Modal de confirmação */
@@ -556,9 +556,9 @@ button[type="submit"] {
 
 .confirm-btn {
     flex: 1 1 0;
-    min-width: 0 !important;
-    max-width: none !important;
-    width: auto !important;
+    min-width: 0;
+    max-width: none;
+    width: auto;
     padding: 15px 12px;
     min-height: 44px;
     display: inline-flex;
@@ -581,9 +581,9 @@ button[type="submit"] {
 
 .confirm-actions .confirm-btn {
     flex: 1 1 0;
-    min-width: 0 !important;
-    max-width: none !important;
-    width: calc(50% - 6px) !important;
+    min-width: 0;
+    max-width: none;
+    width: calc(50% - 6px);
 }
 
 .confirm-btn:hover:not(:disabled) {
@@ -657,9 +657,9 @@ button[type="submit"] {
 }
 
 .professional-item-card {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 120px !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 120px;
     background: rgba(37, 99, 235, 0.16);
     border: 1px solid #60a5fa;
     border-radius: 12px;
@@ -766,7 +766,7 @@ button[type="submit"] {
     button,
     .button-group button,
     button[type="submit"] {
-        width: 100% !important;
+        width: 100%;
         min-width: 100%;
         max-width: 280px;
         font-size: 17px;
@@ -787,7 +787,7 @@ button[type="submit"] {
     }
 
     .customer-portal-page .appointment-item button {
-        width: 100% !important;
+        width: 100%;
         max-width: none;
         min-width: 0;
     }
@@ -799,7 +799,7 @@ button[type="submit"] {
     }
     
     .professional-item-card {
-        max-width: 100px !important;
+        max-width: 100px;
         padding: 10px 6px;
     }
     
@@ -861,7 +861,7 @@ button[type="submit"] {
     }
     
     .professional-item-card {
-        max-width: 90px !important;
+        max-width: 90px;
         padding: 8px 5px;
     }
     

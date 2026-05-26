@@ -1,18 +1,18 @@
-/* Labels de login e senha (Login e Senha) */
-.login-form .form-label {
-  background: none !important;
-  color: #007aff !important;
-  -webkit-background-clip: unset !important;
-  background-clip: unset !important;
+/* Labels de login e senha */
+.login-page .login-form .form-label {
+  background: none;
+  color: #007aff;
+  -webkit-background-clip: unset;
+  background-clip: unset;
 }
-/* Links de ação do login (Cadastre-se e Esqueceu sua senha) */
-.login-link {
-  color: #007aff !important;
+/* Links de ação do login */
+.login-page .login-link {
+  color: #007aff;
   font-weight: 600;
   transition: color 0.2s;
 }
-.login-link:hover {
-  color: #0051d5 !important;
+.login-page .login-link:hover {
+  color: #0051d5;
   text-decoration: underline;
 }
 /* =================================================================
@@ -232,7 +232,7 @@
   padding: 0.75rem 1.5rem;
   font-size: 0.9rem;
   font-weight: 600;
-  border-radius: 14px !important;
+  border-radius: 14px;
   border: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

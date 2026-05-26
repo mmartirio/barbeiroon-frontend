@@ -2,7 +2,7 @@
   position: relative;
   width: 100%;
   display: flex;
-  align-items: stretch !important;
+  align-items: stretch;
   min-height: 48px;
 }
 
@@ -15,8 +15,8 @@
 
 .show-password-btn {
   position: absolute;
-  right: 8px !important;
-  top: 30% !important;
+  right: 8px;
+  top: 30%;
   height: 48px;
   min-height: 48px;
   max-height: 48px;
@@ -25,7 +25,7 @@
   align-items: center;
   justify-content: center;
   z-index: 2;
-  box-shadow: none !important;
+  box-shadow: none;
   transition: none;
 }
 
@@ -34,14 +34,14 @@
   height: 24px;
   box-shadow: none;
   outline: none;
-  top: -20% !important;
+  top: -20%;
 }
 
 .show-password-icon {
   stroke: #007aff;
   transition: stroke 0.2s;
-  height: 20px !important;
-  width: 20px !important;
+  height: 20px;
+  width: 20px;
   min-height: 20px;
   min-width: 20px;
   max-height: 20px;
@@ -52,44 +52,44 @@
 }
 
 .show-password-icon.hide{
-  height: 20px !important;
-  width: 20px !important;
-  min-height: 20px !important;
-  min-width: 20px !important;
-  max-height: 20px !important;
+  height: 20px;
+  width: 20px;
+  min-height: 20px;
+  min-width: 20px;
+  max-height: 20px;
   max-width: 20px;
   display: block;
-  margin: 0 !important;
-  padding: 0 !important;
+  margin: 0;
+  padding: 0;
   line-height: 1;
   box-sizing: content-box;
 }
 
 .show-password-icon.show {
-  height: 18px !important;
-  width: 18px !important;
-  min-height: 18px !important;
-  min-width: 18px !important;
-  max-height: 18px !important;
-  max-width: 18px !important;
+  height: 18px;
+  width: 18px;
+  min-height: 18px;
+  min-width: 18px;
+  max-height: 18px;
+  max-width: 18px;
   display: block;
-  top: 35% !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  top: 35%;
+  margin: 0;
+  padding: 0;
   line-height: 1;
   box-sizing: content-box;
 }
 
 .show-password-btn svg {
-  height: 15px !important;
-  width: 15px !important;
+  height: 15px;
+  width: 15px;
   min-height: 15px;
   min-width: 15px;
   max-height: 15px;
   max-width: 20px;
   display: block;
-  margin: 0 !important;
-  padding: 0 !important;
+  margin: 0;
+  padding: 0;
   line-height: 1;
   box-sizing: content-box;
 }
@@ -167,8 +167,8 @@
 }
 
 .portal-card .user-form-group label {
-  color: #e5e7eb !important;
-  text-align: left !important;
+  color: #e5e7eb;
+  text-align: left;
 }
 
 .portal-card .user-form-hint {
@@ -179,12 +179,12 @@
 .portal-card .user-form-group select {
   background: transparent;
   color: #e5e7eb;
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
 .portal-card .user-form-group input:focus,
 .portal-card .user-form-group select:focus {
-  box-shadow: none !important;
+  box-shadow: none;
 }
 .user-form-actions {
   display: flex;
@@ -257,9 +257,9 @@
 
 /* --- UX/UI Melhorias para o formulário de usuário --- */
 .user-form {
-  display: flex !important;
+  display: flex;
   flex-direction: column;
-  justify-content: center !important;
+  justify-content: center;
   max-width: 440px;
   margin: 40px auto 0 auto;
   background: transparent;
@@ -274,9 +274,9 @@
 
 .user-form-group label {
   font-weight: 600;
-  color: #ffffff  !important;
-  margin-bottom: 2px  !important;
-  text-align: center  !important;
+  color: #ffffff ;
+  margin-bottom: 2px ;
+  text-align: center ;
   font-size: 1.1em;
   letter-spacing: -0.5px;
 }
@@ -294,8 +294,8 @@
   box-sizing: border-box;
 }
 
-.user-form-group input,
-.user-form-group select {
+.user-form .user-form-group input,
+.user-form .user-form-group select {
   width: 100%;
   padding: 14px 18px;
   border-radius: 8px;
@@ -304,7 +304,7 @@
   background: #f7fafd;
   box-shadow: 0 1px 6px #007aff11;
   outline: none;
-  color: #000  !important;
+  color: #000;
   transition: border 0.2s, box-shadow 0.2s;
   font-family: inherit;
 }
@@ -477,37 +477,37 @@
 .user-form-group input::placeholder,
 .user-password-input::placeholder,
 .user-form-group select::placeholder {
-  color: #000 !important;
-  opacity: 1 !important;
+  color: #000;
+  opacity: 1;
 }
 .user-form-group input::-webkit-input-placeholder,
 .user-password-input::-webkit-input-placeholder,
 .user-form-group select::-webkit-input-placeholder {
-  color: #000 !important;
-  opacity: 1 !important;
+  color: #000;
+  opacity: 1;
 }
 .user-form-group input:-ms-input-placeholder,
 .user-password-input:-ms-input-placeholder,
 .user-form-group select:-ms-input-placeholder {
-  color: #000 !important;
-  opacity: 1 !important;
+  color: #000;
+  opacity: 1;
 }
 .user-form-group input::-ms-input-placeholder,
 .user-password-input::-ms-input-placeholder,
 .user-form-group select::-ms-input-placeholder {
-  color: #000 !important;
-  opacity: 1 !important;
+  color: #000;
+  opacity: 1;
 }
 .user-form-group input::-moz-placeholder,
 .user-password-input::-moz-placeholder,
 .user-form-group select::-moz-placeholder {
-  color: #000 !important;
-  opacity: 1 !important;
+  color: #000;
+  opacity: 1;
 }
 .user-form-group input:-moz-placeholder,
 .user-password-input:-moz-placeholder,
 .user-form-group select:-moz-placeholder {
-  color: #000 !important;
-  opacity: 1 !important;
+  color: #000;
+  opacity: 1;
 }
 

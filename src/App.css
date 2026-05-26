@@ -1,7 +1,3 @@
-input[type="text"],
-input[type="number"] {
-    color: #111 !important;
-}
 /* Importar variáveis globais */
 @import './styles/variables.css';
 
@@ -253,7 +249,7 @@ input[type="time"],
 select,
 textarea {
     width: 100%;
-    max-width: 400px;
+    max-width: 100%;
     padding: 12px 16px;
     margin-bottom: 0;
     border: 2px solid var(--border-color);
@@ -328,7 +324,7 @@ textarea::placeholder {
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none !important;
+    transform: none;
 }
 
 /* Loading States */

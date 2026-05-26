@@ -40,12 +40,12 @@
 .sidebar::-webkit-scrollbar-track {
   background: transparent;
 }
-.sidebar-btn-compact {
-  min-height: 32px !important;
-  min-width: 0 !important;
-  padding: 6px 0 !important;
-  font-size: 14px !important;
-  gap: 6px !important;
+.sidebar .sidebar-btn-compact {
+  min-height: 32px;
+  min-width: 0;
+  padding: 6px 0;
+  font-size: 14px;
+  gap: 6px;
 }
 .sidebar {
   background: #23272f;
@@ -108,7 +108,7 @@
 
 .sidebar-menu > li > a:hover {
   background: transparent;
-  color: #007aff !important;
+  color: #007aff;
 }
 
 /* Submenu */
@@ -130,7 +130,7 @@
 
 .menu-item-with-submenu:hover {
   background: transparent;
-  color: #007aff !important;
+  color: #007aff;
 }
 
 .menu-item-content {
@@ -171,7 +171,7 @@
 
 .submenu a:hover {
   background: transparent;
-  color: #007aff !important;
+  color: #007aff;
   transform: translateX(4px);
 }
 
@@ -200,13 +200,13 @@
 
 .sidebar-btn:hover {
   background: #2563eb;
-  color: #007aff !important;
+  color: #fff;
   transform: translateY(-1px);
 }
 
-.sidebar-btn-logout:hover {
-  background: linear-gradient(90deg,#e74c3c,#ff7675) !important;
-  color: #fff !important;
+.sidebar .sidebar-btn-logout:hover {
+  background: linear-gradient(90deg, #e74c3c, #ff7675);
+  color: #fff;
 }
 
 /* ── Botão fechar (×) — oculto no desktop ─────────────────── */

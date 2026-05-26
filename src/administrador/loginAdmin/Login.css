@@ -158,7 +158,7 @@
     margin-top: 0.5rem;
 }
 
-.login-button {
+.login-page .login-button {
     width: 100%;
     max-width: 300px;
     padding: 0.875rem;
@@ -168,8 +168,8 @@
     justify-content: center;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, #007aff 0%, #007aff 100%) !important;
-    color: #fff !important;
+    background: linear-gradient(135deg, #007aff 0%, #007aff 100%);
+    color: #fff;
     border: none;
     border-radius: var(--radius);
     font-weight: 700;
