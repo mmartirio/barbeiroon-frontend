@@ -1,0 +1,17 @@
+.toolbar { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.list { display: flex; flex-direction: column; gap: 1rem; max-width: 600px; }
+
+.card { background: var(--background-light); border: 1.5px solid var(--warning); border-radius: var(--radius); overflow: hidden; }
+
+.badge { display: flex; align-items: center; gap: 0.35rem; background: rgba(245,158,11,0.1); color: #fbbf24; font-size: 0.75rem; font-weight: 700; padding: 0.4rem 1rem; letter-spacing: 0.3px; }
+
+.body { padding: 1rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.row { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+.rowLabel { font-size: 0.8rem; color: var(--color-muted); min-width: 80px; flex-shrink: 0; }
+.rowVal { font-size: 0.88rem; color: var(--color); font-weight: 500; text-align: right; }
+
+.actions { display: flex; gap: 0.75rem; padding: 0.75rem 1rem 1rem; border-top: 1px solid var(--border-color); }
+.actBtn { flex: 1; padding: 0.65rem; }
+
+.spin { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
