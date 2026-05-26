@@ -16,7 +16,9 @@ import {
   FiBriefcase,
   FiTrash2,
   FiPercent,
-  FiSmartphone
+  FiSmartphone,
+  FiMenu,
+  FiX
 } from 'react-icons/fi';
 import ThemeModal from '../../../components/ThemeModal';
 import WhatsAppModal from '../WhatsAppModal';
@@ -28,6 +30,7 @@ import defaultLogo from '../../../assets/user.png';
 const Sidebar = () => {
   const [themeModalOpen, setThemeModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenus, setOpenMenus] = useState(() => {
     try {
       const stored = sessionStorage.getItem('sidebarOpenMenus');
@@ -90,8 +93,32 @@ const Sidebar = () => {
     }
   }, [openMenus]);
 
+  // Fecha sidebar mobile ao navegar
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
   return (
-    <div className="sidebar">
+    <>
+    <button
+      className="sidebar-hamburger"
+      onClick={() => setMobileOpen(true)}
+      aria-label="Abrir menu"
+    >
+      <FiMenu size={22} />
+    </button>
+    <div
+      className={`sidebar-overlay${mobileOpen ? ' open' : ''}`}
+      onClick={() => setMobileOpen(false)}
+    />
+    <div className={`sidebar${mobileOpen ? ' open' : ''}`}>
+      <button
+        className="sidebar-close"
+        onClick={() => setMobileOpen(false)}
+        aria-label="Fechar menu"
+      >
+        <FiX size={22} />
+      </button>
       <div className="sidebar-logo">
         <img 
           src={resolvedLogo || defaultLogo} 
@@ -237,6 +264,7 @@ const Sidebar = () => {
       <ThemeModal isOpen={themeModalOpen} onClose={() => setThemeModalOpen(false)} />
       {whatsappModalOpen && <WhatsAppModal onClose={() => setWhatsappModalOpen(false)} />}
     </div>
+    </>
   );
 }
 

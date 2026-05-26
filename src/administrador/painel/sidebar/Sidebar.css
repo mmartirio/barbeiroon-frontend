@@ -208,3 +208,91 @@
   background: linear-gradient(90deg,#e74c3c,#ff7675) !important;
   color: #fff !important;
 }
+
+/* ── Botão fechar (×) — oculto no desktop ─────────────────── */
+.sidebar-close {
+  display: none;
+}
+
+/* ── Hambúrguer — oculto no desktop ───────────────────────── */
+.sidebar-hamburger {
+  display: none;
+}
+
+/* ── Overlay ────────────────────────────────────────────────── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1050;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+/* ── Mobile: sidebar desliza como drawer ────────────────────── */
+@media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    z-index: 1100;
+    transition: left 0.3s ease;
+    box-shadow: none;
+    width: 260px;
+  }
+
+  .sidebar.open {
+    left: 0;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.55);
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .sidebar-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .sidebar-hamburger {
+    display: flex;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 900;
+    background: #23232b;
+    border: 1px solid #2a2d35;
+    border-radius: 8px;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    transition: background 0.2s;
+  }
+
+  .sidebar-hamburger:hover {
+    background: #2d3040;
+  }
+
+  .sidebar-close {
+    display: flex;
+    align-self: flex-end;
+    background: none;
+    border: none;
+    color: #bdbdbd;
+    cursor: pointer;
+    padding: 4px;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+    transition: color 0.2s;
+  }
+
+  .sidebar-close:hover {
+    color: #fff;
+  }
+}

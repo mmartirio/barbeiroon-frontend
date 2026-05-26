@@ -6,7 +6,7 @@ const LogoHeader = () => {
     return (
         <div className="logo-header">
             <img className='logo-header-image' src={Logo} alt='logo' title='logo' />
-            <span className="logo-header-text">Meu Barbeiro</span>
+            <span className="logo-header-text">Barbeiro On</span>
         </div>
     );
 };
