@@ -18,22 +18,26 @@ function Administrador() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMsg('');
-        // Validações básicas
         if (!email.trim() || !password.trim()) {
             setErrorMsg('Preencha todos os campos');
             return;
         }
         setLoading(true);
+        const doRequest = () => fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
         try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
+            let response = await doRequest();
+            // Retry automático se o proxy retornar 502 (cold start do backend)
+            if (response.status === 502) {
+                await new Promise(r => setTimeout(r, 1500));
+                response = await doRequest();
+            }
             const data = await response.json();
             if (!response.ok) {
                 setErrorMsg(data.message || t('login.error') || 'Erro ao fazer login');
-                setLoading(false);
                 return;
             }
             if (data.token) {
