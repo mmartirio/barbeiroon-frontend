@@ -1,178 +1,165 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout/Layout';
-import { useAuth } from '../../hooks/useAuth';
-import { FiPlus, FiAlertCircle, FiX } from 'react-icons/fi';
-import s from './Dashboard.module.css';
+import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
-const fmtCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
-const fmtDate = (v) => { if (!v) return ''; const [y,m,d] = String(v).split('-'); return `${d}/${m}/${y}`; };
-
-const statusLabel = { confirmed: 'Confirmado', pending: 'Pendente', cancelled: 'Cancelado', completed: 'Concluído', agendado: 'Agendado', concluido: 'Concluído', cancelado: 'Cancelado' };
-const statusClass = { confirmed: 'badge-green', pending: 'badge-amber', cancelled: 'badge-red', completed: 'badge-blue', agendado: 'badge-blue', concluido: 'badge-green', cancelado: 'badge-red' };
-
-function StatCard({ title, value, icon, loading }) {
-  return (
-    <div className={s.statCard}>
-      <div className={s.statIcon}>{icon}</div>
-      <div className={s.statBody}>
-        <span className={s.statTitle}>{title}</span>
-        <span className={s.statValue}>{loading ? '—' : value}</span>
-      </div>
-    </div>
-  );
-}
+const fmtP  = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
 
 export default function Dashboard() {
-  const { user, authReady, token } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats]   = useState({ totalClients: 0, totalAppointments: 0, monthlyRevenue: 0, servicesPerformed: 0, loading: true });
-  const [recent, setRecent] = useState([]);
-  const [topSvc, setTopSvc] = useState(null);
-  const [birthdays, setBirthdays] = useState([]);
-  const [pending, setPending]     = useState(0);
-  const [showBirthdays, setShowBirthdays] = useState(false);
+  const [stats,    setStats]    = useState(null);
+  const [pending,  setPending]  = useState(0);
+  const [nextAppt, setNextAppt] = useState(null);
+  const [loading,  setLoading]  = useState(true);
+  const [bdModal,  setBdModal]  = useState(false);
 
-  const load = useCallback(async (t) => {
+  const load = useCallback(async () => {
     try {
-      const res = await fetch('/api/dashboard/stats', { headers: { Authorization: `Bearer ${t}` } });
-      if (!res.ok) return;
-      const d = await res.json();
-      setStats({
-        totalClients:       Number(d.totalClients ?? 0),
-        totalAppointments:  Number(d.totalAppointments ?? 0),
-        monthlyRevenue:     Number(d.monthlyRevenue ?? 0),
-        servicesPerformed:  Number(d.servicesPerformed ?? 0),
-        loading: false,
-      });
-      setRecent(Array.isArray(d.recentAppointments) ? d.recentAppointments : []);
-      setTopSvc(Array.isArray(d.topServices) && d.topServices[0] ? d.topServices[0] : null);
-      setBirthdays(Array.isArray(d.birthdays) ? d.birthdays : []);
-    } catch { /* noop */ }
+      const [sRes, pRes, ownRes] = await Promise.all([
+        fetch('/api/dashboard/stats', { headers: { Authorization: `Bearer ${tok()}` } }),
+        fetch('/api/appointment/requests/pending/own', { headers: { Authorization: `Bearer ${tok()}` } }),
+        fetch('/api/appointment/own', { headers: { Authorization: `Bearer ${tok()}` } }),
+      ]);
+      const sd = await sRes.json().catch(() => ({}));
+      const pd = await pRes.json().catch(() => ({}));
+      const od = await ownRes.json().catch(() => ({}));
+      setStats(sd.stats || sd);
+      setPending((pd.requests || pd.data || []).length);
+
+      const now = new Date();
+      const nowMins = now.getHours() * 60 + now.getMinutes();
+      const upcoming = (od.appointments || [])
+        .filter(a => {
+          if (a.status === 'cancelado' || a.status === 'concluido') return false;
+          const t = String(a.appointmentTime || '').slice(0, 5);
+          const [h, m] = t.split(':').map(Number);
+          return h * 60 + m >= nowMins;
+        })
+        .sort((a, b) => String(a.appointmentTime).localeCompare(String(b.appointmentTime)));
+      setNextAppt(upcoming[0] || null);
+    } finally { setLoading(false); }
   }, []);
 
-  const loadPending = useCallback(async (t) => {
-    try {
-      const isAdmin = !!user?.permissions?.canViewAppointments;
-      const url = isAdmin ? '/api/appointment/requests/pending' : '/api/appointment/requests/pending/own';
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${t}` } });
-      const d   = await res.json().catch(() => ({}));
-      setPending((d.requests || []).length);
-    } catch { /* noop */ }
-  }, [user?.permissions?.canViewAppointments]);
+  useEffect(() => { load(); const id = setInterval(load, 15_000); return () => clearInterval(id); }, [load]);
 
-  useEffect(() => {
-    if (!authReady) return;
-    const t = sessionStorage.getItem('token') || token;
-    if (!t) return;
-    load(t); loadPending(t);
-    const id = setInterval(() => { load(t); loadPending(t); }, 15000);
-    const onVis = () => { if (document.visibilityState === 'visible') { load(t); loadPending(t); } };
-    document.addEventListener('visibilitychange', onVis);
-    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVis); };
-  }, [authReady, token, load, loadPending]);
+  const s = stats || {};
+  const birthdays = s.birthdays || [];
+  const topSvc    = s.topServices?.[0];
+
+  const STATS = [
+    { label: 'Total de Clientes',    value: s.totalClients       ?? '—', icon: <FiUsers size={20} />,       color: '#22c55e' },
+    { label: 'Agendamentos Hoje',    value: s.totalAppointments  ?? '—', icon: <FiCalendar size={20} />,    color: '#2563eb' },
+    { label: 'Faturamento Mensal',   value: fmtP(s.monthlyRevenue),      icon: <FiDollarSign size={20} />,  color: '#16a34a' },
+    { label: 'Serviços Realizados',  value: s.servicesPerformed  ?? '—', icon: <FiScissors size={20} />,    color: '#ee4c02' },
+  ];
 
   return (
-    <Layout>
-      <div className={s.header}>
-        <div>
-          <h1 className={s.title}>Dashboard</h1>
-          <p className={s.sub}>Bem-vindo de volta, {user?.name?.split(' ')[0] || 'Admin'}!</p>
-        </div>
-        <button className={`btn btn-primary ${s.newBtn}`} onClick={() => navigate('/novo-agendamento')}>
-          <FiPlus size={16} /> Novo Agendamento
+    <Layout title="Painel do Administrador">
+      {/* Top actions */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <button className="btn btn-primary btn-sm" onClick={() => navigate('/novo-agendamento')}>
+          <FiPlusCircle size={14} /> Novo Agendamento
         </button>
+        {pending > 0 && (
+          <button
+            onClick={() => navigate('/solicitacoes-pendentes')}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--warning-soft)', border: '1px solid var(--warning)', borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.9rem', color: 'var(--warning)', fontSize: '0.85rem', fontWeight: 600 }}
+          >
+            <FiAlertCircle size={14} /> {pending} solicitação{pending > 1 ? 'ões' : ''} pendente{pending > 1 ? 's' : ''}
+          </button>
+        )}
       </div>
 
-      {pending > 0 && (
-        <div className={s.pendingBanner} onClick={() => navigate('/solicitacoes-pendentes')}>
-          <FiAlertCircle size={18} />
-          <span>{pending} solicitação{pending > 1 ? 'ões' : ''} aguardando aprovação</span>
-          <span className={s.pendingArrow}>→</span>
-        </div>
+      {loading ? (
+        <div className="empty-state"><p>Carregando...</p></div>
+      ) : (
+        <>
+          {/* Stats grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            {STATS.map(st => (
+              <div key={st.label} className="card">
+                <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: `${st.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: st.color, flexShrink: 0 }}>
+                    {st.icon}
+                  </div>
+                  <div>
+                    <p style={{ color: 'var(--color-muted)', fontSize: '0.75rem', marginBottom: '0.2rem' }}>{st.label}</p>
+                    <p style={{ fontWeight: 700, fontSize: '1.2rem' }}>{st.value}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Compact info row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            {/* Next appointment */}
+            <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate('/servico-agendados')}>
+              <div className="card-header"><p className="card-title">Próximo agendamento</p></div>
+              <div className="card-body">
+                {nextAppt ? (
+                  <>
+                    <p style={{ fontWeight: 600 }}>{nextAppt.customer?.name || nextAppt.customerPhone || '—'}</p>
+                    <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>
+                      {nextAppt.service?.name || '—'} · {String(nextAppt.appointmentTime || '').slice(0, 5)}
+                    </p>
+                  </>
+                ) : <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>Nenhum agendamento hoje</p>}
+              </div>
+            </div>
+
+            {/* Top service */}
+            <div className="card">
+              <div className="card-header"><p className="card-title">Serviço mais vendido</p></div>
+              <div className="card-body">
+                {topSvc ? (
+                  <>
+                    <p style={{ fontWeight: 600 }}>{topSvc.name || topSvc.serviceName}</p>
+                    <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>{topSvc.count || topSvc.total || 0} atendimentos</p>
+                  </>
+                ) : <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>Sem dados</p>}
+              </div>
+            </div>
+
+            {/* Birthdays */}
+            <div className="card" style={{ cursor: birthdays.length > 0 ? 'pointer' : 'default' }} onClick={() => birthdays.length > 0 && setBdModal(true)}>
+              <div className="card-header"><p className="card-title">Aniversariantes do Mês</p></div>
+              <div className="card-body">
+                {birthdays.length > 0 ? (
+                  <p style={{ fontWeight: 600, color: 'var(--accent)' }}>{birthdays.length} cliente{birthdays.length > 1 ? 's' : ''} — clique para ver</p>
+                ) : <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>Nenhum este mês</p>}
+              </div>
+            </div>
+          </div>
+
+        </>
       )}
 
-      <div className={s.statsGrid}>
-        <StatCard title="Total de Clientes"    value={stats.totalClients}              icon="👥" loading={stats.loading} />
-        <StatCard title="Agendamentos Hoje"    value={stats.totalAppointments}         icon="📅" loading={stats.loading} />
-        <StatCard title="Faturamento Mensal"   value={fmtCurrency(stats.monthlyRevenue)} icon="💰" loading={stats.loading} />
-        <StatCard title="Serviços Realizados"  value={stats.servicesPerformed}         icon="✂️" loading={stats.loading} />
-      </div>
-
-      <div className={s.grid}>
-        {/* Próximos Agendamentos */}
-        <div className="card">
-          <div className="card-header"><span className="card-title">Próximos Agendamentos</span></div>
-          <div className="card-body" style={{ padding: 0 }}>
-            {recent.length === 0
-              ? <div className="empty-state" style={{ padding: '2rem' }}><p>Nenhum agendamento próximo</p></div>
-              : recent.map(a => (
-                <div key={a.id} className={s.apptRow}>
-                  <div className={s.apptInfo}>
-                    <span className={s.apptClient}>{a.client || a.customerName || 'Cliente'}</span>
-                    <span className={s.apptSvc}>{a.service || a.serviceName}</span>
-                  </div>
-                  <div className={s.apptMeta}>
-                    <span className={s.apptTime}>🕐 {a.time || a.appointmentTime}</span>
-                    <span className={`badge ${statusClass[a.status] || 'badge-gray'}`}>{statusLabel[a.status] || a.status}</span>
-                  </div>
-                </div>
-              ))
-            }
-          </div>
-        </div>
-
-        {/* Serviço Top */}
-        <div className="card">
-          <div className="card-header"><span className="card-title">Serviço mais vendido</span></div>
-          <div className="card-body">
-            {topSvc
-              ? <div className={s.topSvc}>
-                  <span className={s.topSvcIcon}>✂️</span>
-                  <div>
-                    <div className={s.topSvcName}>{topSvc.name}</div>
-                    <div className={s.topSvcMeta}>{topSvc.count} solicitações · {topSvc.revenue || ''}</div>
-                  </div>
-                </div>
-              : <div className="empty-state"><p>Sem dados</p></div>
-            }
-          </div>
-        </div>
-
-        {/* Aniversariantes */}
-        <div className="card" style={{ cursor: 'pointer' }} onClick={() => setShowBirthdays(true)}>
-          <div className="card-header"><span className="card-title">Aniversariantes do Mês</span></div>
-          <div className="card-body" style={{ padding: '0.75rem 1.25rem' }}>
-            {birthdays.length === 0
-              ? <div className="empty-state" style={{ padding: '1.5rem 0' }}><p>Nenhum aniversariante</p></div>
-              : <>
-                  {birthdays.slice(0, 3).map((b, i) => (
-                    <div key={i} className={s.birthdayRow}>
-                      <span>🎂</span>
-                      <div><div className={s.bdName}>{b.name}</div><div className={s.bdDate}>{fmtDate(b.date) || b.date}</div></div>
-                    </div>
-                  ))}
-                  {birthdays.length > 3 && <p className={s.bdMore}>+ {birthdays.length - 3} mais — clique para ver todos</p>}
-                </>
-            }
-          </div>
-        </div>
-      </div>
-
       {/* Birthdays modal */}
-      {showBirthdays && (
-        <div className="modal-overlay" onClick={() => setShowBirthdays(false)}>
+      {bdModal && (
+        <div className="modal-overlay" onClick={() => setBdModal(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Aniversariantes do Mês</h3>
-              <button className="modal-close" onClick={() => setShowBirthdays(false)}><FiX size={18} /></button>
+              <button className="modal-close" onClick={() => setBdModal(false)}><FiX size={18} /></button>
             </div>
             <div className="modal-body">
               {birthdays.map((b, i) => (
-                <div key={i} className={s.birthdayRow} style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
-                  <span>🎂</span>
-                  <div><div className={s.bdName}>{b.name}</div><div className={s.bdDate}>{fmtDate(b.date) || b.date}</div></div>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0', borderBottom: '1px solid var(--border)' }}>
+                  <div>
+                    <p style={{ fontWeight: 600 }}>{b.name}</p>
+                    <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>{b.phone} · {b.birthDate ? new Date(b.birthDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : ''}</p>
+                  </div>
+                  {b.phone && (
+                    <a
+                      href={`https://wa.me/55${b.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Feliz aniversário, ${b.name}! 🎉`)}`}
+                      target="_blank" rel="noreferrer"
+                      className="btn btn-success btn-sm"
+                    >
+                      <FiMessageCircle size={13} /> WhatsApp
+                    </a>
+                  )}
                 </div>
               ))}
             </div>

@@ -1,52 +1,77 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Layout from '../../components/Layout/Layout';
-import { FiEdit2, FiTrash2, FiPlus, FiX } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiRefreshCw, FiX } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
-const BASE = '/api';
 
-const ALL_PERMS = [
-  { key: 'canViewCustomers',       label: 'Ver clientes' },
-  { key: 'canCreateCustomer',      label: 'Cadastrar clientes' },
-  { key: 'canEditCustomer',        label: 'Editar clientes' },
-  { key: 'canDeleteCustomer',      label: 'Excluir clientes' },
-  { key: 'canViewAppointments',    label: 'Ver agendamentos' },
-  { key: 'canCreateAppointment',   label: 'Criar agendamentos' },
-  { key: 'canEditAppointment',     label: 'Editar agendamentos' },
-  { key: 'canCancelAppointment',   label: 'Cancelar agendamentos' },
-  { key: 'canViewServices',        label: 'Ver serviços' },
-  { key: 'canCreateService',       label: 'Cadastrar serviços' },
-  { key: 'canEditService',         label: 'Editar serviços' },
-  { key: 'canDeleteService',       label: 'Excluir serviços' },
-  { key: 'canViewUsers',           label: 'Ver usuários' },
-  { key: 'canCreateUser',          label: 'Cadastrar usuários' },
-  { key: 'canEditUser',            label: 'Editar usuários' },
-  { key: 'canDeleteUser',          label: 'Excluir usuários' },
-  { key: 'canViewGroups',          label: 'Ver grupos' },
-  { key: 'canManageGroups',        label: 'Gerenciar grupos' },
-  { key: 'canViewReports',         label: 'Ver relatórios' },
-  { key: 'canViewPromotions',      label: 'Ver promoções' },
-  { key: 'canManagePromotions',    label: 'Gerenciar promoções' },
-  { key: 'canManageAccount',       label: 'Gerenciar conta' },
-  { key: 'canManageAgenda',        label: 'Gerenciar agenda' },
-  { key: 'canManageCustomerScreen',label: 'Tela do cliente' },
+const PERMISSOES = [
+  { categoria: 'Usuário', perms: [
+    { key: 'canViewUsers',   label: 'Visualizar' },
+    { key: 'canCreateUser',  label: 'Criar' },
+    { key: 'canEditUser',    label: 'Editar' },
+    { key: 'canDeleteUser',  label: 'Excluir' },
+  ]},
+  { categoria: 'Grupos', perms: [
+    { key: 'canManageGroups', label: 'Gerenciar grupos' },
+  ]},
+  { categoria: 'Clientes', perms: [
+    { key: 'canViewCustomers',   label: 'Visualizar' },
+    { key: 'canCreateCustomer',  label: 'Criar' },
+    { key: 'canEditCustomer',    label: 'Editar' },
+    { key: 'canDeleteCustomer',  label: 'Excluir' },
+  ]},
+  { categoria: 'Agendamento', perms: [
+    { key: 'canViewAppointments',   label: 'Visualizar' },
+    { key: 'canCreateAppointment',  label: 'Criar' },
+    { key: 'canEditAppointment',    label: 'Editar' },
+    { key: 'canDeleteAppointment',  label: 'Excluir' },
+  ]},
+  { categoria: 'Conta', perms: [
+    { key: 'canManageTenant', label: 'Gerenciar conta' },
+  ]},
+  { categoria: 'Relatório', perms: [
+    { key: 'canViewReports', label: 'Visualizar relatórios' },
+  ]},
+  { categoria: 'Serviços', perms: [
+    { key: 'canViewServices',    label: 'Visualizar' },
+    { key: 'canManageServices',  label: 'Gerenciar' },
+  ]},
+  { categoria: 'Profissionais', perms: [
+    { key: 'canViewProfessionals',    label: 'Visualizar' },
+    { key: 'canManageProfessionals',  label: 'Gerenciar' },
+  ]},
+  { categoria: 'Agenda', perms: [
+    { key: 'canViewAgenda',    label: 'Visualizar' },
+    { key: 'canManageAgenda',  label: 'Gerenciar' },
+  ]},
+  { categoria: 'Dashboard', perms: [
+    { key: 'canViewDashboard', label: 'Visualizar dashboard' },
+  ]},
 ];
 
-const emptyPerms = () => Object.fromEntries(ALL_PERMS.map(p => [p.key, false]));
+const emptyPerms = () => {
+  const p = {};
+  PERMISSOES.forEach(cat => cat.perms.forEach(perm => { p[perm.key] = false; }));
+  return p;
+};
 
 export default function Grupo() {
-  const [groups,  setGroups]  = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null);
-  const [form,    setForm]    = useState({ name: '', permissions: emptyPerms() });
-  const [saving,  setSaving]  = useState(false);
-  const [confirm, setConfirm] = useState(null);
-  const [error,   setError]   = useState('');
+  const [groups,      setGroups]      = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [saving,      setSaving]      = useState(false);
+  const [error,       setError]       = useState('');
+  const [success,     setSuccess]     = useState('');
+  const [confirm,     setConfirm]     = useState(null);
+  const [groupName,   setGroupName]   = useState('');
+  const [perms,       setPerms]       = useState(emptyPerms());
+  const [editingId,   setEditingId]   = useState(null);
+
+  const selectedCount = useMemo(() => Object.values(perms).filter(Boolean).length, [perms]);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BASE}/group`, { headers: { Authorization: `Bearer ${tok()}` } });
+      const res = await fetch('/api/group?limit=50', { headers: { Authorization: `Bearer ${tok()}` } });
       const d   = await res.json().catch(() => ({}));
       setGroups(d.groups || d.data || []);
     } finally { setLoading(false); }
@@ -54,115 +79,132 @@ export default function Grupo() {
 
   useEffect(() => { load(); }, [load]);
 
-  const openCreate = () => {
-    setEditing('new');
-    setForm({ name: '', permissions: emptyPerms() });
+  const togglePerm = (key) => setPerms(p => ({ ...p, [key]: !p[key] }));
+
+  const resetForm = () => {
+    setGroupName('');
+    setPerms(emptyPerms());
+    setEditingId(null);
     setError('');
+    setSuccess('');
   };
 
-  const openEdit = (g) => {
-    setEditing(g);
-    const perms = { ...emptyPerms(), ...(g.permissions || {}) };
-    setForm({ name: g.name || '', permissions: perms });
+  const startEdit = (g) => {
+    setEditingId(g.id);
+    setGroupName(g.name || '');
+    const next = emptyPerms();
+    PERMISSOES.forEach(cat => cat.perms.forEach(perm => { next[perm.key] = !!g[perm.key]; }));
+    setPerms(next);
     setError('');
+    setSuccess('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  const togglePerm = (key) => setForm(p => ({ ...p, permissions: { ...p.permissions, [key]: !p.permissions[key] } }));
 
   const save = async () => {
-    if (!form.name.trim()) { setError('Nome obrigatório'); return; }
-    setSaving(true);
+    if (!groupName.trim()) { setError('Nome do grupo obrigatório'); return; }
+    setSaving(true); setError(''); setSuccess('');
     try {
-      const isNew = editing === 'new';
-      const url   = isNew ? `${BASE}/group` : `${BASE}/group/${editing.id}`;
-      const res   = await fetch(url, {
-        method: isNew ? 'POST' : 'PUT',
+      const url = editingId ? `/api/group/${editingId}` : '/api/group';
+      const res = await fetch(url, {
+        method: editingId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
-        body: JSON.stringify({ name: form.name, permissions: form.permissions }),
+        body: JSON.stringify({ name: groupName.trim(), description: `Grupo ${groupName.trim()}`, ...perms }),
       });
-      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.message || 'Erro ao salvar'); }
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.message || 'Erro ao salvar');
+      setSuccess(editingId ? 'Grupo atualizado com sucesso!' : 'Grupo criado com sucesso!');
+      resetForm();
       await load();
-      setEditing(null);
     } catch (err) { setError(err.message); }
     finally { setSaving(false); }
   };
 
   const del = async (g) => {
     try {
-      await fetch(`${BASE}/group/${g.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${tok()}` } });
-      setGroups(prev => prev.filter(gr => gr.id !== g.id));
+      await fetch(`/api/group/${g.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${tok()}` } });
+      setGroups(prev => prev.filter(x => x.id !== g.id));
+      if (editingId === g.id) resetForm();
     } finally { setConfirm(null); }
   };
 
-  const permCount = (g) => Object.values(g.permissions || {}).filter(Boolean).length;
-
   return (
-    <Layout title="Grupos de Permissão">
-      <div style={{ marginBottom: '1rem' }}>
-        <button className="btn btn-primary btn-sm" onClick={openCreate}><FiPlus size={14} style={{ marginRight: 4 }} />Novo Grupo</button>
-      </div>
+    <Layout title="Grupos de Permissões">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
 
-      {loading && <div className="empty-state"><p>Carregando...</p></div>}
-      {!loading && groups.length === 0 && <div className="empty-state"><p>Nenhum grupo cadastrado</p></div>}
-
-      {!loading && groups.length > 0 && (
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead><tr><th>Nome</th><th>Permissões ativas</th><th>Ações</th></tr></thead>
-            <tbody>
-              {groups.map(g => (
-                <tr key={g.id}>
-                  <td><span style={{ fontWeight: 600 }}>{g.name}</span></td>
-                  <td><span className="badge badge-blue">{permCount(g)} de {ALL_PERMS.length}</span></td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(g)}><FiEdit2 size={14} /></button>
-                      <button className="btn btn-danger btn-sm" onClick={() => setConfirm(g)}><FiTrash2 size={14} /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {editing !== null && (
-        <div className="modal-overlay" onClick={() => setEditing(null)}>
-          <div className="modal-box" style={{ maxWidth: 540 }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{editing === 'new' ? 'Novo Grupo' : 'Editar Grupo'}</h3>
-              <button className="modal-close" onClick={() => setEditing(null)}><FiX size={18} /></button>
-            </div>
-            <div className="modal-body">
-              {error && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{error}</div>}
-              <div className="form-field"><label className="form-label">Nome do grupo</label><input className="form-input" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
-
-              <p style={{ fontWeight: 600, marginBottom: '0.75rem', marginTop: '0.5rem' }}>Permissões</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1rem', maxHeight: 320, overflowY: 'auto', paddingRight: 4 }}>
-                {ALL_PERMS.map(p => (
-                  <label key={p.key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem' }}>
-                    <input type="checkbox" checked={!!form.permissions[p.key]} onChange={() => togglePerm(p.key)} style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} />
-                    {p.label}
-                  </label>
-                ))}
+        {/* Left: form */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="card">
+            <div className="card-body">
+              <h3 style={{ marginBottom: '1rem' }}>{editingId ? 'Editar Grupo' : 'Criar Grupo'}</h3>
+              {error   && <div className="alert alert-error"   style={{ marginBottom: '1rem' }}>{error}</div>}
+              {success && <div className="alert alert-success" style={{ marginBottom: '1rem' }}>{success}</div>}
+              <div className="form-group">
+                <label className="form-label">Nome do Grupo *</label>
+                <input className="form-input" placeholder="Ex: Atendente, Barbeiro, Gerente" value={groupName} onChange={e => setGroupName(e.target.value)} />
               </div>
-
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-                <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setEditing(null)}>Cancelar</button>
-                <button className="btn btn-primary" style={{ flex: 1 }} onClick={save} disabled={saving}>{saving ? 'Salvando...' : 'Salvar'}</button>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-muted)', marginBottom: '1rem' }}>{selectedCount} permissão(ões) selecionada(s)</p>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                {editingId && <button className="btn btn-ghost" style={{ flex: 1 }} onClick={resetForm}>Cancelar</button>}
+                <button className="btn btn-primary" style={{ flex: 1 }} onClick={save} disabled={saving}>{saving ? 'Salvando...' : editingId ? 'Atualizar Grupo' : 'Criar Grupo'}</button>
               </div>
             </div>
           </div>
+
+          {/* Permission categories */}
+          {PERMISSOES.map(cat => (
+            <div key={cat.categoria} className="card" style={{ borderColor: 'var(--accent)', borderWidth: 1 }}>
+              <div className="card-body">
+                <h4 style={{ marginBottom: '0.75rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border)' }}>{cat.categoria}</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {cat.perms.map(perm => (
+                    <label key={perm.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '0.4rem 0' }}>
+                      <span style={{ fontSize: '0.875rem' }}>{perm.label}</span>
+                      <input type="checkbox" checked={!!perms[perm.key]} onChange={() => togglePerm(perm.key)} style={{ width: 18, height: 18, accentColor: 'var(--accent)' }} />
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
+
+        {/* Right: list */}
+        <div className="card">
+          <div className="card-body">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3>Grupos Criados</h3>
+              <button className="btn btn-ghost btn-sm" onClick={load} disabled={loading}><FiRefreshCw size={14} /></button>
+            </div>
+
+            {loading && <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Carregando...</p>}
+            {!loading && groups.length === 0 && <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Nenhum grupo encontrado</p>}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {groups.map(g => (
+                <div key={g.id} style={{ background: 'var(--bg-input)', borderRadius: 'var(--radius-xs)', padding: '0.75rem', borderLeft: '3px solid var(--accent)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <p style={{ fontWeight: 700 }}>{g.name}</p>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.1rem' }}>ID: {g.id}</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <button className="btn btn-ghost btn-sm btn-icon" onClick={() => startEdit(g)}><FiEdit2 size={14} /></button>
+                      <button className="btn btn-danger btn-sm btn-icon" onClick={() => setConfirm(g)}><FiTrash2 size={14} /></button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {confirm && (
         <div className="modal-overlay" onClick={() => setConfirm(null)}>
           <div className="modal-box" style={{ maxWidth: 380 }} onClick={e => e.stopPropagation()}>
             <div className="modal-header"><h3>Excluir grupo?</h3><button className="modal-close" onClick={() => setConfirm(null)}><FiX size={18} /></button></div>
             <div className="modal-body">
-              <p style={{ color: 'var(--color-muted)', marginBottom: '1.25rem' }}>Deseja excluir <strong style={{ color: 'var(--color)' }}>{confirm.name}</strong>?</p>
+              <p style={{ color: 'var(--color-muted)' }}>Excluir <strong style={{ color: 'var(--color)' }}>{confirm.name}</strong>?</p>
               <div style={{ display: 'flex', gap: '0.75rem' }}>
                 <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirm(null)}>Cancelar</button>
                 <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => del(confirm)}>Excluir</button>

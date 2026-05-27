@@ -1,44 +1,23 @@
-/* Variáveis Globais CSS */
 :root {
-    /* Cores de fundo — alinhadas com o Mobile */
-    --background: #18191a;
-    --background-light: #23232b;
-    --background-dark: #111318;
-
-    /* Cores de texto */
-    --color: #ffffff;
-    --color-muted: #bdbdbd;
-
-    /* Cores primárias */
-    --primary: #ee4c02;
-    --primary-hover: #ff5c12;
-    --primary-light: rgba(238, 76, 2, 0.1);
-
-    /* Cores secundárias */
-    --secondary: #23232b;
-    --secondary-hover: #2d3040;
-
-    /* Cores de destaque (azul Mobile) */
-    --accent: #2563eb;
-    --accent-hover: #1d55d5;
-
-    /* Cores de status — alinhadas com o Mobile */
-    --success: #16a34a;
-    --warning: #f59e0b;
-    --danger: #dc2626;
-
-    /* Bordas */
-    --border-color: #2a2d35;
-
-    /* Sombras mais suaves (Mobile pattern) */
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.22);
-
-    /* Raios de borda (Mobile usa 12-14px) */
-    --radius: 12px;
-    --radius-sm: 6px;
-    --radius-full: 999px;
-
-    /* Transições */
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --bg:           #18191a;
+  --bg-card:      #23232b;
+  --bg-input:     #1e1f27;
+  --border:       #2a2d35;
+  --accent:       #2563eb;
+  --accent-hover: #1d4ed8;
+  --primary:      #ee4c02;
+  --success:      #16a34a;
+  --success-soft: #14532d22;
+  --warning:      #f59e0b;
+  --warning-soft: #78350f22;
+  --danger:       #dc2626;
+  --danger-soft:  #7f1d1d22;
+  --color:        #f1f1f1;
+  --color-muted:  #9ca3af;
+  --radius:       12px;
+  --radius-sm:    8px;
+  --radius-xs:    6px;
+  --shadow:       0 4px 24px rgba(0,0,0,0.35);
+  --sidebar-w:    248px;
+  --header-h:     56px;
 }

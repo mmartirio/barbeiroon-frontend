@@ -3,21 +3,22 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  esbuild: {
-    loader: 'tsx',
-    include: /src\/.*\.[jt]sx?$/,
-    exclude: [],
-  },
-  optimizeDeps: {
-    esbuildOptions: { loader: { '.js': 'jsx' } },
-  },
   server: {
     proxy: {
-      '/api': 'http://localhost:3001',
-      '/uploads': 'http://localhost:3001',
+      '/api': {
+        target: 'http://191.252.228.245:3001',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.removeHeader('origin');
+          });
+        },
+      },
+      '/uploads': {
+        target: 'http://191.252.228.245:3001',
+        changeOrigin: true,
+      },
     },
   },
-  build: {
-    outDir: 'dist',
-  },
+  build: { outDir: 'dist' },
 });

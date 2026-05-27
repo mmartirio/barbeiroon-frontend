@@ -1,5 +1,0 @@
-.page { min-height: 100vh; background: var(--background); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.card { background: var(--background-light); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 400px; }
-.back { background: none; border: none; color: #60a5fa; font-size: 0.9rem; cursor: pointer; padding: 0; margin-bottom: 1.25rem; display: block; }
-.title { font-size: 1.4rem; font-weight: 700; color: var(--color); margin-bottom: 0.4rem; }
-.sub { font-size: 0.88rem; color: var(--color-muted); line-height: 1.5; }

@@ -1,191 +1,358 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '../../components/Layout/Layout';
-import { FiEdit2, FiTrash2, FiPlus, FiX } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiRefreshCw, FiChevronDown, FiX } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
-const BASE = '/api';
 
-const fmtDate = (v) => { if (!v) return ''; const [y, m, d] = String(v).split('T')[0].split('-'); return `${d}/${m}/${y}`; };
-const fmtP    = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
+const fmtP = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0);
+const toBrDate = (d) => { if (!d) return ''; const [y,m,dy] = d.split('-'); return `${dy}/${m}/${y}`; };
+const toApiDate = (d) => { if (!d) return ''; const [dy,m,y] = d.split('/'); return `${y}-${m}-${dy}`; };
+const fromApiDate = (s) => { if (!s) return ''; const [y,m,d] = s.split('T')[0].split('-'); return `${d}/${m}/${y}`; };
 
-const TYPES = [
-  { value: 'desconto_percentual', label: 'Desconto percentual (%)' },
-  { value: 'desconto_fixo',       label: 'Desconto fixo (R$)' },
-  { value: 'brinde',              label: 'Brinde / serviço grátis' },
+const CRITERIOS = [
+  { label: 'Aniversariantes do mês',        value: 'aniversariantes' },
+  { label: 'Após compras',                   value: 'x_compras' },
+  { label: 'Na compra do serviço',           value: 'servico_x' },
+  { label: 'Efetiva no prazo estimado',      value: 'prazo_estimado' },
+  { label: 'Número específico de clientes',  value: 'num_clientes' },
 ];
 
-const CRITERIA = [
-  { value: 'aniversariante',      label: 'Aniversariante do mês' },
-  { value: 'frequencia',          label: 'Frequência de visitas' },
-  { value: 'todos',               label: 'Todos os clientes' },
-];
+const TARGET_ALL = 'target_all_customers';
+const TARGET_PFX = 'target_customer:';
 
-const emptyForm = () => ({
-  name: '', type: 'desconto_percentual', discountValue: '', criteriaType: 'todos',
-  minVisits: '', startDate: '', endDate: '', description: '', active: true,
-});
+const INITIAL = {
+  nome: '', preco: '', tipoPreco: 'fixo', tipo: 'desconto_compra',
+  validadeInicio: '', validadeFim: '', criterios: [],
+  xCompras: '', servicoX: '', numClientes: '', clienteId: TARGET_ALL, repetir: 0,
+};
+
+const parseTarget = (criteria = []) => {
+  let clienteId = TARGET_ALL;
+  const clean = criteria.filter(item => {
+    if (item === TARGET_ALL) { clienteId = TARGET_ALL; return false; }
+    if (item.startsWith(TARGET_PFX)) { clienteId = item.replace(TARGET_PFX, '').trim(); return false; }
+    return true;
+  });
+  return { clienteId, clean };
+};
 
 export default function Promocoes() {
-  const [promos,   setPromos]   = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [editing,  setEditing]  = useState(null);
-  const [form,     setForm]     = useState(emptyForm());
-  const [saving,   setSaving]   = useState(false);
-  const [confirm,  setConfirm]  = useState(null);
-  const [error,    setError]    = useState('');
+  const [promotions, setPromotions]   = useState([]);
+  const [customers,  setCustomers]    = useState([]);
+  const [loading,    setLoading]      = useState(true);
+  const [saving,     setSaving]       = useState(false);
+  const [error,      setError]        = useState('');
+  const [success,    setSuccess]      = useState('');
+  const [form,       setForm]         = useState(INITIAL);
+  const [editingId,  setEditingId]    = useState(null);
+  const [confirm,    setConfirm]      = useState(null);
+  const [showCust,   setShowCust]     = useState(false);
+  const [showTipoP,  setShowTipoP]    = useState(false);
+  const [showTipo,   setShowTipo]     = useState(false);
+  const [showRep,    setShowRep]      = useState(false);
 
-  const load = useCallback(async () => {
+  const setF = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const toggleCrit = (v) => setF('criterios', form.criterios.includes(v) ? form.criterios.filter(c => c !== v) : [...form.criterios, v]);
+
+  const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BASE}/promotion`, { headers: { Authorization: `Bearer ${tok()}` } });
-      const d   = await res.json().catch(() => ({}));
-      setPromos(d.promotions || d.data || []);
+      const [pRes, cRes] = await Promise.all([
+        fetch('/api/promotion?limit=100', { headers: { Authorization: `Bearer ${tok()}` } }),
+        fetch('/api/customer?limit=500',  { headers: { Authorization: `Bearer ${tok()}` } }),
+      ]);
+      const [pData, cData] = await Promise.all([pRes.json().catch(()=>({})), cRes.json().catch(()=>({}))]);
+      setPromotions(pData.promotions || pData.data || []);
+      setCustomers(cData.customers || cData.data || []);
     } finally { setLoading(false); }
-  }, []);
+  };
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(); }, []);
 
-  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const resetForm = () => { setForm(INITIAL); setEditingId(null); setError(''); setSuccess(''); };
 
-  const openCreate = () => { setEditing('new'); setForm(emptyForm()); setError(''); };
-  const openEdit   = (p) => {
-    setEditing(p);
-    setForm({
-      name: p.name || '', type: p.type || 'desconto_percentual',
-      discountValue: String(p.discountValue || ''), criteriaType: p.criteriaType || 'todos',
-      minVisits: String(p.minVisits || ''), startDate: (p.startDate || '').split('T')[0],
-      endDate: (p.endDate || '').split('T')[0], description: p.description || '', active: p.active !== false,
-    });
-    setError('');
+  const validate = () => {
+    if (!form.nome.trim()) return 'Informe o nome da promoção.';
+    if (!form.validadeInicio) return 'Informe a data inicial de validade.';
+    if (form.criterios.includes('x_compras') && (!form.xCompras || Number(form.xCompras) < 1)) return 'Informe a quantidade de compras.';
+    if (form.criterios.includes('servico_x') && !form.servicoX.trim()) return 'Informe o nome do serviço.';
+    if (form.criterios.includes('num_clientes') && (!form.numClientes || Number(form.numClientes) < 1)) return 'Informe o número de clientes.';
+    const precoNum = Number((form.preco || '0').replace(',', '.'));
+    if (form.tipoPreco === 'percentual' && (precoNum <= 0 || precoNum > 100)) return 'Para percentual, informe um valor entre 1 e 100.';
+    return null;
+  };
+
+  const buildPayload = () => {
+    const targetCrit = form.clienteId === TARGET_ALL ? TARGET_ALL : `${TARGET_PFX}${form.clienteId}`;
+    return {
+      nome:         form.nome.trim(),
+      preco:        Number((form.preco || '0').replace(',', '.')),
+      tipoPreco:    form.tipoPreco,
+      tipo:         form.tipo,
+      validadeInicio: form.validadeInicio ? toApiDate(form.validadeInicio) : null,
+      validadeFim:    form.validadeFim ? toApiDate(form.validadeFim) : null,
+      criterios:    [...form.criterios, targetCrit],
+      xCompras:     form.criterios.includes('x_compras') ? Number(form.xCompras) : null,
+      servicoX:     form.criterios.includes('servico_x') ? form.servicoX.trim() : null,
+      numClientes:  form.criterios.includes('num_clientes') ? Number(form.numClientes) : null,
+      repetir:      form.repetir,
+    };
   };
 
   const save = async () => {
-    if (!form.name.trim()) { setError('Nome obrigatório'); return; }
-    setSaving(true);
+    const err = validate();
+    if (err) { setError(err); return; }
+    setSaving(true); setError(''); setSuccess('');
     try {
-      const isNew = editing === 'new';
-      const url   = isNew ? `${BASE}/promotion` : `${BASE}/promotion/${editing.id}`;
-      const body  = {
-        name: form.name, type: form.type, discountValue: Number(form.discountValue),
-        criteriaType: form.criteriaType, minVisits: form.minVisits ? Number(form.minVisits) : undefined,
-        startDate: form.startDate || undefined, endDate: form.endDate || undefined,
-        description: form.description, active: form.active,
-      };
+      const url = editingId ? `/api/promotion/${editingId}` : '/api/promotion';
       const res = await fetch(url, {
-        method: isNew ? 'POST' : 'PUT',
+        method: editingId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
-        body: JSON.stringify(body),
+        body: JSON.stringify(buildPayload()),
       });
-      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.message || 'Erro ao salvar'); }
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.message || 'Erro ao salvar');
+      setSuccess(editingId ? 'Promoção atualizada!' : 'Promoção criada!');
+      resetForm();
       await load();
-      setEditing(null);
-    } catch (err) { setError(err.message); }
+    } catch (e) { setError(e.message); }
     finally { setSaving(false); }
   };
 
-  const del = async (p) => {
+  const startEdit = (item) => {
+    const { clienteId, clean } = parseTarget(Array.isArray(item.criteria) ? item.criteria : []);
+    setEditingId(item.id);
+    setForm({
+      nome:           item.name || '',
+      preco:          item.price !== null ? String(Number(item.price).toFixed(2)).replace('.', ',') : '',
+      tipoPreco:      item.priceType || 'fixo',
+      tipo:           item.discountType || 'desconto_compra',
+      validadeInicio: fromApiDate(item.validFrom),
+      validadeFim:    fromApiDate(item.validUntil),
+      criterios:      clean,
+      xCompras:       item.xPurchases != null ? String(item.xPurchases) : '',
+      servicoX:       item.serviceX || '',
+      numClientes:    item.customerCount != null ? String(item.customerCount) : '',
+      clienteId,
+      repetir:        item.repetir != null ? Number(item.repetir) : 0,
+    });
+    setError(''); setSuccess('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const toggleActive = async (item) => {
     try {
-      await fetch(`${BASE}/promotion/${p.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${tok()}` } });
-      setPromos(prev => prev.filter(pr => pr.id !== p.id));
+      const res = await fetch(`/api/promotion/${item.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
+        body: JSON.stringify({ active: !Boolean(item.active) }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.message || 'Erro');
+      setPromotions(prev => prev.map(p => p.id === item.id ? { ...p, active: !p.active } : p));
+    } catch (e) { setError(e.message); }
+  };
+
+  const del = async (item) => {
+    try {
+      await fetch(`/api/promotion/${item.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${tok()}` } });
+      setPromotions(prev => prev.filter(p => p.id !== item.id));
+      if (editingId === item.id) resetForm();
     } finally { setConfirm(null); }
   };
 
-  const typeLabel  = (v) => (TYPES.find(t => t.value === v) || {}).label || v;
-  const criteriaLabel = (v) => (CRITERIA.find(c => c.value === v) || {}).label || v;
+  const custName = useMemo(() => {
+    if (!form.clienteId || form.clienteId === TARGET_ALL) return 'Todos os usuários';
+    const c = customers.find(x => String(x.id || x.phone) === String(form.clienteId));
+    return c?.name || 'Cliente não encontrado';
+  }, [customers, form.clienteId]);
+
+  const repLabel = form.repetir === 0 ? 'Nunca' : form.repetir === 1 ? '1 vez (em 1 mês)' : `${form.repetir} vezes (em ${form.repetir} meses)`;
+
+  const Sel = ({ label, value, onClick }) => (
+    <div className="form-group">
+      <label className="form-label">{label}</label>
+      <button type="button" onClick={onClick}
+        style={{ width:'100%', background:'var(--bg-input)', border:'1px solid var(--border)', borderRadius:'var(--radius-xs)', padding:'0.6rem 0.75rem', display:'flex', alignItems:'center', justifyContent:'space-between', color:'var(--color)', fontSize:'0.875rem', textAlign:'left' }}>
+        <span>{value}</span>
+        <FiChevronDown size={14} />
+      </button>
+    </div>
+  );
+
+  const DropMenu = ({ show, items, onSelect }) => show ? (
+    <div style={{ marginTop: -12, background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--radius-xs)', marginBottom:'0.75rem', overflow:'hidden' }}>
+      {items.map((item, i) => (
+        <button key={i} type="button" onClick={() => onSelect(item)}
+          style={{ width:'100%', padding:'0.6rem 0.75rem', textAlign:'left', background:'transparent', color:'var(--color)', fontSize:'0.875rem', border:'none', borderBottom:'1px solid var(--border)', cursor:'pointer' }}>
+          {item.label}
+        </button>
+      ))}
+    </div>
+  ) : null;
 
   return (
     <Layout title="Promoções">
-      <div style={{ marginBottom: '1rem' }}>
-        <button className="btn btn-primary btn-sm" onClick={openCreate}><FiPlus size={14} style={{ marginRight: 4 }} />Nova Promoção</button>
-      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
 
-      {loading && <div className="empty-state"><p>Carregando...</p></div>}
-      {!loading && promos.length === 0 && <div className="empty-state"><p>Nenhuma promoção cadastrada</p></div>}
+        {/* Form */}
+        <div className="card">
+          <div className="card-body">
+            <h3 style={{ marginBottom: '1rem' }}>{editingId ? 'Editar Promoção' : 'Nova Promoção'}</h3>
+            {error   && <div className="alert alert-error"   style={{ marginBottom:'0.75rem' }}>{error}</div>}
+            {success && <div className="alert alert-success" style={{ marginBottom:'0.75rem' }}>{success}</div>}
 
-      {!loading && promos.length > 0 && (
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead><tr><th>Nome</th><th>Tipo</th><th>Desconto</th><th>Critério</th><th>Validade</th><th>Status</th><th>Ações</th></tr></thead>
-            <tbody>
-              {promos.map(p => (
-                <tr key={p.id}>
-                  <td><span style={{ fontWeight: 600 }}>{p.name}</span></td>
-                  <td style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>{typeLabel(p.type)}</td>
-                  <td>{p.type === 'desconto_percentual' ? `${p.discountValue}%` : p.type === 'desconto_fixo' ? fmtP(p.discountValue) : '—'}</td>
-                  <td style={{ fontSize: '0.8rem' }}>{criteriaLabel(p.criteriaType)}</td>
-                  <td style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>{p.startDate || p.endDate ? `${fmtDate(p.startDate)} – ${fmtDate(p.endDate)}` : 'Sem limite'}</td>
-                  <td><span className={`badge ${p.active !== false ? 'badge-green' : 'badge-gray'}`}>{p.active !== false ? 'Ativa' : 'Inativa'}</span></td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(p)}><FiEdit2 size={14} /></button>
-                      <button className="btn btn-danger btn-sm" onClick={() => setConfirm(p)}><FiTrash2 size={14} /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {editing !== null && (
-        <div className="modal-overlay" onClick={() => setEditing(null)}>
-          <div className="modal-box" style={{ maxWidth: 520 }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{editing === 'new' ? 'Nova Promoção' : 'Editar Promoção'}</h3>
-              <button className="modal-close" onClick={() => setEditing(null)}><FiX size={18} /></button>
+            <div className="form-group">
+              <label className="form-label">Nome da Promoção</label>
+              <input className="form-input" value={form.nome} onChange={e => setF('nome', e.target.value)} placeholder="Ex: Corte aniversário" />
             </div>
-            <div className="modal-body">
-              {error && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{error}</div>}
-              <div className="form-field"><label className="form-label">Nome *</label><input className="form-input" value={form.name} onChange={e => set('name', e.target.value)} /></div>
-              <div className="form-field">
-                <label className="form-label">Tipo de promoção</label>
-                <select className="form-input" value={form.type} onChange={e => set('type', e.target.value)}>
-                  {TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="form-group">
+                <label className="form-label">Preço</label>
+                <input className="form-input" value={form.preco} onChange={e => setF('preco', e.target.value)} placeholder={form.tipoPreco === 'percentual' ? '10' : '0,00'} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.25rem' }}>{form.tipoPreco === 'percentual' ? 'Ex.: 10 (1 a 100)' : 'Ex.: 25,00'}</p>
               </div>
-              {form.type !== 'brinde' && (
-                <div className="form-field">
-                  <label className="form-label">{form.type === 'desconto_percentual' ? 'Desconto (%)' : 'Desconto (R$)'}</label>
-                  <input className="form-input" type="number" min="0" step="0.01" value={form.discountValue} onChange={e => set('discountValue', e.target.value)} />
-                </div>
-              )}
-              <div className="form-field">
-                <label className="form-label">Critério</label>
-                <select className="form-input" value={form.criteriaType} onChange={e => set('criteriaType', e.target.value)}>
-                  {CRITERIA.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-                </select>
+              <div>
+                <Sel label="Tipo de Preço" value={form.tipoPreco === 'fixo' ? 'Fixo (R$)' : 'Percentual (%)'} onClick={() => setShowTipoP(p => !p)} />
+                <DropMenu show={showTipoP} items={[{label:'Fixo (R$)', value:'fixo'},{label:'Percentual (%)',value:'percentual'}]} onSelect={item=>{setF('tipoPreco',item.value);setShowTipoP(false);}} />
               </div>
-              {form.criteriaType === 'frequencia' && (
-                <div className="form-field"><label className="form-label">Mínimo de visitas</label><input className="form-input" type="number" min="1" value={form.minVisits} onChange={e => set('minVisits', e.target.value)} /></div>
-              )}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
-                <div className="form-field"><label className="form-label">Data início</label><input className="form-input" type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} /></div>
-                <div className="form-field"><label className="form-label">Data fim</label><input className="form-input" type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} /></div>
+            </div>
+
+            <Sel label="Tipo" value={form.tipo === 'desconto_compra' ? 'Desconto na compra' : 'Desconto na próxima compra'} onClick={() => setShowTipo(p => !p)} />
+            <DropMenu show={showTipo} items={[{label:'Desconto na compra',value:'desconto_compra'},{label:'Desconto na próxima compra',value:'desconto_proxima'}]} onSelect={item=>{setF('tipo',item.value);setShowTipo(false);}} />
+
+            <Sel label="Usuário da Promoção" value={custName} onClick={() => setShowCust(p => !p)} />
+            {showCust && (
+              <div style={{ marginTop: -12, background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--radius-xs)', marginBottom:'0.75rem', maxHeight: 200, overflowY:'auto' }}>
+                <button type="button" onClick={() => { setF('clienteId', TARGET_ALL); setShowCust(false); }}
+                  style={{ width:'100%', padding:'0.6rem 0.75rem', textAlign:'left', background: form.clienteId === TARGET_ALL ? 'var(--accent)' : 'transparent', color:'var(--color)', fontSize:'0.875rem', border:'none', borderBottom:'1px solid var(--border)', cursor:'pointer' }}>
+                  Todos os usuários
+                </button>
+                {customers.map(c => {
+                  const cid = String(c.id || c.phone);
+                  return (
+                    <button key={cid} type="button" onClick={() => { setF('clienteId', cid); setShowCust(false); }}
+                      style={{ width:'100%', padding:'0.6rem 0.75rem', textAlign:'left', background: form.clienteId === cid ? 'var(--accent)' : 'transparent', color:'var(--color)', fontSize:'0.875rem', border:'none', borderBottom:'1px solid var(--border)', cursor:'pointer' }}>
+                      {c.name}
+                    </button>
+                  );
+                })}
               </div>
-              <div className="form-field"><label className="form-label">Descrição</label><textarea className="form-input" rows={2} value={form.description} onChange={e => set('description', e.target.value)} /></div>
-              <div className="form-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem' }}>
-                <input type="checkbox" id="active" checked={form.active} onChange={e => set('active', e.target.checked)} style={{ width: 18, height: 18, accentColor: 'var(--accent)' }} />
-                <label htmlFor="active" className="form-label" style={{ margin: 0 }}>Promoção ativa</label>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="form-group">
+                <label className="form-label">Validade inicial (DD/MM/AAAA)</label>
+                <input className="form-input" value={form.validadeInicio} onChange={e => setF('validadeInicio', e.target.value)} placeholder="01/06/2026" />
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setEditing(null)}>Cancelar</button>
-                <button className="btn btn-primary" style={{ flex: 1 }} onClick={save} disabled={saving}>{saving ? 'Salvando...' : 'Salvar'}</button>
+              <div className="form-group">
+                <label className="form-label">Validade final (DD/MM/AAAA)</label>
+                <input className="form-input" value={form.validadeFim} onChange={e => setF('validadeFim', e.target.value)} placeholder="30/06/2026" />
               </div>
+            </div>
+
+            <Sel label="Repetir para o mesmo usuário" value={repLabel} onClick={() => setShowRep(p => !p)} />
+            {showRep && (
+              <div style={{ marginTop: -12, background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--radius-xs)', marginBottom:'0.75rem', maxHeight: 220, overflowY:'auto' }}>
+                {[0,...Array.from({length:12},(_,i)=>i+1)].map(val => (
+                  <button key={val} type="button" onClick={() => { setF('repetir', val); setShowRep(false); }}
+                    style={{ width:'100%', padding:'0.5rem 0.75rem', textAlign:'left', background: form.repetir === val ? 'var(--accent)' : 'transparent', color:'var(--color)', fontSize:'0.85rem', border:'none', borderBottom:'1px solid var(--border)', cursor:'pointer' }}>
+                    {val === 0 ? 'Nunca' : val === 1 ? '1 vez (em 1 mês)' : `${val} vezes (em ${val} meses)`}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="form-group">
+              <label className="form-label">Critérios</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {CRITERIOS.map(c => (
+                  <label key={c.value} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', background:'var(--bg-input)', borderRadius:'var(--radius-xs)', padding:'0.5rem 0.75rem', cursor:'pointer', border:'1px solid var(--border)' }}>
+                    <span style={{ fontSize:'0.875rem' }}>{c.label}</span>
+                    <input type="checkbox" checked={form.criterios.includes(c.value)} onChange={() => toggleCrit(c.value)} style={{ width:16, height:16, accentColor:'var(--accent)' }} />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {form.criterios.includes('x_compras') && (
+              <div className="form-group">
+                <label className="form-label">Quantidade de compras</label>
+                <input className="form-input" type="number" min="1" value={form.xCompras} onChange={e => setF('xCompras', e.target.value)} placeholder="5" />
+              </div>
+            )}
+            {form.criterios.includes('servico_x') && (
+              <div className="form-group">
+                <label className="form-label">Nome do serviço</label>
+                <input className="form-input" value={form.servicoX} onChange={e => setF('servicoX', e.target.value)} placeholder="Ex: Barba premium" />
+              </div>
+            )}
+            {form.criterios.includes('num_clientes') && (
+              <div className="form-group">
+                <label className="form-label">Número de clientes</label>
+                <input className="form-input" type="number" min="1" value={form.numClientes} onChange={e => setF('numClientes', e.target.value)} placeholder="20" />
+              </div>
+            )}
+
+            <div style={{ display:'flex', gap:'0.75rem', marginTop:'0.5rem' }}>
+              {editingId && <button className="btn btn-ghost" style={{ flex:1 }} onClick={resetForm}>Cancelar</button>}
+              <button className="btn btn-primary" style={{ flex:1 }} onClick={save} disabled={saving}>{saving ? 'Salvando...' : editingId ? 'Salvar Edição' : 'Criar Promoção'}</button>
             </div>
           </div>
         </div>
-      )}
+
+        {/* List */}
+        <div className="card">
+          <div className="card-body">
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
+              <h3>Promoções Cadastradas</h3>
+              <button className="btn btn-ghost btn-sm" onClick={load}><FiRefreshCw size={14} /></button>
+            </div>
+
+            {loading && <p style={{ color:'var(--color-muted)', fontSize:'0.875rem' }}>Carregando...</p>}
+            {!loading && promotions.length === 0 && <p style={{ color:'var(--color-muted)', fontSize:'0.875rem' }}>Nenhuma promoção cadastrada</p>}
+
+            <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}>
+              {promotions.map(item => {
+                const { clienteId } = parseTarget(Array.isArray(item.criteria) ? item.criteria : []);
+                const custN = clienteId === TARGET_ALL ? 'Todos' : (customers.find(c => String(c.id || c.phone) === String(clienteId))?.name || `Cliente #${clienteId}`);
+                return (
+                  <div key={item.id} style={{ background:'var(--bg-input)', borderRadius:'var(--radius-xs)', padding:'0.75rem', borderLeft:`3px solid ${item.active ? 'var(--success)' : 'var(--border)'}` }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:'0.5rem' }}>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <p style={{ fontWeight:700, marginBottom:'0.3rem' }}>{item.name || '-'}</p>
+                        <p style={{ fontSize:'0.78rem', color:'var(--color-muted)' }}>
+                          {item.priceType === 'percentual' ? `${Math.round(Number(item.price))}%` : fmtP(item.price)} de desconto · {custN}
+                        </p>
+                        <p style={{ fontSize:'0.78rem', color:'var(--color-muted)' }}>{toBrDate(item.validFrom)} – {item.validUntil ? toBrDate(item.validUntil) : 'indeterminado'}</p>
+                        <label style={{ display:'flex', alignItems:'center', gap:'0.4rem', cursor:'pointer', marginTop:'0.4rem' }}>
+                          <input type="checkbox" checked={!!item.active} onChange={() => toggleActive(item)} style={{ width:14, height:14, accentColor:'var(--success)' }} />
+                          <span style={{ fontSize:'0.78rem' }}>{item.active ? 'Ativo' : 'Inativo'}</span>
+                        </label>
+                      </div>
+                      <div style={{ display:'flex', flexDirection:'column', gap:'0.4rem' }}>
+                        <button className="btn btn-ghost btn-sm btn-icon" onClick={() => startEdit(item)}><FiEdit2 size={13} /></button>
+                        <button className="btn btn-danger btn-sm btn-icon" onClick={() => setConfirm(item)}><FiTrash2 size={13} /></button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {confirm && (
         <div className="modal-overlay" onClick={() => setConfirm(null)}>
-          <div className="modal-box" style={{ maxWidth: 380 }} onClick={e => e.stopPropagation()}>
+          <div className="modal-box" style={{ maxWidth:380 }} onClick={e => e.stopPropagation()}>
             <div className="modal-header"><h3>Excluir promoção?</h3><button className="modal-close" onClick={() => setConfirm(null)}><FiX size={18} /></button></div>
             <div className="modal-body">
-              <p style={{ color: 'var(--color-muted)', marginBottom: '1.25rem' }}>Deseja excluir <strong style={{ color: 'var(--color)' }}>{confirm.name}</strong>?</p>
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirm(null)}>Cancelar</button>
-                <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => del(confirm)}>Excluir</button>
+              <p style={{ color:'var(--color-muted)' }}>Excluir <strong style={{ color:'var(--color)' }}>{confirm.name}</strong>?</p>
+              <div style={{ display:'flex', gap:'0.75rem' }}>
+                <button className="btn btn-ghost" style={{ flex:1 }} onClick={() => setConfirm(null)}>Cancelar</button>
+                <button className="btn btn-danger" style={{ flex:1 }} onClick={() => del(confirm)}>Excluir</button>
               </div>
             </div>
           </div>

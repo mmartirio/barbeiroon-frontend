@@ -1,70 +1,105 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import s from './Sidebar.module.css';
-import { AuthContext } from '../../context/AuthContext';
-import { useTheme } from '../../hooks/useTheme';
+import { useAuth } from '../../context/AuthContext';
 import {
   FiGrid, FiUsers, FiCalendar, FiScissors, FiBarChart2,
   FiUser, FiUserPlus, FiList, FiMonitor, FiBriefcase,
-  FiSettings, FiLogOut, FiMenu, FiX, FiChevronDown, FiChevronRight,
-  FiSmartphone, FiTag,
+  FiSettings, FiLogOut, FiMenu, FiX,
+  FiChevronDown, FiChevronRight, FiSmartphone, FiTag,
+  FiPlusCircle, FiAlertCircle, FiClock,
 } from 'react-icons/fi';
-import defaultAvatar from '../../assets/user.png';
-import WhatsAppModal from '../../administrador/painel/WhatsAppModal';
 
-const NavItem = ({ to, icon, label }) => (
-  <li className={s.navItem}>
-    <NavLink to={to} className={({ isActive }) => isActive ? s.active : undefined}>
-      {icon} {label}
-    </NavLink>
-  </li>
-);
+const tok = () => sessionStorage.getItem('token');
 
-const SubMenu = ({ icon, label, children, menuKey, open, onToggle }) => (
-  <li>
-    <button className={s.submenuToggle} onClick={() => onToggle(menuKey)}>
-      <span className={s.submenuLabel}>{icon} {label}</span>
-      {open ? <FiChevronDown size={14} /> : <FiChevronRight size={14} />}
-    </button>
-    <ul className={`${s.submenu} ${open ? s.open : ''}`}>
-      {children}
-    </ul>
-  </li>
-);
+function NavItem({ to, icon, label, onClick }) {
+  if (onClick) {
+    return (
+      <li>
+        <button className={s.navLink} onClick={onClick}>
+          {icon} {label}
+        </button>
+      </li>
+    );
+  }
+  return (
+    <li>
+      <NavLink to={to} className={({ isActive }) => `${s.navLink}${isActive ? ` ${s.active}` : ''}`}>
+        {icon} {label}
+      </NavLink>
+    </li>
+  );
+}
 
-const SubItem = ({ to, icon, label }) => (
-  <li>
-    <NavLink to={to} className={({ isActive }) => isActive ? s.active : undefined}>
-      {icon} {label}
-    </NavLink>
-  </li>
-);
+function SubMenu({ icon, label, menuKey, open, onToggle, children }) {
+  return (
+    <li>
+      <button className={`${s.submenuToggle}${open ? ` ${s.open}` : ''}`} onClick={() => onToggle(menuKey)}>
+        <span className={s.submenuLabel}>{icon} {label}</span>
+        {open ? <FiChevronDown size={13} /> : <FiChevronRight size={13} />}
+      </button>
+      <ul className={`${s.submenu}${open ? ` ${s.open}` : ''}`}>
+        {children}
+      </ul>
+    </li>
+  );
+}
 
-export default function Sidebar() {
-  const { user, logout } = useContext(AuthContext);
-  const { logo } = useTheme();
+function SubItem({ to, icon, label, onClick }) {
+  if (onClick) {
+    return (
+      <li>
+        <button className={s.navLink} style={{ paddingLeft: '2.25rem', fontSize: '0.84rem' }} onClick={onClick}>
+          {icon} {label}
+        </button>
+      </li>
+    );
+  }
+  return (
+    <li>
+      <NavLink to={to} className={({ isActive }) => `${s.navLink}${isActive ? ` ${s.active}` : ''}`} style={{ paddingLeft: '2.25rem', fontSize: '0.84rem' }}>
+        {icon} {label}
+      </NavLink>
+    </li>
+  );
+}
+
+export default function Sidebar({ onWhatsApp }) {
+  const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [whatsappOpen, setWhatsappOpen] = useState(false);
+  const [tenantLogo, setTenantLogo] = useState('');
+  const [tenantName, setTenantName] = useState('');
   const [openMenus, setOpenMenus] = useState(() => {
-    try { return JSON.parse(sessionStorage.getItem('sidebarMenus') || '{}'); }
-    catch { return {}; }
+    try { return JSON.parse(sessionStorage.getItem('sb_menus') || '{}'); } catch { return {}; }
   });
 
-  const p = (perm) => !!user?.permissions?.[perm];
-  const any = (...perms) => perms.some(p);
+  const p   = (k) => !!user?.permissions?.[k];
+  const any = (...ks) => ks.some(k => p(k));
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
   useEffect(() => {
-    try { sessionStorage.setItem('sidebarMenus', JSON.stringify(openMenus)); } catch { /* noop */ }
+    try { sessionStorage.setItem('sb_menus', JSON.stringify(openMenus)); } catch { /* noop */ }
   }, [openMenus]);
 
-  const toggle = (key) => setOpenMenus(prev => ({ ...prev, [key]: !prev[key] }));
+  useEffect(() => {
+    if (!user) return;
+    fetch('/api/tenant/settings', { headers: { Authorization: `Bearer ${tok()}` } })
+      .then(r => r.json()).catch(() => ({}))
+      .then(d => {
+        const t = d.tenant || d.settings || d;
+        setTenantName(t.name || user?.name || 'Barbeiro On');
+        setTenantLogo(t.logo || t.logoUrl || '');
+      });
+  }, [user]);
 
-  const canDashboard = any('canViewAppointments','canViewAgenda','canViewCustomers','canViewServices','canViewReports');
-  const canClients   = any('canViewCustomers','canCreateCustomer','canEditCustomer','canDeleteCustomer');
-  const canUsers     = any('canViewUsers','canCreateUser','canEditUser','canDeleteUser','canManageGroups');
-  const canServices  = any('canViewServices','canManageServices','canViewAppointments');
+  const toggle = (k) => setOpenMenus(p => ({ ...p, [k]: !p[k] }));
+
+  const canClients  = any('canViewCustomers','canCreateCustomer','canEditCustomer','canDeleteCustomer');
+  const canUsers    = any('canViewUsers','canCreateUser','canEditUser','canDeleteUser','canManageGroups');
+  const canServices = any('canViewServices','canManageServices','canViewAppointments');
+  const canDash     = any('canViewAppointments','canViewAgenda','canViewCustomers','canViewServices','canViewReports');
 
   return (
     <>
@@ -72,79 +107,73 @@ export default function Sidebar() {
         <FiMenu size={20} />
       </button>
 
-      <div className={`${s.overlay} ${mobileOpen ? s.open : ''}`} onClick={() => setMobileOpen(false)} />
+      <div className={`${s.overlay}${mobileOpen ? ` ${s.open}` : ''}`} onClick={() => setMobileOpen(false)} />
 
-      <nav className={`${s.sidebar} ${mobileOpen ? s.open : ''}`}>
-        <button className={s.closeBtn} onClick={() => setMobileOpen(false)} aria-label="Fechar">
-          <FiX size={20} />
-        </button>
-
-        <div className={s.logo}>
-          <img src={logo || defaultAvatar} alt="logo" className={s.logoImg} onError={e => { e.target.src = defaultAvatar; }} />
-          <span className={s.logoName}>{user?.name || 'Barbeiro On'}</span>
+      <nav className={`${s.sidebar}${mobileOpen ? ` ${s.open}` : ''}`}>
+        <div className={s.brand}>
+          {tenantLogo
+            ? <img src={tenantLogo} alt="" className={s.brandLogo} onError={e => { e.target.style.display = 'none'; }} />
+            : <div className={s.brandLogo} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', fontSize: '1.1rem', fontWeight: 700 }}>B</div>
+          }
+          <button className={s.closeBtn} onClick={() => setMobileOpen(false)} style={{ marginLeft: 'auto' }}><FiX size={18} /></button>
+          <span className={s.brandName}>{tenantName}</span>
         </div>
 
         <ul className={s.nav}>
-          {canDashboard && <NavItem to="/dashboard" icon={<FiGrid size={16} />} label="Dashboard" />}
+          {canDash && <NavItem to="/dashboard" icon={<FiGrid size={15} />} label="Painel Principal" />}
 
           {canClients && (
-            <SubMenu icon={<FiUsers size={16} />} label="Clientes" menuKey="clients" open={openMenus.clients} onToggle={toggle}>
-              {p('canCreateCustomer') && <SubItem to="/cliente-cadastro" icon={<FiUserPlus size={14} />} label="Cadastrar" />}
-              {p('canViewCustomers')  && <SubItem to="/cliente-lista"    icon={<FiList size={14} />}     label="Lista de Clientes" />}
+            <SubMenu icon={<FiUsers size={15} />} label="Clientes" menuKey="clients" open={openMenus.clients} onToggle={toggle}>
+              {p('canCreateCustomer') && <SubItem to="/cliente-cadastro"   icon={<FiUserPlus size={14} />} label="Cadastro" />}
+              {p('canViewCustomers')  && <SubItem to="/cliente-lista"      icon={<FiList size={14} />}     label="Lista de Clientes" />}
               {p('canViewAppointments') && <SubItem to="/servico-agendados" icon={<FiCalendar size={14} />} label="Clientes Agendados" />}
-              {p('canViewCustomers')  && <SubItem to="/tela-cliente"     icon={<FiMonitor size={14} />}  label="Tela do Cliente" />}
+              {p('canViewCustomers')  && <SubItem to="/tela-cliente"       icon={<FiMonitor size={14} />}  label="Tela do Cliente" />}
             </SubMenu>
           )}
 
           {canUsers && (
-            <SubMenu icon={<FiUser size={16} />} label="Usuários" menuKey="users" open={openMenus.users} onToggle={toggle}>
-              {p('canCreateUser')    && <SubItem to="/usuario"       icon={<FiUserPlus size={14} />} label="Cadastrar" />}
-              {p('canViewUsers')     && <SubItem to="/usuario-lista" icon={<FiList size={14} />}     label="Lista de Usuários" />}
-              {p('canManageGroups') && <SubItem to="/grupo"          icon={<FiBriefcase size={14} />} label="Grupos" />}
+            <SubMenu icon={<FiUser size={15} />} label="Usuários" menuKey="users" open={openMenus.users} onToggle={toggle}>
+              {p('canCreateUser')    && <SubItem to="/usuario-cadastro" icon={<FiUserPlus size={14} />}  label="Cadastrar" />}
+              {p('canViewUsers')     && <SubItem to="/usuario-lista"    icon={<FiList size={14} />}      label="Lista de Usuários" />}
+              {p('canManageGroups') && <SubItem to="/grupo"             icon={<FiBriefcase size={14} />} label="Grupo" />}
             </SubMenu>
           )}
 
           {canServices && (
-            <SubMenu icon={<FiScissors size={16} />} label="Serviços" menuKey="services" open={openMenus.services} onToggle={toggle}>
+            <SubMenu icon={<FiScissors size={15} />} label="Serviços" menuKey="services" open={openMenus.services} onToggle={toggle}>
               {p('canManageServices') && <SubItem to="/servico-cadastro" icon={<FiUserPlus size={14} />} label="Cadastrar Serviço" />}
               {p('canViewServices')   && <SubItem to="/servico-lista"    icon={<FiList size={14} />}     label="Lista de Serviços" />}
             </SubMenu>
           )}
 
           {p('canViewAgenda') && (
-            <SubMenu icon={<FiCalendar size={16} />} label="Agenda" menuKey="agenda" open={openMenus.agenda} onToggle={toggle}>
-              <SubItem to="/agenda"            icon={<FiSettings size={14} />}   label="Expediente" />
+            <SubMenu icon={<FiCalendar size={15} />} label="Agenda" menuKey="agenda" open={openMenus.agenda} onToggle={toggle}>
+              <SubItem to="/agenda"           icon={<FiClock size={14} />}     label="Expediente" />
               {p('canViewAppointments') && <SubItem to="/servico-agendados" icon={<FiCalendar size={14} />} label="Agendados" />}
             </SubMenu>
           )}
 
-          {p('canManageServices') && <NavItem to="/promocoes"  icon={<FiTag size={16} />}      label="Promoções" />}
-          {p('canViewReports')    && <NavItem to="/relatorios" icon={<FiBarChart2 size={16} />} label="Relatórios" />}
+          {p('canManageServices') && <NavItem to="/promocoes"  icon={<FiTag size={15} />}      label="Promoções" />}
+          {p('canViewReports')    && <NavItem to="/relatorios" icon={<FiBarChart2 size={15} />} label="Relatórios" />}
 
           <li className={s.divider} />
 
-          <NavItem to="/perfil" icon={<FiUser size={16} />} label="Perfil" />
+          <NavItem to="/perfil" icon={<FiUser size={15} />} label="Perfil" />
 
           {p('canManageTenant') && (
-            <SubMenu icon={<FiBriefcase size={16} />} label="Conta" menuKey="account" open={openMenus.account} onToggle={toggle}>
-              <SubItem to="/conta" icon={<FiSettings size={14} />} label="Conta" />
-              <li>
-                <button className={s.navBtn} onClick={() => setWhatsappOpen(true)}>
-                  <FiSmartphone size={14} style={{ marginLeft: '1.5rem' }} /> QR Code WhatsApp
-                </button>
-              </li>
+            <SubMenu icon={<FiBriefcase size={15} />} label="Conta" menuKey="account" open={openMenus.account} onToggle={toggle}>
+              <SubItem to="/conta"    icon={<FiSettings size={14} />}   label="Conta" />
+              {onWhatsApp && <SubItem onClick={onWhatsApp} icon={<FiSmartphone size={14} />} label="QR Code WhatsApp" />}
             </SubMenu>
           )}
         </ul>
 
-        <div className={s.bottomActions}>
-          <button className={s.logoutBtn} onClick={() => { logout(); }}>
+        <div className={s.bottom}>
+          <button className={s.logoutBtn} onClick={logout}>
             <FiLogOut size={15} /> Sair
           </button>
         </div>
       </nav>
-
-      {whatsappOpen && <WhatsAppModal onClose={() => setWhatsappOpen(false)} />}
     </>
   );
 }

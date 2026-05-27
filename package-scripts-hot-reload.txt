@@ -1,5 +1,0 @@
-// Adicione ou ajuste no package.json do frontend:
-"scripts": {
-  "start": "webpack serve --mode development --open --hot --port 3000",
-  // ...outros scripts...
-}
