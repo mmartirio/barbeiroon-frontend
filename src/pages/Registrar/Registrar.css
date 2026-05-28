@@ -50,7 +50,7 @@
 .reg-nav-badge {
   width: 34px;
   height: 34px;
-  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   border-radius: 9px;
   display: flex;
   align-items: center;
@@ -80,7 +80,7 @@
 }
 
 .reg-nav-right a {
-  color: #a78bfa;
+  color: #60a5fa;
   font-weight: 600;
 }
 
@@ -121,10 +121,10 @@
 }
 
 .reg-step-item.active .reg-step-circle {
-  background: #7c3aed;
-  border-color: #7c3aed;
+  background: #2563eb;
+  border-color: #2563eb;
   color: #fff;
-  box-shadow: 0 0 12px rgba(124,58,237,0.5);
+  box-shadow: 0 0 12px rgba(37,99,235,0.5);
 }
 
 .reg-step-item.done .reg-step-circle {
@@ -185,7 +185,7 @@
   position: relative;
   width: 44px;
   height: 24px;
-  background: #7c3aed;
+  background: #2563eb;
   border-radius: 12px;
   border: none;
   padding: 0;
@@ -244,14 +244,14 @@
 }
 
 .plan-card:hover {
-  border-color: rgba(124,58,237,0.45);
+  border-color: rgba(37,99,235,0.45);
   transform: translateY(-3px);
   box-shadow: 0 12px 40px rgba(0,0,0,0.5);
 }
 
 .plan-card.selected {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 1px rgba(124,58,237,0.3), 0 12px 40px rgba(124,58,237,0.15);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.3), 0 12px 40px rgba(37,99,235,0.15);
 }
 
 .plan-card-header {
@@ -265,15 +265,15 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  background: rgba(124,58,237,0.15);
-  color: #a78bfa;
+  background: rgba(37,99,235,0.15);
+  color: #60a5fa;
   padding: 4px 12px;
   border-radius: 6px;
 }
 
 .plan-card.selected .plan-card-name {
-  background: rgba(124,58,237,0.25);
-  color: #c4b5fd;
+  background: rgba(37,99,235,0.25);
+  color: #93c5fd;
 }
 
 .plan-users-badge {
@@ -342,8 +342,8 @@
 .plan-feat-check {
   width: 16px; height: 16px;
   border-radius: 50%;
-  background: rgba(124,58,237,0.15);
-  color: #a78bfa;
+  background: rgba(37,99,235,0.15);
+  color: #60a5fa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -356,24 +356,24 @@
   width: 100%;
   padding: 11px;
   border-radius: 9px;
-  border: 1.5px solid rgba(124,58,237,0.4);
+  border: 1.5px solid rgba(37,99,235,0.4);
   background: transparent;
-  color: #a78bfa;
+  color: #60a5fa;
   font-weight: 700;
   font-size: 0.875rem;
   transition: all 0.15s;
 }
 
 .plan-select-btn:hover {
-  background: rgba(124,58,237,0.12);
-  border-color: #a78bfa;
+  background: rgba(37,99,235,0.12);
+  border-color: #60a5fa;
 }
 
 .plan-card.selected .plan-select-btn {
-  background: #7c3aed;
-  border-color: #7c3aed;
+  background: #2563eb;
+  border-color: #2563eb;
   color: #fff;
-  box-shadow: 0 0 16px rgba(124,58,237,0.4);
+  box-shadow: 0 0 16px rgba(37,99,235,0.4);
 }
 
 /* Continue button (step 1) */
@@ -415,7 +415,7 @@
   color: #475569;
 }
 
-.reg-login-hint a { color: #a78bfa; font-weight: 600; }
+.reg-login-hint a { color: #60a5fa; font-weight: 600; }
 
 /* Loading / Error */
 .reg-loading { text-align: center; padding: 48px; color: #475569; }
@@ -430,8 +430,8 @@
 
 /* Plan summary bar */
 .reg-plan-summary {
-  background: rgba(124,58,237,0.1);
-  border: 1px solid rgba(124,58,237,0.25);
+  background: rgba(37,99,235,0.1);
+  border: 1px solid rgba(37,99,235,0.25);
   border-radius: 12px;
   padding: 14px 20px;
   display: flex;
@@ -442,13 +442,13 @@
 }
 
 .reg-plan-summary-info { display: flex; flex-direction: column; gap: 2px; }
-.reg-plan-summary-name { font-weight: 800; font-size: 0.95rem; color: #c4b5fd; }
-.reg-plan-summary-price { font-size: 0.82rem; color: #8b5cf6; }
+.reg-plan-summary-name { font-weight: 800; font-size: 0.95rem; color: #93c5fd; }
+.reg-plan-summary-price { font-size: 0.82rem; color: #3b82f6; }
 
 .reg-plan-change {
   background: none;
   border: none;
-  color: #a78bfa;
+  color: #60a5fa;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -514,9 +514,9 @@
 .reg-field input:focus,
 .reg-field select:focus {
   outline: none;
-  border-color: #7c3aed;
-  background: rgba(124,58,237,0.06);
-  box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+  border-color: #2563eb;
+  background: rgba(37,99,235,0.06);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
 }
 
 .reg-field select option { background: #0d1120; color: #e2e8f0; }
@@ -554,13 +554,13 @@
 }
 
 .billing-option:hover {
-  border-color: rgba(124,58,237,0.4);
-  background: rgba(124,58,237,0.06);
+  border-color: rgba(37,99,235,0.4);
+  background: rgba(37,99,235,0.06);
 }
 
 .billing-option.selected {
-  border-color: #7c3aed;
-  background: rgba(124,58,237,0.12);
+  border-color: #2563eb;
+  background: rgba(37,99,235,0.12);
 }
 
 .billing-option-label {
@@ -577,7 +577,7 @@
   display: block;
 }
 
-.billing-option.selected .billing-option-label { color: #c4b5fd; }
+.billing-option.selected .billing-option-label { color: #93c5fd; }
 
 /* PIX notice */
 .pix-notice {
@@ -625,7 +625,7 @@
   width: 18px; height: 18px;
   flex-shrink: 0;
   margin-top: 2px;
-  accent-color: #7c3aed;
+  accent-color: #2563eb;
   cursor: pointer;
 }
 
@@ -674,7 +674,7 @@
 
 .reg-back-link {
   font-size: 0.82rem;
-  color: #a78bfa;
+  color: #60a5fa;
   background: none;
   border: none;
   cursor: pointer;
