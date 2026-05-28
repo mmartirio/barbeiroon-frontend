@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiRefreshCw } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiRefreshCw, FiKey } from 'react-icons/fi';
 import { useGestorAuth } from '../../context/GestorAuthContext';
 
 const fmtDate = (v) => { if (!v) return '—'; const [y, m, d] = String(v).split('T')[0].split('-'); return `${d}/${m}/${y}`; };
@@ -105,6 +105,14 @@ export default function GestorCompanies() {
         finally { setSaving(false); }
     };
 
+    const handleBootstrap = async (t) => {
+        try {
+            const result = await api(`/tenants/${t.id}/bootstrap`, { method: 'POST' });
+            setBootstrapCreds(result.bootstrapCredentials);
+            setModal('bootstrap');
+        } catch (e) { setError(e.message); }
+    };
+
     const handleDelete = async () => {
         setSaving(true);
         try { await api(`/tenants/${delTarget.id}`, { method: 'DELETE' }); closeModal(); load(); }
@@ -161,8 +169,9 @@ export default function GestorCompanies() {
                                 <td style={TD}><span style={{ padding: '2px 8px', borderRadius: 4, fontSize: '0.73rem', background: t.isActive ? 'rgba(22,163,74,0.15)' : 'rgba(220,38,38,0.15)', color: t.isActive ? '#4ade80' : '#f87171' }}>{t.isActive ? 'Ativa' : 'Inativa'}</span></td>
                                 <td style={TD}>{fmtDate(t.createdAt)}</td>
                                 <td style={{ ...TD, textAlign: 'right' }}>
-                                    <button className="btn" onClick={() => openEdit(t)} style={{ padding: '4px 8px', marginRight: 6 }}><FiEdit2 size={13} /></button>
-                                    <button className="btn" onClick={() => { setDelTarget(t); setError(''); setModal('delete'); }} style={{ padding: '4px 8px', color: '#f87171' }}><FiTrash2 size={13} /></button>
+                                    <button className="btn" onClick={() => openEdit(t)} style={{ padding: '4px 8px', marginRight: 4 }} title="Editar"><FiEdit2 size={13} /></button>
+                                    <button className="btn" onClick={() => handleBootstrap(t)} style={{ padding: '4px 8px', marginRight: 4, color: '#facc15' }} title="Gerar acesso bootstrap"><FiKey size={13} /></button>
+                                    <button className="btn" onClick={() => { setDelTarget(t); setError(''); setModal('delete'); }} style={{ padding: '4px 8px', color: '#f87171' }} title="Excluir"><FiTrash2 size={13} /></button>
                                 </td>
                             </tr>
                         ))}
@@ -240,7 +249,7 @@ export default function GestorCompanies() {
             )}
 
             {modal === 'bootstrap' && bootstrapCreds && (
-                <Modal title="Empresa criada com sucesso" onClose={() => { setModal(null); setBootstrapCreds(null); }}>
+                <Modal title="Credenciais de acesso bootstrap" onClose={() => { setModal(null); setBootstrapCreds(null); }}>
                     <p style={{ marginBottom: 16, color: 'var(--color-muted)', fontSize: '0.88rem' }}>
                         Compartilhe as credenciais de acesso inicial com o administrador da empresa. No primeiro acesso, ele deverá criar um usuário próprio.
                     </p>
