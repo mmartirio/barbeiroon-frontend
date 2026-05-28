@@ -239,7 +239,7 @@ export default function Registrar() {
   // ── Step 1: Plan selection ────────────────────────────────────────
   if (step === 1) {
     return (
-      <div className="reg-page">
+      <div className="reg-page reg-page--hero">
         <Navbar />
 
         <div className="reg-body">
