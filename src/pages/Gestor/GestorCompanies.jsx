@@ -48,7 +48,7 @@ export default function GestorCompanies() {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [planFilter, setPlanFilter] = useState('');
+    const [planFilter] = useState('');
     const [modal, setModal] = useState(null);
     const [form, setForm] = useState(EMPTY);
     const [editId, setEditId] = useState(null);
@@ -124,11 +124,7 @@ export default function GestorCompanies() {
                     <option value="active">Ativa</option>
                     <option value="inactive">Inativa</option>
                 </select>
-                <select className="form-input" value={planFilter} onChange={e => { setPlanFilter(e.target.value); setPage(1); }} style={{ width: 130 }}>
-                    <option value="">Plano</option>
-                    {PLAN_TYPES.map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
-                </select>
-                <button className="btn" onClick={load} style={{ padding: '0 12px' }}><FiRefreshCw size={14} /></button>
+<button className="btn" onClick={load} style={{ padding: '0 12px' }}><FiRefreshCw size={14} /></button>
             </div>
 
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
