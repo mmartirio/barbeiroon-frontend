@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { RiCheckLine, RiArrowRightLine } from 'react-icons/ri';
+import { RiCheckLine, RiArrowRightLine, RiShieldCheckLine, RiWhatsappLine } from 'react-icons/ri';
 import './Registrar.css';
 
 const STATES_BR = [
@@ -81,6 +81,27 @@ function fmtPrice(val) {
   const n = Number(val || 0);
   const [int, dec] = n.toFixed(2).split('.');
   return { int, dec, full: `${int},${dec}` };
+}
+
+function Footer() {
+  return (
+    <footer className="reg-footer">
+      <div className="reg-footer-inner">
+        <div className="reg-footer-brand">
+          <div className="reg-nav-badge" style={{ width: 28, height: 28, fontSize: 13 }}>B</div>
+          <span>Barbeiro <em>ON</em></span>
+        </div>
+        <div className="reg-footer-badges">
+          <span className="reg-footer-badge"><RiShieldCheckLine size={13} /> Sem fidelidade</span>
+          <span className="reg-footer-badge"><RiWhatsappLine size={13} /> Suporte via WhatsApp</span>
+          <span className="reg-footer-badge">🔒 Dados protegidos</span>
+        </div>
+        <div className="reg-footer-copy">
+          © {new Date().getFullYear()} Barbeiro ON · Todos os direitos reservados
+        </div>
+      </div>
+    </footer>
+  );
 }
 
 function Navbar() {
@@ -220,6 +241,7 @@ export default function Registrar() {
     return (
       <div className="reg-page">
         <Navbar />
+
         <div className="reg-body">
           <Steps current={1} />
 
@@ -310,6 +332,7 @@ export default function Registrar() {
             </>
           )}
         </div>
+        <Footer />
       </div>
     );
   }
@@ -357,6 +380,7 @@ export default function Registrar() {
             </Link>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -557,6 +581,7 @@ export default function Registrar() {
           </div>
         </form>
       </div>
+      <Footer />
     </div>
   );
 }
