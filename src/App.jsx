@@ -26,6 +26,7 @@ const TelaCliente        = lazy(() => import('./pages/TelaCliente/TelaCliente'))
 const AgendamentoPublico = lazy(() => import('./pages/AgendamentoPublico/AgendamentoPublico'));
 const GestorApp          = lazy(() => import('./pages/Gestor/GestorApp'));
 const Registrar          = lazy(() => import('./pages/Registrar/Registrar'));
+const Landing            = lazy(() => import('./pages/Landing/Landing'));
 
 const Fallback = () => <div className="app-loading">Carregando...</div>;
 
@@ -44,7 +45,7 @@ function AppRoutes() {
       {user && <PendingNotifier />}
       <Suspense fallback={<Fallback />}>
         <Routes>
-          <Route path="/"          element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
+          <Route path="/"          element={user ? <Navigate to="/dashboard" replace /> : <Landing />} />
           <Route path="/login"     element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
           <Route path="/recuperar-senha" element={<RecuperaSenha />} />
           <Route path="/agendar/:slug"  element={<AgendamentoPublico />} />
