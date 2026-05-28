@@ -10,7 +10,7 @@ import {
   RiMenuLine,
   RiCloseLine,
   RiShieldLine,
-  RiMonitorLine,
+  RiComputerLine,
 } from 'react-icons/ri';
 import { useGestorAuth } from '../../context/GestorAuthContext';
 import './Layout.css';
@@ -18,7 +18,7 @@ import './Layout.css';
 const NAV = [
   { to: '/gestor',                icon: RiDashboardLine,   label: 'Dashboard' },
   { to: '/gestor/empresas',       icon: RiBuildingLine,    label: 'Empresas' },
-  { to: '/gestor/monitoramento',  icon: RiMonitorLine,     label: 'Monitoramento' },
+  { to: '/gestor/monitoramento',  icon: RiComputerLine,    label: 'Monitoramento' },
   { to: '/gestor/planos',         icon: RiPriceTag3Line,   label: 'Planos' },
   { to: '/gestor/cobrancas',      icon: RiBankCardLine,    label: 'Cobranças' },
   { to: '/gestor/admins',         icon: RiUserSettingsLine, label: 'Admins' },
