@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { RiCheckLine, RiArrowRightLine } from 'react-icons/ri';
 import './Registrar.css';
 
 const STATES_BR = [
   'AC','AL','AM','AP','BA','CE','DF','ES','GO','MA',
   'MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN',
-  'RO','RR','RS','SC','SE','SP','TO'
+  'RO','RR','RS','SC','SE','SP','TO',
 ];
 
 const DUE_DAYS = Array.from({ length: 28 }, (_, i) => i + 1);
@@ -34,15 +35,10 @@ O presente termo regula a prestação de serviços de acesso à plataforma Barbe
 
 5. RESPONSABILIDADES
 5.1. A Barbeiro On se compromete a manter a plataforma disponível e operacional, ressalvadas manutenções programadas e eventos de força maior.
-5.2. O contratante é responsável pela veracidade dos dados cadastrais e pelo uso adequado da plataforma, incluindo a segurança de suas credenciais de acesso.
-5.3. A Barbeiro On não se responsabiliza por dados inseridos incorretamente ou por ações realizadas por terceiros com as credenciais do contratante.
+5.2. O contratante é responsável pela veracidade dos dados cadastrais e pelo uso adequado da plataforma.
 
-6. PRIVACIDADE
-6.1. Os dados cadastrais são utilizados exclusivamente para a prestação do serviço e cobrança via WhatsApp.
-6.2. Não há compartilhamento de dados com terceiros sem consentimento do contratante.
-
-7. ACEITE ELETRÔNICO
-A marcação da caixa abaixo constitui aceite eletrônico e tem validade jurídica equivalente a uma assinatura física, nos termos da legislação brasileira aplicável (Lei nº 14.063/2020 — Assinaturas Eletrônicas).`;
+6. ACEITE ELETRÔNICO
+A marcação da caixa abaixo constitui aceite eletrônico com validade jurídica equivalente a uma assinatura física (Lei nº 14.063/2020).`;
 
 const EMPTY_FORM = {
   name: '', email: '', phone: '', cnpj: '',
@@ -55,7 +51,26 @@ const EMPTY_FORM = {
 };
 
 function fmtPrice(val) {
-  return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const n = Number(val || 0);
+  const [int, dec] = n.toFixed(2).split('.');
+  return { int, dec, full: `${int},${dec}` };
+}
+
+function Navbar() {
+  return (
+    <nav className="reg-nav">
+      <div className="reg-nav-brand">
+        <div className="reg-nav-badge">B</div>
+        <div>
+          Barbeiro <em>ON</em>
+          <small>Plataforma de gestão para barbearias</small>
+        </div>
+      </div>
+      <div className="reg-nav-right">
+        Já tem conta?&nbsp;<Link to="/login">Entrar</Link>
+      </div>
+    </nav>
+  );
 }
 
 function Steps({ current }) {
@@ -68,9 +83,7 @@ function Steps({ current }) {
         return (
           <div key={n} style={{ display: 'flex', alignItems: 'center' }}>
             <div className={`reg-step-item ${cls}`}>
-              <div className="reg-step-circle">
-                {n < current ? '✓' : n}
-              </div>
+              <div className="reg-step-circle">{n < current ? '✓' : n}</div>
               <span>{label}</span>
             </div>
             {i < steps.length - 1 && <div className="reg-step-line" />}
@@ -88,7 +101,6 @@ export default function Registrar() {
   const [plansError, setPlansError] = useState('');
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [priceView, setPriceView] = useState('monthly');
-
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -103,7 +115,7 @@ export default function Registrar() {
         setPlans(list);
         if (list.length > 0) setSelectedPlan(list[0]);
       })
-      .catch(() => setPlansError('Não foi possível carregar os planos. Tente recarregar a página.'))
+      .catch(() => setPlansError('Não foi possível carregar os planos. Verifique a conexão e recarregue a página.'))
       .finally(() => setLoadingPlans(false));
   }, []);
 
@@ -115,17 +127,14 @@ export default function Registrar() {
   function validate() {
     const e = {};
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!form.name.trim()) e.name = 'Nome fantasia é obrigatório';
-    if (!form.email.trim() || !emailRe.test(form.email)) e.email = 'Informe um e-mail válido';
-    if (!form.phone.trim()) e.phone = 'Telefone é obrigatório';
-    if (!form.ownerName.trim()) e.ownerName = 'Nome do responsável é obrigatório';
-    if (!form.ownerEmail.trim() || !emailRe.test(form.ownerEmail)) e.ownerEmail = 'Informe um e-mail válido';
-    if (!form.ownerPassword || form.ownerPassword.length < 6)
-      e.ownerPassword = 'Senha deve ter no mínimo 6 caracteres';
-    if (form.ownerPassword !== form.confirmPassword)
-      e.confirmPassword = 'Senhas não coincidem';
-    if (!form.contractAccepted)
-      e.contractAccepted = 'Você precisa aceitar o contrato para continuar';
+    if (!form.name.trim())                                       e.name            = 'Nome fantasia é obrigatório';
+    if (!form.email.trim() || !emailRe.test(form.email))        e.email           = 'Informe um e-mail válido';
+    if (!form.phone.trim())                                      e.phone           = 'Telefone é obrigatório';
+    if (!form.ownerName.trim())                                  e.ownerName       = 'Nome do responsável é obrigatório';
+    if (!form.ownerEmail.trim() || !emailRe.test(form.ownerEmail)) e.ownerEmail   = 'Informe um e-mail válido';
+    if (!form.ownerPassword || form.ownerPassword.length < 6)   e.ownerPassword   = 'Senha deve ter no mínimo 6 caracteres';
+    if (form.ownerPassword !== form.confirmPassword)             e.confirmPassword = 'Senhas não coincidem';
+    if (!form.contractAccepted)                                  e.contractAccepted = 'Você precisa aceitar o contrato para continuar';
     return e;
   }
 
@@ -134,8 +143,7 @@ export default function Registrar() {
     const v = validate();
     if (Object.keys(v).length) {
       setErrors(v);
-      const firstErr = document.querySelector('.has-error');
-      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.querySelector('.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
     setSubmitting(true);
@@ -178,23 +186,17 @@ export default function Registrar() {
     }
   }
 
-  // ── Step 1: Plan selection ───────────────────────────────────────
+  // ── Step 1: Plan selection ────────────────────────────────────────
   if (step === 1) {
     return (
       <div className="reg-page">
-        <header className="reg-header">
-          <div className="reg-logo-icon">B</div>
-          <div>
-            <h1>Barbeiro On</h1>
-            <p className="reg-header-sub">Plataforma de gestão para barbearias</p>
-          </div>
-        </header>
+        <Navbar />
         <div className="reg-body">
           <Steps current={1} />
+
           <h2 className="reg-title">Escolha o plano ideal</h2>
           <p className="reg-subtitle">Sem fidelidade. Cancele quando quiser.</p>
 
-          {/* Monthly / Annual toggle */}
           <div className="billing-toggle">
             <span className={priceView === 'monthly' ? 'active-label' : ''}>Mensal</span>
             <button
@@ -203,11 +205,11 @@ export default function Registrar() {
               aria-label="Alternar período de cobrança"
             />
             <span className={priceView === 'annual' ? 'active-label' : ''}>Anual</span>
-            {priceView === 'annual' && <span className="annual-badge">Economia de 2 meses</span>}
+            {priceView === 'annual' && <span className="annual-badge">2 meses grátis</span>}
           </div>
 
           {loadingPlans && <div className="reg-loading">Carregando planos...</div>}
-          {plansError && <div className="reg-error-state">{plansError}</div>}
+          {plansError  && <div className="reg-error-state">{plansError}</div>}
 
           {!loadingPlans && !plansError && (
             <>
@@ -216,8 +218,10 @@ export default function Registrar() {
                   const monthly = Number(plan.priceMonthly || 0);
                   const annual  = Number(plan.priceAnnual  || 0);
                   const price   = priceView === 'annual' ? annual / 12 : monthly;
+                  const { int, dec } = fmtPrice(price);
                   const isSel   = selectedPlan?.id === plan.id;
-                  const features = Array.isArray(plan.features) ? plan.features : [];
+                  const features = Array.isArray(plan.features) && plan.features.length > 0
+                    ? plan.features : [];
 
                   return (
                     <div
@@ -237,12 +241,12 @@ export default function Registrar() {
                       <div>
                         <div className="plan-price">
                           <span className="plan-price-cur">R$</span>
-                          <span className="plan-price-val">{fmtPrice(price)}</span>
+                          <span className="plan-price-val">{int}<span style={{ fontSize: '1.2rem' }}>,{dec}</span></span>
                           <span className="plan-price-period">/mês</span>
                         </div>
-                        {priceView === 'annual' && (
+                        {priceView === 'annual' && annual > 0 && (
                           <div className="plan-price-annual-note">
-                            R$ {fmtPrice(annual)}/ano — equivale a 10 meses
+                            R$ {fmtPrice(annual).full}/ano — 10× o preço mensal
                           </div>
                         )}
                       </div>
@@ -250,31 +254,32 @@ export default function Registrar() {
                       {features.length > 0 && (
                         <ul className="plan-features">
                           {features.slice(0, 6).map((f, i) => (
-                            <li key={i}>{f}</li>
+                            <li key={i}>
+                              <span className="plan-feat-check"><RiCheckLine size={9} /></span>
+                              {f}
+                            </li>
                           ))}
                         </ul>
                       )}
 
-                      <button className="plan-select-btn">
-                        {isSel ? 'Selecionado' : 'Selecionar'}
+                      <button className="plan-select-btn" onClick={e => { e.stopPropagation(); setSelectedPlan(plan); }}>
+                        {isSel ? '✓ Selecionado' : 'Selecionar'}
                       </button>
                     </div>
                   );
                 })}
               </div>
 
-              <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+              <div className="reg-continue-area">
                 <button
-                  className="reg-submit-btn"
-                  style={{ maxWidth: 320 }}
+                  className="reg-continue-btn"
                   disabled={!selectedPlan}
                   onClick={() => { setStep(2); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 >
-                  Continuar com {selectedPlan?.name || '—'}
+                  Continuar com {selectedPlan?.name || '—'} <RiArrowRightLine />
                 </button>
-                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                  Já tem conta?{' '}
-                  <Link to="/login" style={{ color: '#6366f1', fontWeight: 600 }}>Entrar</Link>
+                <span className="reg-login-hint">
+                  Já tem conta? <Link to="/login">Entrar</Link>
                 </span>
               </div>
             </>
@@ -284,18 +289,12 @@ export default function Registrar() {
     );
   }
 
-  // ── Step 3: Success ──────────────────────────────────────────────
+  // ── Step 3: Success ───────────────────────────────────────────────
   if (step === 3) {
     const t = result?.tenant;
     return (
       <div className="reg-page">
-        <header className="reg-header">
-          <div className="reg-logo-icon">B</div>
-          <div>
-            <h1>Barbeiro On</h1>
-            <p className="reg-header-sub">Plataforma de gestão para barbearias</p>
-          </div>
-        </header>
+        <Navbar />
         <div className="reg-body">
           <div className="reg-success">
             <div className="reg-success-icon">🎉</div>
@@ -304,7 +303,6 @@ export default function Registrar() {
               Sua barbearia foi cadastrada com sucesso. Em breve você receberá
               os detalhes de cobrança via WhatsApp.
             </p>
-
             {t && (
               <div className="reg-success-box">
                 <h4>Seus dados de acesso</h4>
@@ -322,17 +320,13 @@ export default function Registrar() {
                 </div>
                 <div className="reg-success-row">
                   <span>Cobrança</span>
-                  <span>
-                    {form.billingCycle === 'annual' ? 'Anual' : 'Mensal'} — dia {form.billingDueDay}
-                  </span>
+                  <span>{form.billingCycle === 'annual' ? 'Anual' : 'Mensal'} — dia {form.billingDueDay}</span>
                 </div>
               </div>
             )}
-
-            <p style={{ fontSize: '0.82rem', color: '#64748b' }}>
-              Use o e-mail e a senha que você cadastrou para acessar o sistema.
+            <p style={{ fontSize: '0.82rem' }}>
+              Use o e-mail e a senha cadastrados para acessar o sistema.
             </p>
-
             <Link to="/login" className="reg-login-btn">
               Ir para o login
             </Link>
@@ -342,33 +336,27 @@ export default function Registrar() {
     );
   }
 
-  // ── Step 2: Registration form ────────────────────────────────────
+  // ── Step 2: Registration form ─────────────────────────────────────
   const planPrice = selectedPlan
     ? (form.billingCycle === 'annual'
-        ? Number(selectedPlan.priceAnnual || 0) / 12
+        ? Number(selectedPlan.priceAnnual  || 0) / 12
         : Number(selectedPlan.priceMonthly || 0))
     : 0;
 
   return (
     <div className="reg-page">
-      <header className="reg-header">
-        <div className="reg-logo-icon">B</div>
-        <div>
-          <h1>Barbeiro On</h1>
-          <p className="reg-header-sub">Plataforma de gestão para barbearias</p>
-        </div>
-      </header>
+      <Navbar />
       <div className="reg-body">
         <Steps current={2} />
 
         <form onSubmit={handleSubmit} noValidate className="reg-form-wrapper">
-          {/* Plan summary */}
+
           {selectedPlan && (
             <div className="reg-plan-summary">
               <div className="reg-plan-summary-info">
                 <span className="reg-plan-summary-name">{selectedPlan.name}</span>
                 <span className="reg-plan-summary-price">
-                  R$ {fmtPrice(planPrice)}/mês
+                  R$ {fmtPrice(planPrice).full}/mês
                   {form.billingCycle === 'annual' && ' — cobrança anual'}
                 </span>
               </div>
@@ -382,87 +370,48 @@ export default function Registrar() {
             </div>
           )}
 
-          {/* Company data */}
+          {/* ── Dados da Barbearia ── */}
           <div className="reg-section">
             <h3 className="reg-section-title">Dados da Barbearia</h3>
             <div className="reg-fields">
               <div className="reg-field full">
                 <label>Nome fantasia *</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={e => set('name', e.target.value)}
-                  className={errors.name ? 'has-error' : ''}
-                  placeholder="Ex: Barbearia do João"
-                  autoFocus
-                />
+                <input type="text" value={form.name} onChange={e => set('name', e.target.value)}
+                  className={errors.name ? 'has-error' : ''} placeholder="Ex: Barbearia do João" autoFocus />
                 {errors.name && <span className="field-error">{errors.name}</span>}
               </div>
-
               <div className="reg-field">
                 <label>E-mail da barbearia *</label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={e => set('email', e.target.value)}
-                  className={errors.email ? 'has-error' : ''}
-                  placeholder="contato@barbearia.com"
-                />
+                <input type="email" value={form.email} onChange={e => set('email', e.target.value)}
+                  className={errors.email ? 'has-error' : ''} placeholder="contato@barbearia.com" />
                 {errors.email && <span className="field-error">{errors.email}</span>}
               </div>
-
               <div className="reg-field">
                 <label>Telefone / WhatsApp *</label>
-                <input
-                  type="tel"
-                  value={form.phone}
-                  onChange={e => set('phone', e.target.value)}
-                  className={errors.phone ? 'has-error' : ''}
-                  placeholder="(11) 99999-9999"
-                />
+                <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
+                  className={errors.phone ? 'has-error' : ''} placeholder="(11) 99999-9999" />
                 {errors.phone && <span className="field-error">{errors.phone}</span>}
               </div>
-
               <div className="reg-field">
                 <label>CNPJ (opcional)</label>
-                <input
-                  type="text"
-                  value={form.cnpj}
-                  onChange={e => set('cnpj', e.target.value)}
-                  placeholder="00.000.000/0001-00"
-                />
+                <input type="text" value={form.cnpj} onChange={e => set('cnpj', e.target.value)}
+                  placeholder="00.000.000/0001-00" />
               </div>
-
               <div className="reg-field full">
                 <label>Endereço (rua e número)</label>
-                <input
-                  type="text"
-                  value={form.address}
-                  onChange={e => set('address', e.target.value)}
-                  placeholder="Rua das Flores, 123"
-                />
+                <input type="text" value={form.address} onChange={e => set('address', e.target.value)}
+                  placeholder="Rua das Flores, 123" />
               </div>
-
               <div className="reg-field">
                 <label>Bairro</label>
-                <input
-                  type="text"
-                  value={form.neighborhood}
-                  onChange={e => set('neighborhood', e.target.value)}
-                  placeholder="Centro"
-                />
+                <input type="text" value={form.neighborhood} onChange={e => set('neighborhood', e.target.value)}
+                  placeholder="Centro" />
               </div>
-
               <div className="reg-field">
                 <label>Cidade</label>
-                <input
-                  type="text"
-                  value={form.city}
-                  onChange={e => set('city', e.target.value)}
-                  placeholder="São Paulo"
-                />
+                <input type="text" value={form.city} onChange={e => set('city', e.target.value)}
+                  placeholder="São Paulo" />
               </div>
-
               <div className="reg-field">
                 <label>Estado</label>
                 <select value={form.state} onChange={e => set('state', e.target.value)}>
@@ -470,164 +419,114 @@ export default function Registrar() {
                   {STATES_BR.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
-
               <div className="reg-field">
                 <label>CEP</label>
-                <input
-                  type="text"
-                  value={form.zipCode}
-                  onChange={e => set('zipCode', e.target.value)}
-                  placeholder="00000-000"
-                />
+                <input type="text" value={form.zipCode} onChange={e => set('zipCode', e.target.value)}
+                  placeholder="00000-000" />
               </div>
             </div>
           </div>
 
-          {/* Owner data */}
+          {/* ── Dados do Responsável ── */}
           <div className="reg-section">
             <h3 className="reg-section-title">Dados do Responsável</h3>
             <div className="reg-fields">
               <div className="reg-field full">
                 <label>Nome completo *</label>
-                <input
-                  type="text"
-                  value={form.ownerName}
-                  onChange={e => set('ownerName', e.target.value)}
-                  className={errors.ownerName ? 'has-error' : ''}
-                  placeholder="João da Silva"
-                />
+                <input type="text" value={form.ownerName} onChange={e => set('ownerName', e.target.value)}
+                  className={errors.ownerName ? 'has-error' : ''} placeholder="João da Silva" />
                 {errors.ownerName && <span className="field-error">{errors.ownerName}</span>}
               </div>
-
               <div className="reg-field">
                 <label>E-mail de acesso *</label>
-                <input
-                  type="email"
-                  value={form.ownerEmail}
-                  onChange={e => set('ownerEmail', e.target.value)}
-                  className={errors.ownerEmail ? 'has-error' : ''}
-                  placeholder="joao@email.com"
-                />
+                <input type="email" value={form.ownerEmail} onChange={e => set('ownerEmail', e.target.value)}
+                  className={errors.ownerEmail ? 'has-error' : ''} placeholder="joao@email.com" />
                 {errors.ownerEmail && <span className="field-error">{errors.ownerEmail}</span>}
               </div>
-
               <div className="reg-field">
                 <label>Telefone do responsável</label>
-                <input
-                  type="tel"
-                  value={form.ownerPhone}
-                  onChange={e => set('ownerPhone', e.target.value)}
-                  placeholder="(11) 99999-9999"
-                />
+                <input type="tel" value={form.ownerPhone} onChange={e => set('ownerPhone', e.target.value)}
+                  placeholder="(11) 99999-9999" />
               </div>
-
               <div className="reg-field">
                 <label>Senha *</label>
-                <input
-                  type="password"
-                  value={form.ownerPassword}
-                  onChange={e => set('ownerPassword', e.target.value)}
-                  className={errors.ownerPassword ? 'has-error' : ''}
-                  placeholder="Mínimo 6 caracteres"
-                  autoComplete="new-password"
-                />
+                <input type="password" value={form.ownerPassword} onChange={e => set('ownerPassword', e.target.value)}
+                  className={errors.ownerPassword ? 'has-error' : ''} placeholder="Mínimo 6 caracteres"
+                  autoComplete="new-password" />
                 {errors.ownerPassword && <span className="field-error">{errors.ownerPassword}</span>}
               </div>
-
               <div className="reg-field">
                 <label>Confirmar senha *</label>
-                <input
-                  type="password"
-                  value={form.confirmPassword}
-                  onChange={e => set('confirmPassword', e.target.value)}
-                  className={errors.confirmPassword ? 'has-error' : ''}
-                  placeholder="Repita a senha"
-                  autoComplete="new-password"
-                />
+                <input type="password" value={form.confirmPassword} onChange={e => set('confirmPassword', e.target.value)}
+                  className={errors.confirmPassword ? 'has-error' : ''} placeholder="Repita a senha"
+                  autoComplete="new-password" />
                 {errors.confirmPassword && <span className="field-error">{errors.confirmPassword}</span>}
               </div>
             </div>
           </div>
 
-          {/* Billing */}
+          {/* ── Cobrança ── */}
           <div className="reg-section">
             <h3 className="reg-section-title">Preferências de Cobrança</h3>
-
             <div>
-              <label style={{ fontSize: '0.78rem', fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.03em', display: 'block', marginBottom: 8 }}>
+              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>
                 Periodicidade
               </label>
               <div className="billing-options">
                 {[
-                  { val: 'monthly', label: 'Mensal', note: `R$ ${fmtPrice(Number(selectedPlan?.priceMonthly || 0))}/mês` },
-                  { val: 'annual',  label: 'Anual',  note: `R$ ${fmtPrice(Number(selectedPlan?.priceAnnual || 0))}/ano (2 meses grátis)` },
+                  { val: 'monthly', label: 'Mensal',  note: `R$ ${fmtPrice(Number(selectedPlan?.priceMonthly || 0)).full}/mês` },
+                  { val: 'annual',  label: 'Anual',   note: `R$ ${fmtPrice(Number(selectedPlan?.priceAnnual  || 0)).full}/ano (2 meses grátis)` },
                 ].map(opt => (
-                  <div
-                    key={opt.val}
-                    className={`billing-option ${form.billingCycle === opt.val ? 'selected' : ''}`}
-                    onClick={() => set('billingCycle', opt.val)}
-                  >
+                  <div key={opt.val} className={`billing-option ${form.billingCycle === opt.val ? 'selected' : ''}`}
+                    onClick={() => set('billingCycle', opt.val)}>
                     <span className="billing-option-label">{opt.label}</span>
                     <span className="billing-option-note">{opt.note}</span>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div className="reg-fields" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="reg-fields" style={{ gridTemplateColumns: '180px 1fr' }}>
               <div className="reg-field">
                 <label>Dia do vencimento</label>
                 <select value={form.billingDueDay} onChange={e => set('billingDueDay', e.target.value)}>
-                  {DUE_DAYS.map(d => (
-                    <option key={d} value={d}>Dia {d}</option>
-                  ))}
+                  {DUE_DAYS.map(d => <option key={d} value={d}>Dia {d}</option>)}
                 </select>
               </div>
             </div>
-
             <div className="pix-notice">
               <span className="pix-notice-icon">💡</span>
               <span className="pix-notice-text">
-                <strong>Pagamento somente via PIX.</strong> A cobrança será enviada via WhatsApp
-                para o número da barbearia na data de vencimento escolhida. Não há débito automático.
+                <strong>Pagamento exclusivamente via PIX.</strong> A cobrança é enviada via WhatsApp
+                no número da barbearia. Não há débito automático — você paga quando receber o aviso.
               </span>
             </div>
           </div>
 
-          {/* Contract */}
+          {/* ── Contrato ── */}
           <div className="reg-section">
             <h3 className="reg-section-title">Contrato de Prestação de Serviços</h3>
-            <div className="contract-box" tabIndex={0}>
-              {CONTRACT}
-            </div>
+            <div className="contract-box">{CONTRACT}</div>
             <div>
               <label className="contract-check">
-                <input
-                  type="checkbox"
-                  checked={form.contractAccepted}
-                  onChange={e => set('contractAccepted', e.target.checked)}
-                />
+                <input type="checkbox" checked={form.contractAccepted}
+                  onChange={e => set('contractAccepted', e.target.checked)} />
                 <span>
-                  Li e aceito os termos do Contrato de Prestação de Serviços acima, incluindo as condições de cancelamento e pagamento.
+                  Li e aceito os termos do Contrato de Prestação de Serviços, incluindo as condições
+                  de cancelamento e pagamento via PIX.
                 </span>
               </label>
-              {errors.contractAccepted && (
-                <div className="contract-error">{errors.contractAccepted}</div>
-              )}
+              {errors.contractAccepted && <div className="contract-error">{errors.contractAccepted}</div>}
             </div>
           </div>
 
-          {/* Submit */}
+          {/* ── Submit ── */}
           <div className="reg-submit-area">
             {submitError && <div className="reg-submit-error">{submitError}</div>}
             <button type="submit" className="reg-submit-btn" disabled={submitting}>
               {submitting ? 'Cadastrando...' : 'Criar Conta'}
             </button>
-            <button
-              type="button"
-              className="reg-back-link"
-              onClick={() => { setStep(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            >
+            <button type="button" className="reg-back-link"
+              onClick={() => { setStep(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
               ← Voltar para os planos
             </button>
           </div>
