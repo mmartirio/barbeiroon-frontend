@@ -34,7 +34,7 @@ const EMPTY_FORM = {
   priceMonthly: '', priceAnnual: '',
   maxUsers: '', maxAppointments: '',
   trialMonths: '', sortOrder: '0',
-  isActive: true, isDefault: false,
+  isActive: true, isDefault: false, isPublic: true,
   features: [],
 };
 
@@ -88,6 +88,7 @@ export default function GestorPlans() {
       sortOrder:        plan.sortOrder ?? '0',
       isActive:         plan.isActive ?? true,
       isDefault:        plan.isDefault ?? false,
+      isPublic:         plan.isPublic ?? true,
       features:         Array.isArray(plan.features) ? plan.features : [],
     });
     setError('');
@@ -97,7 +98,7 @@ export default function GestorPlans() {
   function setField(field) {
     return e => setForm(f => ({
       ...f,
-      [field]: field === 'isActive' || field === 'isDefault'
+      [field]: field === 'isActive' || field === 'isDefault' || field === 'isPublic'
         ? e.target.value === 'true'
         : e.target.value,
     }));
@@ -133,6 +134,7 @@ export default function GestorPlans() {
         sortOrder:       toNum(form.sortOrder) ?? 0,
         isActive:        form.isActive,
         isDefault:       form.isDefault,
+        isPublic:        form.isPublic,
         features:        form.features,
       };
       const url    = modal.mode === 'create' ? '/api/gestor/plans' : `/api/gestor/plans/${modal.id}`;
@@ -191,6 +193,7 @@ export default function GestorPlans() {
                 <th>Usuários</th>
                 <th>Recursos</th>
                 <th>Status</th>
+                <th>Visib.</th>
                 <th></th>
               </tr>
             </thead>
@@ -216,6 +219,11 @@ export default function GestorPlans() {
                   <td>
                     <span className={`badge ${plan.isActive ? 'badge-green' : 'badge-gray'}`}>
                       {plan.isActive ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`badge ${plan.isPublic !== false ? 'badge-blue' : 'badge-gray'}`}>
+                      {plan.isPublic !== false ? 'Público' : 'Privado'}
                     </span>
                   </td>
                   <td>
@@ -283,7 +291,7 @@ export default function GestorPlans() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.75rem' }}>
                   <div className="form-group">
                     <label className="form-label">Ordem</label>
                     <input className="form-input" type="number" min="0" value={form.sortOrder} onChange={setField('sortOrder')} />
@@ -300,6 +308,13 @@ export default function GestorPlans() {
                     <select className="form-input" value={String(form.isDefault)} onChange={setField('isDefault')}>
                       <option value="false">Não</option>
                       <option value="true">Sim</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Visibilidade</label>
+                    <select className="form-input" value={String(form.isPublic)} onChange={setField('isPublic')}>
+                      <option value="true">Público</option>
+                      <option value="false">Privado</option>
                     </select>
                   </div>
                 </div>
