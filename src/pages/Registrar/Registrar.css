@@ -131,9 +131,9 @@
 
 /* ── Body wrapper ────────────────────────────────────────────────── */
 .reg-body {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 36px 20px 80px;
+  padding: 36px 24px 80px;
 }
 
 /* ── Step 1: Plans ───────────────────────────────────────────────── */
@@ -208,9 +208,13 @@
 /* Plans grid */
 .plans-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
   margin-bottom: 36px;
+}
+
+@media (max-width: 960px) {
+  .plans-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .plan-card {
@@ -772,7 +776,7 @@
 }
 
 .reg-footer-inner {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -824,4 +828,6 @@
   .reg-field.full { grid-column: 1; }
   .plans-grid { grid-template-columns: 1fr; }
   .reg-title { font-size: 1.5rem; }
+  .reg-footer-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .reg-footer-badges { gap: 8px; }
 }
