@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   RiCalendarCheckLine,
@@ -8,7 +8,6 @@ import {
   RiBarChartLine,
   RiRocketLine,
   RiArrowRightLine,
-  RiCheckLine,
   RiShieldCheckLine,
   RiScissorsCutLine,
   RiPlayCircleLine,
@@ -27,17 +26,6 @@ const FEATURES = [
   { icon: RiRocketLine,        label: 'Sua barbearia no próximo nível' },
 ];
 
-const PLAN_FEATURES = {
-  0: ['Agendamentos online', 'Perfil da barbearia', 'Notificações via WhatsApp', 'Agenda e horários', 'Suporte por chat'],
-  1: ['Tudo do plano Básico', 'Clientes ilimitados', 'Relatórios de agendamentos', 'Lembretes automáticos (WhatsApp)', 'Controle de cancelamentos', 'Suporte prioritário'],
-  2: ['Tudo do plano Profissional', 'Multi barbeiros', 'Dashboard financeiro', 'Promoções e cupons', 'Integração com WhatsApp Business', 'Suporte dedicado'],
-};
-
-const PLAN_DESC = [
-  'Ideal para barbearias que estão começando.',
-  'O plano perfeito para crescer e se organizar.',
-  'Para barbearias que querem o máximo de resultados.',
-];
 
 const NAV_LINKS = ['Recursos', 'Planos', 'Funcionalidades', 'Como funciona', 'Depoimentos'];
 
@@ -48,11 +36,6 @@ const APPTS = [
   { time: '14:00', name: 'Felipe Augusto',  service: 'Barba' },
 ];
 
-function fmtPrice(val) {
-  const n = Number(val || 0);
-  const [int, dec] = n.toFixed(2).split('.');
-  return { int, dec };
-}
 
 function PhoneFront() {
   return (
@@ -154,25 +137,7 @@ function PhoneBack() {
 }
 
 export default function Landing() {
-  const [plans, setPlans] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/public/plans')
-      .then(r => r.json())
-      .then(d => setPlans(Array.isArray(d?.plans) ? d.plans : []))
-      .catch(() => {});
-  }, []);
-
-  const displayPlans = plans.length > 0
-    ? plans
-    : [
-        { id: 1, name: 'Básico',         priceMonthly: 39.9,  sortOrder: 0 },
-        { id: 2, name: 'Profissional',   priceMonthly: 69.9,  sortOrder: 1 },
-        { id: 3, name: 'Premium',        priceMonthly: 99.9,  sortOrder: 2 },
-      ];
-
-  const featuredIdx = Math.floor(displayPlans.length / 2);
 
   return (
     <div className="lp">
@@ -276,49 +241,12 @@ export default function Landing() {
           <div className="lp-section-eyebrow">Planos para sua barbearia</div>
           <h2 className="lp-section-title">Escolha o plano ideal para você</h2>
 
-          <div className="lp-plans-grid">
-            {displayPlans.map((plan, i) => {
-              const isFeatured = i === featuredIdx;
-              const { int, dec } = fmtPrice(plan.priceMonthly);
-              const features = Array.isArray(plan.features) && plan.features.length > 0
-                ? plan.features
-                : PLAN_FEATURES[i] || PLAN_FEATURES[0];
-
-              return (
-                <div key={plan.id} className={`plan-card-lp ${isFeatured ? 'featured' : ''}`}>
-                  {isFeatured && <div className="plan-featured-badge">Mais escolhido</div>}
-
-                  <div className="plan-lp-header">
-                    <div className="plan-lp-name">{plan.name.toUpperCase()}</div>
-                    <p className="plan-lp-desc">{PLAN_DESC[i] || PLAN_DESC[0]}</p>
-                  </div>
-
-                  <div className="plan-lp-price">
-                    <div className="plan-lp-price-row">
-                      <span className="plan-lp-currency">R$</span>
-                      <span className="plan-lp-amount">{int}</span>
-                      <span className="plan-lp-currency" style={{ alignSelf: 'flex-end', marginBottom: 4 }}>,{dec}</span>
-                    </div>
-                    <span className="plan-lp-period">/mês</span>
-                  </div>
-
-                  <ul className="plan-lp-features">
-                    {features.map((f, fi) => (
-                      <li key={fi}>
-                        <div className="plan-check"><RiCheckLine size={10} /></div>
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link to={`/registrar`}>
-                    <button className="plan-lp-btn">
-                      Escolher {plan.name}
-                    </button>
-                  </Link>
-                </div>
-              );
-            })}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2.5rem' }}>
+            <Link to="/registrar">
+              <button className="btn-plan-cta">
+                Escolha seu plano <RiArrowRightLine />
+              </button>
+            </Link>
           </div>
         </div>
       </section>
