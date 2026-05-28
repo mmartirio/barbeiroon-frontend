@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiEye, FiEyeOff, FiScissors } from 'react-icons/fi';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import s from './Login.module.css';
 
@@ -39,7 +39,7 @@ export default function Login() {
     <div className={s.page}>
       <div className={s.card}>
         <div className={s.brand}>
-          <div className={s.brandIcon}><FiScissors size={28} /></div>
+          <img src="/logo.png" alt="Barbeiro ON" style={{ height: 64, marginBottom: '1rem' }} />
           <h1 className={s.brandTitle}>Barbeiro On</h1>
           <p className={s.brandSub}>Bem-vindo</p>
         </div>
