@@ -218,6 +218,17 @@
     background: #dc2626;
 }
 
+.portal-btn-new {
+    background: #16a34a;
+    width: auto;
+    padding: 13px 32px;
+    font-size: 1.05rem;
+}
+
+.portal-btn-new:hover:not(:disabled) {
+    background: #15803d;
+}
+
 .button-group {
     display: flex;
     flex-direction: row;

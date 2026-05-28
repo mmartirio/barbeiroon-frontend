@@ -281,6 +281,23 @@ export default function AgendamentoPublico() {
         return { discounted: Math.round(discounted * 100) / 100, promo };
     };
 
+    const resetBooking = () => {
+        setStep(1);
+        setCustomerData({ phone: '', name: '', birthDate: '' });
+        setShowExtraFields(false);
+        setCustomer(null);
+        setAppointments([]);
+        setSelectedServiceId('');
+        setAppointmentData({ serviceId: '', professionalId: '', date: '', time: '' });
+        setAvailableTimes([]);
+        setOverflowTimes([]);
+        setPromotions([]);
+        setVoucherAlert('');
+        setVoucherDisplayed(false);
+        setVoucherAgendamento('');
+        setPendingRequest(null);
+    };
+
     const bgStyle = tenant.backgroundImage
         ? { background: `linear-gradient(rgba(0,0,0,0.72),rgba(0,0,0,0.72)), url(${tenant.backgroundImage}) center/cover fixed` }
         : {};
@@ -480,6 +497,11 @@ export default function AgendamentoPublico() {
                                         </a>
                                     </div>
                                 )}
+                                <div className="button-group" style={{ marginTop: 12 }}>
+                                    <button className="portal-btn portal-btn-new" onClick={resetBooking}>
+                                        + Novo Agendamento
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
