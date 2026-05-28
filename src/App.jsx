@@ -25,6 +25,7 @@ const Conta              = lazy(() => import('./pages/Conta/Conta'));
 const TelaCliente        = lazy(() => import('./pages/TelaCliente/TelaCliente'));
 const AgendamentoPublico = lazy(() => import('./pages/AgendamentoPublico/AgendamentoPublico'));
 const GestorApp          = lazy(() => import('./pages/Gestor/GestorApp'));
+const Registrar          = lazy(() => import('./pages/Registrar/Registrar'));
 
 const Fallback = () => <div className="app-loading">Carregando...</div>;
 
@@ -47,6 +48,7 @@ function AppRoutes() {
           <Route path="/login"     element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
           <Route path="/recuperar-senha" element={<RecuperaSenha />} />
           <Route path="/agendar/:slug"  element={<AgendamentoPublico />} />
+          <Route path="/registrar"      element={<Registrar />} />
 
           <Route path="/dashboard"             element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/cliente-lista"         element={<PrivateRoute perm="canViewCustomers"><ClienteLista /></PrivateRoute>} />
