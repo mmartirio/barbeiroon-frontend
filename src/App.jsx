@@ -24,7 +24,7 @@ const Perfil             = lazy(() => import('./pages/Perfil/Perfil'));
 const Conta              = lazy(() => import('./pages/Conta/Conta'));
 const TelaCliente        = lazy(() => import('./pages/TelaCliente/TelaCliente'));
 const AgendamentoPublico = lazy(() => import('./pages/AgendamentoPublico/AgendamentoPublico'));
-const AdminPanel         = lazy(() => import('./pages/AdminPanel/AdminPanel'));
+const GestorApp          = lazy(() => import('./pages/Gestor/GestorApp'));
 
 const Fallback = () => <div className="app-loading">Carregando...</div>;
 
@@ -65,7 +65,7 @@ function AppRoutes() {
           <Route path="/perfil"                element={<PrivateRoute><Perfil /></PrivateRoute>} />
           <Route path="/conta"                 element={<PrivateRoute perm="canManageTenant"><Conta /></PrivateRoute>} />
           <Route path="/tela-cliente"          element={<PrivateRoute perm="canViewCustomers"><TelaCliente /></PrivateRoute>} />
-          <Route path="/gestor"                element={<AdminPanel />} />
+          <Route path="/gestor/*"              element={<GestorApp />} />
 
           <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
         </Routes>
