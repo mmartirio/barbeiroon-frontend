@@ -8,6 +8,9 @@ const GestorSetup     = lazy(() => import('./GestorSetup'));
 const GestorDashboard = lazy(() => import('./GestorDashboard'));
 const GestorAdmins    = lazy(() => import('./GestorAdmins'));
 const GestorPlans     = lazy(() => import('./GestorPlans'));
+const GestorCompanies = lazy(() => import('./GestorCompanies'));
+const GestorMonitor   = lazy(() => import('./GestorMonitor'));
+const GestorBilling   = lazy(() => import('./GestorBilling'));
 
 const Fallback = () => <div className="app-loading">Carregando...</div>;
 
@@ -22,8 +25,11 @@ function GestorRoutes() {
       <Routes>
         <Route element={<GestorLayout />}>
           <Route index element={<GestorDashboard />} />
-          <Route path="admins" element={<GestorAdmins />} />
-          <Route path="planos" element={<GestorPlans />} />
+          <Route path="empresas"      element={<GestorCompanies />} />
+          <Route path="monitoramento" element={<GestorMonitor />} />
+          <Route path="planos"        element={<GestorPlans />} />
+          <Route path="cobrancas"     element={<GestorBilling />} />
+          <Route path="admins"        element={<GestorAdmins />} />
         </Route>
       </Routes>
     </Suspense>
