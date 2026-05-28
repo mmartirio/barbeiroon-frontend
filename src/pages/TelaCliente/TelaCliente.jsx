@@ -33,7 +33,7 @@ export default function TelaCliente() {
       .finally(() => setLoading(false));
   }, []);
 
-  const slug = tenantData.slug?.trim() || toSlug(tenantData.name);
+  const slug = toSlug(tenantData.slug?.trim() || tenantData.name);
   const clientLink = slug ? `${window.location.origin}/agendar/${slug}` : '';
 
   const pickFile = (type, e) => {
