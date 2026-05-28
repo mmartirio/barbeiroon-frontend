@@ -106,9 +106,12 @@ export default function GestorCompanies() {
     };
 
     const handleBootstrap = async (t) => {
+        setError('');
         try {
             const result = await api(`/tenants/${t.id}/bootstrap`, { method: 'POST' });
-            setBootstrapCreds(result.bootstrapCredentials);
+            const creds = result.bootstrapCredentials || result;
+            if (!creds?.email) throw new Error('Resposta inválida do servidor.');
+            setBootstrapCreds(creds);
             setModal('bootstrap');
         } catch (e) { setError(e.message); }
     };
@@ -126,6 +129,7 @@ export default function GestorCompanies() {
 
     return (
         <div>
+            {error && !modal && <div style={{ ...errStyle, marginBottom: 16 }} onClick={() => setError('')}>{error} <span style={{ float: 'right', cursor: 'pointer' }}>×</span></div>}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h2 style={{ fontSize: '1.35rem', fontWeight: 700 }}>Empresas</h2>
                 <button className="btn btn-primary" onClick={openCreate} style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FiPlus size={14} /> Nova Empresa</button>
