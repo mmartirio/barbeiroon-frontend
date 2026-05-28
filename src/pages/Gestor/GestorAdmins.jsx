@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { RiAddLine, RiEditLine, RiDeleteBinLine, RiCloseLine, RiSearchLine, RiShieldUserLine } from 'react-icons/ri';
-import { useGestorAuth } from '../context/GestorAuthContext';
+import { useGestorAuth } from '../../context/GestorAuthContext';
 
 const EMPTY_FORM = { name: '', email: '', password: '', isActive: true };
 

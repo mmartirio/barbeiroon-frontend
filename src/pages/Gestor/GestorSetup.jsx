@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { RiShieldLine, RiAlertLine } from 'react-icons/ri';
-import { useGestorAuth } from '../context/GestorAuthContext';
+import { useGestorAuth } from '../../context/GestorAuthContext';
 
 export default function Setup() {
   const { authFetch, clearSetup, logout } = useGestorAuth();
