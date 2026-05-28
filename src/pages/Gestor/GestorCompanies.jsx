@@ -3,6 +3,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiRefreshCw } from 'react-icons/fi
 import { useGestorAuth } from '../../context/GestorAuthContext';
 
 const fmtDate = (v) => { if (!v) return '—'; const [y, m, d] = String(v).split('T')[0].split('-'); return `${d}/${m}/${y}`; };
+const toSlug = (v) => (v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 const errStyle = { background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171', padding: '10px 14px', borderRadius: 8, fontSize: '0.84rem', marginBottom: 14 };
 const TH ={ padding: '10px 14px', textAlign: 'left', fontWeight: 600, fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' };
 const TD = { padding: '10px 14px', verticalAlign: 'middle', fontSize: '0.84rem' };
@@ -56,6 +57,7 @@ export default function GestorCompanies() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [bootstrapCreds, setBootstrapCreds] = useState(null);
+    const [slugEdited, setSlugEdited] = useState(false);
     const LIMIT = 15;
 
     const load = useCallback(async () => {
@@ -78,11 +80,11 @@ export default function GestorCompanies() {
     const openCreate = () => {
         const defaultPlan = plans.find(p => p.isDefault);
         setForm({ ...EMPTY, planId: defaultPlan?.id ? String(defaultPlan.id) : '' });
-        setEditId(null); setError(''); setModal('form');
+        setEditId(null); setError(''); setSlugEdited(false); setModal('form');
     };
     const openEdit = (t) => {
         setForm({ name: t.name || '', companyName: t.companyName || '', cnpj: t.cnpj || '', slug: t.slug || '', email: t.email || '', phone: t.phone || '', address: t.address || '', neighborhood: t.neighborhood || '', city: t.city || '', state: t.state || '', zipCode: t.zipCode || '', ownerName: t.ownerName || '', ownerEmail: t.ownerEmail || '', ownerPhone: t.ownerPhone || '', planId: t.planId ? String(t.planId) : '', isActive: t.isActive });
-        setEditId(t.id); setError(''); setModal('form');
+        setEditId(t.id); setError(''); setSlugEdited(true); setModal('form');
     };
     const closeModal = () => { setModal(null); setError(''); };
 
@@ -182,10 +184,10 @@ export default function GestorCompanies() {
                         {error && <div style={errStyle}>{error}</div>}
                         <p style={{ fontSize: '0.78rem', color: 'var(--color-muted)', marginBottom: 14, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dados da Empresa</p>
                         <div style={g2}>
-                            <Field label="Nome *"><input className="form-input" {...inp('name')} required /></Field>
+                            <Field label="Nome *"><input className="form-input" value={form.name} onChange={e => { const name = e.target.value; setForm(p => ({ ...p, name, ...(!slugEdited && { slug: toSlug(name) }) })); }} required /></Field>
                             <Field label="Razão Social"><input className="form-input" {...inp('companyName')} /></Field>
                             <Field label="CNPJ"><input className="form-input" {...inp('cnpj')} placeholder="00.000.000/0000-00" /></Field>
-                            <Field label="Slug *"><input className="form-input" {...inp('slug')} required placeholder="minha-barbearia" /></Field>
+                            <Field label="Slug *"><input className="form-input" value={form.slug} onChange={e => { setSlugEdited(true); setForm(p => ({ ...p, slug: e.target.value })); }} required placeholder="minha-barbearia" /></Field>
                             <Field label="Email *"><input className="form-input" type="email" {...inp('email')} required /></Field>
                             <Field label="Telefone"><input className="form-input" {...inp('phone')} /></Field>
                         </div>
