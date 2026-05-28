@@ -37,6 +37,11 @@
   margin-bottom: 0.25rem;
 }
 
+.brandTitle em {
+  font-style: normal;
+  color: #4ade80;
+}
+
 .brandSub {
   color: var(--color-muted);
   font-size: 0.9rem;

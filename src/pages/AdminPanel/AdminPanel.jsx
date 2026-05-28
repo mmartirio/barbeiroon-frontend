@@ -106,7 +106,7 @@ export default function AdminPanel() {
             <aside className={styles.sidebar}>
                 <div className={styles.sidebarBrand}>
                     <FiScissors size={18} />
-                    <span>Barbeiro On</span>
+                    <span>Barbeiro <em style={{ fontStyle: 'normal', color: '#4ade80' }}>On</em></span>
                 </div>
                 <nav className={styles.nav}>
                     {SECTIONS.map(({ key, label, icon: Icon }) => (
