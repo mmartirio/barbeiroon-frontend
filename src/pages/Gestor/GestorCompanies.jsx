@@ -55,6 +55,7 @@ export default function GestorCompanies() {
     const [delTarget, setDelTarget] = useState(null);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [bootstrapCreds, setBootstrapCreds] = useState(null);
     const LIMIT = 15;
 
     const load = useCallback(async () => {
@@ -89,9 +90,15 @@ export default function GestorCompanies() {
         e.preventDefault(); setSaving(true); setError('');
         try {
             const payload = { ...form, planId: form.planId || null };
-            if (editId) await api(`/tenants/${editId}`, { method: 'PUT', body: JSON.stringify(payload) });
-            else await api('/tenants', { method: 'POST', body: JSON.stringify(payload) });
-            closeModal(); load();
+            if (editId) {
+                await api(`/tenants/${editId}`, { method: 'PUT', body: JSON.stringify(payload) });
+                closeModal();
+            } else {
+                const result = await api('/tenants', { method: 'POST', body: JSON.stringify(payload) });
+                setBootstrapCreds(result.bootstrapCredentials || null);
+                setModal('bootstrap');
+            }
+            load();
         } catch (e) { setError(e.message); }
         finally { setSaving(false); }
     };
@@ -226,6 +233,30 @@ export default function GestorCompanies() {
                     <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                         <button className="btn" onClick={closeModal}>Cancelar</button>
                         <button className="btn" onClick={handleDelete} disabled={saving} style={{ background: '#dc2626', color: '#fff', border: 'none' }}>{saving ? 'Excluindo...' : 'Excluir'}</button>
+                    </div>
+                </Modal>
+            )}
+
+            {modal === 'bootstrap' && bootstrapCreds && (
+                <Modal title="Empresa criada com sucesso" onClose={() => { setModal(null); setBootstrapCreds(null); }}>
+                    <p style={{ marginBottom: 16, color: 'var(--color-muted)', fontSize: '0.88rem' }}>
+                        Compartilhe as credenciais de acesso inicial com o administrador da empresa. No primeiro acesso, ele deverá criar um usuário próprio.
+                    </p>
+                    <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 8, padding: '14px 16px', marginBottom: 16 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email</span>
+                            <strong style={{ fontSize: '0.9rem' }}>{bootstrapCreds.email}</strong>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Senha</span>
+                            <strong style={{ fontSize: '0.9rem', fontFamily: 'monospace' }}>{bootstrapCreds.password}</strong>
+                        </div>
+                    </div>
+                    <p style={{ fontSize: '0.78rem', color: '#f59e0b', marginBottom: 20 }}>
+                        Anote estas credenciais agora. Elas não serão exibidas novamente.
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <button className="btn btn-primary" onClick={() => { setModal(null); setBootstrapCreds(null); }}>Entendido</button>
                     </div>
                 </Modal>
             )}
