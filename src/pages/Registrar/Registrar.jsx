@@ -40,6 +40,33 @@ O presente termo regula a prestação de serviços de acesso à plataforma Barbe
 6. ACEITE ELETRÔNICO
 A marcação da caixa abaixo constitui aceite eletrônico com validade jurídica equivalente a uma assinatura física (Lei nº 14.063/2020).`;
 
+const FALLBACK_PLANS = [
+  {
+    id: 'fallback-1',
+    name: 'Básico',
+    priceMonthly: 29.90,
+    priceAnnual: 0,
+    maxUsers: 2,
+    features: ['Agendamentos online', 'Perfil da barbearia', 'Notificações via WhatsApp', 'Agenda e horários', 'Suporte por chat'],
+  },
+  {
+    id: 'fallback-2',
+    name: 'Essencial',
+    priceMonthly: 49.90,
+    priceAnnual: 0,
+    maxUsers: 5,
+    features: ['Tudo do plano Básico', 'Até 5 barbeiros', 'Relatórios de agendamentos', 'Lembretes automáticos (WhatsApp)', 'Controle de cancelamentos', 'Suporte prioritário'],
+  },
+  {
+    id: 'fallback-3',
+    name: 'Prêmio',
+    priceMonthly: 99.90,
+    priceAnnual: 0,
+    maxUsers: 8,
+    features: ['Tudo do plano Essencial', 'Até 8 barbeiros', 'Dashboard financeiro', 'Promoções e cupons', 'Integração WhatsApp Business', 'Suporte dedicado'],
+  },
+];
+
 const EMPTY_FORM = {
   name: '', email: '', phone: '', cnpj: '',
   address: '', neighborhood: '', city: '', state: '', zipCode: '',
@@ -98,7 +125,6 @@ export default function Registrar() {
   const [step, setStep] = useState(1);
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
-  const [plansError, setPlansError] = useState('');
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [priceView, setPriceView] = useState('monthly');
   const [form, setForm] = useState(EMPTY_FORM);
@@ -109,13 +135,16 @@ export default function Registrar() {
 
   useEffect(() => {
     fetch('/api/public/plans')
-      .then(r => r.json())
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then(d => {
-        const list = Array.isArray(d?.plans) ? d.plans : [];
+        const list = Array.isArray(d?.plans) && d.plans.length > 0 ? d.plans : FALLBACK_PLANS;
         setPlans(list);
-        if (list.length > 0) setSelectedPlan(list[0]);
+        setSelectedPlan(list[0]);
       })
-      .catch(() => setPlansError('Não foi possível carregar os planos. Verifique a conexão e recarregue a página.'))
+      .catch(() => {
+        setPlans(FALLBACK_PLANS);
+        setSelectedPlan(FALLBACK_PLANS[0]);
+      })
       .finally(() => setLoadingPlans(false));
   }, []);
 
@@ -209,9 +238,8 @@ export default function Registrar() {
           </div>
 
           {loadingPlans && <div className="reg-loading">Carregando planos...</div>}
-          {plansError  && <div className="reg-error-state">{plansError}</div>}
 
-          {!loadingPlans && !plansError && (
+          {!loadingPlans && (
             <>
               <div className="plans-grid">
                 {plans.map(plan => {
