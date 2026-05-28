@@ -306,9 +306,6 @@ export default function Registrar() {
                 >
                   Continuar com {selectedPlan?.name || '—'} <RiArrowRightLine />
                 </button>
-                <span className="reg-login-hint">
-                  Já tem conta? <Link to="/login">Entrar</Link>
-                </span>
               </div>
             </>
           )}
