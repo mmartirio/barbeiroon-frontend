@@ -156,9 +156,6 @@ export default function Landing() {
           <Link to="/login" className="btn-outline" style={{ padding: '9px 18px', fontSize: '0.82rem' }}>
             Entrar
           </Link>
-          <Link to="/registrar" className="btn-primary">
-            Começar agora <RiArrowRightLine />
-          </Link>
           <button className="lp-menu-btn" onClick={() => setMenuOpen(o => !o)} aria-label="Menu">
             {menuOpen ? <RiCloseLine size={22} /> : <RiMenuLine size={22} />}
           </button>
@@ -169,9 +166,6 @@ export default function Landing() {
       <div className={`lp-nav-mobile ${menuOpen ? 'open' : ''}`}>
         {NAV_LINKS.map(l => <a key={l} href="#" onClick={() => setMenuOpen(false)}>{l}</a>)}
         <Link to="/login" onClick={() => setMenuOpen(false)} style={{ color: '#94a3b8' }}>Entrar</Link>
-        <Link to="/registrar" onClick={() => setMenuOpen(false)} style={{ color: '#4ade80', fontWeight: 700 }}>
-          Começar agora →
-        </Link>
       </div>
 
       {/* ── Hero ── */}
@@ -276,15 +270,6 @@ export default function Landing() {
             <p>Barbeiros que já usam<br />e recomendam o Barbeiro ON</p>
           </div>
 
-          <div className="lp-bottom-cta">
-            <Link to="/registrar" className="btn-primary" style={{ padding: '12px 28px', fontSize: '0.95rem' }}>
-              Começar agora <RiArrowRightLine />
-            </Link>
-            <div className="lp-bottom-secure">
-              <RiShieldCheckLine size={14} />
-              Cancelamento fácil e seguro
-            </div>
-          </div>
         </div>
       </footer>
     </div>
