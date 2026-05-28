@@ -55,10 +55,14 @@ export default function GestorPlans() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
       const res  = await authFetch('/api/gestor/plans');
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || `Erro ${res.status}`);
       setPlans(Array.isArray(data?.plans) ? data.plans : []);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -169,6 +173,8 @@ export default function GestorPlans() {
           <RiAddLine size={15} /> Novo plano
         </button>
       </div>
+
+      {error && <div className="alert alert-error">{error}</div>}
 
       {loading ? (
         <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Carregando...</p>
