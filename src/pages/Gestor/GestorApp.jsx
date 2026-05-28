@@ -3,10 +3,11 @@ import { Routes, Route } from 'react-router-dom';
 import { GestorAuthProvider, useGestorAuth } from '../../context/GestorAuthContext';
 import GestorLayout from '../../components/GestorLayout/Layout';
 
-const GestorLogin    = lazy(() => import('./GestorLogin'));
-const GestorSetup    = lazy(() => import('./GestorSetup'));
+const GestorLogin     = lazy(() => import('./GestorLogin'));
+const GestorSetup     = lazy(() => import('./GestorSetup'));
 const GestorDashboard = lazy(() => import('./GestorDashboard'));
-const GestorAdmins   = lazy(() => import('./GestorAdmins'));
+const GestorAdmins    = lazy(() => import('./GestorAdmins'));
+const GestorPlans     = lazy(() => import('./GestorPlans'));
 
 const Fallback = () => <div className="app-loading">Carregando...</div>;
 
@@ -22,6 +23,7 @@ function GestorRoutes() {
         <Route element={<GestorLayout />}>
           <Route index element={<GestorDashboard />} />
           <Route path="admins" element={<GestorAdmins />} />
+          <Route path="planos" element={<GestorPlans />} />
         </Route>
       </Routes>
     </Suspense>

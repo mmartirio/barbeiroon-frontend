@@ -15,8 +15,9 @@ import { useGestorAuth } from '../../context/GestorAuthContext';
 import './Layout.css';
 
 const NAV = [
-  { to: '/gestor',        icon: RiDashboardLine,   label: 'Dashboard' },
-  { to: '/gestor/admins', icon: RiUserSettingsLine, label: 'Admins' },
+  { to: '/gestor',         icon: RiDashboardLine,   label: 'Dashboard' },
+  { to: '/gestor/planos',  icon: RiPriceTag3Line,   label: 'Planos' },
+  { to: '/gestor/admins',  icon: RiUserSettingsLine, label: 'Admins' },
 ];
 
 export default function Layout() {
