@@ -135,7 +135,7 @@ function PhoneBack() {
             ))}
           </div>
           <div className="pbs-legend">
-            {[['#a78bfa','Corte','65%'],['#4ade80','Barba','20%'],['#60a5fa','Combo','15%']].map(([color, label, pct]) => (
+            {[['#60a5fa','Corte','65%'],['#4ade80','Barba','20%'],['#60a5fa','Combo','15%']].map(([color, label, pct]) => (
               <div className="pbs-legend-item" key={label}>
                 <div className="pbs-legend-dot" style={{ background: color }} />
                 <span>{label}</span>
@@ -179,7 +179,7 @@ export default function Landing() {
       {/* ── Nav ── */}
       <nav className="lp-nav">
         <div className="lp-nav-logo">
-          <div className="lp-nav-logo-badge">B</div>
+          <img src="/logo.png" alt="Barbeiro ON" style={{ height: 38 }} />
           <span>Barbeiro <span><em>ON</em></span></span>
         </div>
 
@@ -327,8 +327,8 @@ export default function Landing() {
       <footer className="lp-bottom">
         <div className="lp-bottom-inner">
           <div className="lp-bottom-brand">
-            <div className="lp-bottom-brand-icon">
-              <RiScissorsCutLine />
+            <div className="lp-bottom-brand-icon" style={{ background: 'none', border: 'none', padding: 0 }}>
+              <img src="/logo.png" alt="Barbeiro ON" style={{ height: 48 }} />
             </div>
             <div className="lp-bottom-brand-text">
               <p>Barbearia organizada.</p>

@@ -88,8 +88,7 @@ function Footer() {
     <footer className="reg-footer">
       <div className="reg-footer-inner">
         <div className="reg-footer-brand">
-          <div className="reg-nav-badge" style={{ width: 28, height: 28, fontSize: 13 }}>B</div>
-          <span>Barbeiro <em>ON</em></span>
+          <img src="/logo.png" alt="Barbeiro ON" style={{ height: 36 }} />
         </div>
         <div className="reg-footer-badges">
           <span className="reg-footer-badge"><RiShieldCheckLine size={13} /> Sem fidelidade</span>
@@ -108,7 +107,7 @@ function Navbar() {
   return (
     <nav className="reg-nav">
       <div className="reg-nav-brand">
-        <div className="reg-nav-badge">B</div>
+        <img src="/logo.png" alt="Barbeiro ON" style={{ height: 40 }} />
         <div>
           Barbeiro <em>ON</em>
           <small>Plataforma de gestão para barbearias</small>

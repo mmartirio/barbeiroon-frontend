@@ -31,9 +31,7 @@ export default function Login() {
       <div className="card" style={{ width: '100%', maxWidth: 380 }}>
         <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', paddingBottom: '0.5rem' }}>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(124,58,237,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
-              <RiShieldLine size={22} />
-            </div>
+            <img src="/logo.png" alt="Barbeiro ON" style={{ height: 56 }} />
             <h1 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Painel Gestor</h1>
             <p style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>Acesso restrito a administradores</p>
           </div>

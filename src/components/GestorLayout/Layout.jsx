@@ -9,7 +9,6 @@ import {
   RiLogoutBoxLine,
   RiMenuLine,
   RiCloseLine,
-  RiShieldLine,
   RiComputerLine,
 } from 'react-icons/ri';
 import { useGestorAuth } from '../../context/GestorAuthContext';
@@ -38,7 +37,7 @@ export default function Layout() {
     <div className="layout">
       <aside className={`sidebar ${open ? 'sidebar--open' : ''}`}>
         <div className="sidebar-logo">
-          <RiShieldLine size={22} />
+          <img src="/logo.png" alt="Barbeiro ON" style={{ height: 32 }} />
           <span>Painel Gestor</span>
         </div>
 
