@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 
 const tok = () => sessionStorage.getItem('token');
@@ -38,6 +39,9 @@ const compressToBase64 = (file, maxBytes = 100_000) =>
 
 export default function UsuarioCadastro() {
   const navigate = useNavigate();
+  const { slug } = useParams();
+  const { user } = useAuth();
+  const tenantSlug = slug || user?.tenantSlug || '';
   const [groups,  setGroups]  = useState([]);
   const [form,    setForm]    = useState({ name: '', email: '', password: '', groupId: '', isBarber: false, photo: null });
   const [loading, setLoading] = useState(false);
@@ -163,7 +167,7 @@ export default function UsuarioCadastro() {
               <label htmlFor="isBarber" style={{ fontSize: '0.875rem', cursor: 'pointer' }}>É barbeiro</label>
             </div>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => navigate('/usuario-lista')}>Cancelar</button>
+              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => navigate(`/${tenantSlug}/usuario-lista`)}>Cancelar</button>
               <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>{loading ? 'Salvando...' : 'Cadastrar'}</button>
             </div>
           </div>

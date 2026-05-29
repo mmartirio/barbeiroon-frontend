@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle } from 'react-icons/fi';
 
@@ -8,6 +9,9 @@ const fmtP  = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currenc
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { slug } = useParams();
+  const { user } = useAuth();
+  const tenantSlug = slug || user?.tenantSlug || '';
   const [stats,    setStats]    = useState(null);
   const [pending,  setPending]  = useState(0);
   const [nextAppt, setNextAppt] = useState(null);
@@ -58,12 +62,12 @@ export default function Dashboard() {
     <Layout title="Painel do Administrador">
       {/* Top actions */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-        <button className="btn btn-primary btn-sm" onClick={() => navigate('/novo-agendamento')}>
+        <button className="btn btn-primary btn-sm" onClick={() => navigate(`/${tenantSlug}/novo-agendamento`)}>
           <FiPlusCircle size={14} /> Novo Agendamento
         </button>
         {pending > 0 && (
           <button
-            onClick={() => navigate('/solicitacoes-pendentes')}
+            onClick={() => navigate(`/${tenantSlug}/solicitacoes-pendentes`)}
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--warning-soft)', border: '1px solid var(--warning)', borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.9rem', color: 'var(--warning)', fontSize: '0.85rem', fontWeight: 600 }}
           >
             <FiAlertCircle size={14} /> {pending} solicitação{pending > 1 ? 'ões' : ''} pendente{pending > 1 ? 's' : ''}
@@ -95,7 +99,7 @@ export default function Dashboard() {
           {/* Compact info row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             {/* Next appointment */}
-            <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate('/servico-agendados')}>
+            <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/${tenantSlug}/servico-agendados`)}>
               <div className="card-header"><p className="card-title">Próximo agendamento</p></div>
               <div className="card-body">
                 {nextAppt ? (

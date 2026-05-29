@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 import SearchModal from '../../components/SearchModal/SearchModal';
 import { FiChevronDown, FiTag } from 'react-icons/fi';
@@ -11,6 +12,9 @@ const today = () => new Date().toISOString().split('T')[0];
 
 export default function NovoAgendamento() {
   const navigate = useNavigate();
+  const { slug } = useParams();
+  const { user } = useAuth();
+  const tenantSlug = slug || user?.tenantSlug || '';
 
   const [clients,  setClients]  = useState([]);
   const [services, setServices] = useState([]);
@@ -106,7 +110,7 @@ export default function NovoAgendamento() {
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(d.message || res.status === 409 ? 'Horário já ocupado' : 'Erro ao agendar');
       setSuccess('Agendamento realizado com sucesso!');
-      setTimeout(() => navigate('/servico-agendados'), 1500);
+      setTimeout(() => navigate(`/${tenantSlug}/servico-agendados`), 1500);
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
   };
@@ -203,7 +207,7 @@ export default function NovoAgendamento() {
             )}
 
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
-              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => navigate('/servico-agendados')}>Cancelar</button>
+              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => navigate(`/${tenantSlug}/servico-agendados`)}>Cancelar</button>
               <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading || !time}>{loading ? 'Agendando...' : 'Confirmar Agendamento'}</button>
             </div>
           </div>

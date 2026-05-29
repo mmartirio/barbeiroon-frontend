@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import s from './Sidebar.module.css';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -68,6 +68,8 @@ export default function Sidebar({ onWhatsApp }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const params = useParams();
+  const slug = params.slug || user?.tenantSlug || '';
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tenantLogo, setTenantLogo] = useState('');
   const [tenantName, setTenantName] = useState('');
@@ -120,49 +122,49 @@ export default function Sidebar({ onWhatsApp }) {
         </div>
 
         <ul className={s.nav}>
-          {canDash && <NavItem to="/dashboard" icon={<FiGrid size={15} />} label="Painel Principal" />}
+          {canDash && <NavItem to={`/${slug}/dashboard`} icon={<FiGrid size={15} />} label="Painel Principal" />}
 
           {canClients && (
             <SubMenu icon={<FiUsers size={15} />} label="Clientes" menuKey="clients" open={openMenus.clients} onToggle={toggle}>
-              {p('canCreateCustomer') && <SubItem to="/cliente-cadastro"   icon={<FiUserPlus size={14} />} label="Cadastro" />}
-              {p('canViewCustomers')  && <SubItem to="/cliente-lista"      icon={<FiList size={14} />}     label="Lista de Clientes" />}
-              {p('canViewAppointments') && <SubItem to="/servico-agendados" icon={<FiCalendar size={14} />} label="Clientes Agendados" />}
-              {p('canViewCustomers')  && <SubItem to="/tela-cliente"       icon={<FiMonitor size={14} />}  label="Tela do Cliente" />}
+              {p('canCreateCustomer') && <SubItem to={`/${slug}/cliente-cadastro`}   icon={<FiUserPlus size={14} />} label="Cadastro" />}
+              {p('canViewCustomers')  && <SubItem to={`/${slug}/cliente-lista`}      icon={<FiList size={14} />}     label="Lista de Clientes" />}
+              {p('canViewAppointments') && <SubItem to={`/${slug}/servico-agendados`} icon={<FiCalendar size={14} />} label="Clientes Agendados" />}
+              {p('canViewCustomers')  && <SubItem to={`/${slug}/tela-cliente`}       icon={<FiMonitor size={14} />}  label="Tela do Cliente" />}
             </SubMenu>
           )}
 
           {canUsers && (
             <SubMenu icon={<FiUser size={15} />} label="Usuários" menuKey="users" open={openMenus.users} onToggle={toggle}>
-              {p('canCreateUser')    && <SubItem to="/usuario-cadastro" icon={<FiUserPlus size={14} />}  label="Cadastrar" />}
-              {p('canViewUsers')     && <SubItem to="/usuario-lista"    icon={<FiList size={14} />}      label="Lista de Usuários" />}
-              {p('canManageGroups') && <SubItem to="/grupo"             icon={<FiBriefcase size={14} />} label="Grupo" />}
+              {p('canCreateUser')    && <SubItem to={`/${slug}/usuario-cadastro`} icon={<FiUserPlus size={14} />}  label="Cadastrar" />}
+              {p('canViewUsers')     && <SubItem to={`/${slug}/usuario-lista`}    icon={<FiList size={14} />}      label="Lista de Usuários" />}
+              {p('canManageGroups') && <SubItem to={`/${slug}/grupo`}             icon={<FiBriefcase size={14} />} label="Grupo" />}
             </SubMenu>
           )}
 
           {canServices && (
             <SubMenu icon={<FiScissors size={15} />} label="Serviços" menuKey="services" open={openMenus.services} onToggle={toggle}>
-              {p('canManageServices') && <SubItem to="/servico-cadastro" icon={<FiUserPlus size={14} />} label="Cadastrar Serviço" />}
-              {p('canViewServices')   && <SubItem to="/servico-lista"    icon={<FiList size={14} />}     label="Lista de Serviços" />}
+              {p('canManageServices') && <SubItem to={`/${slug}/servico-cadastro`} icon={<FiUserPlus size={14} />} label="Cadastrar Serviço" />}
+              {p('canViewServices')   && <SubItem to={`/${slug}/servico-lista`}    icon={<FiList size={14} />}     label="Lista de Serviços" />}
             </SubMenu>
           )}
 
           {p('canViewAgenda') && (
             <SubMenu icon={<FiCalendar size={15} />} label="Agenda" menuKey="agenda" open={openMenus.agenda} onToggle={toggle}>
-              <SubItem to="/agenda"           icon={<FiClock size={14} />}     label="Expediente" />
-              {p('canViewAppointments') && <SubItem to="/servico-agendados" icon={<FiCalendar size={14} />} label="Agendados" />}
+              <SubItem to={`/${slug}/agenda`}           icon={<FiClock size={14} />}     label="Expediente" />
+              {p('canViewAppointments') && <SubItem to={`/${slug}/servico-agendados`} icon={<FiCalendar size={14} />} label="Agendados" />}
             </SubMenu>
           )}
 
-          {p('canManageServices') && <NavItem to="/promocoes"  icon={<FiTag size={15} />}      label="Promoções" />}
-          {p('canViewReports')    && <NavItem to="/relatorios" icon={<FiBarChart2 size={15} />} label="Relatórios" />}
+          {p('canManageServices') && <NavItem to={`/${slug}/promocoes`}  icon={<FiTag size={15} />}      label="Promoções" />}
+          {p('canViewReports')    && <NavItem to={`/${slug}/relatorios`} icon={<FiBarChart2 size={15} />} label="Relatórios" />}
 
           <li className={s.divider} />
 
-          <NavItem to="/perfil" icon={<FiUser size={15} />} label="Perfil" />
+          <NavItem to={`/${slug}/perfil`} icon={<FiUser size={15} />} label="Perfil" />
 
           {p('canManageTenant') && (
             <SubMenu icon={<FiBriefcase size={15} />} label="Conta" menuKey="account" open={openMenus.account} onToggle={toggle}>
-              <SubItem to="/conta"    icon={<FiSettings size={14} />}   label="Conta" />
+              <SubItem to={`/${slug}/conta`}    icon={<FiSettings size={14} />}   label="Conta" />
               {onWhatsApp && <SubItem onClick={onWhatsApp} icon={<FiSmartphone size={14} />} label="QR Code WhatsApp" />}
             </SubMenu>
           )}

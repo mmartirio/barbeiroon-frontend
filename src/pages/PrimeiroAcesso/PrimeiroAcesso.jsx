@@ -17,7 +17,7 @@ export default function PrimeiroAcesso() {
   // Se não for o usuário bootstrap, redireciona
   useEffect(() => {
     if (user && !/^cliente\..+@barbeiroon\.com$/.test(user.email)) {
-      navigate('/dashboard', { replace: true });
+      navigate(`/${user.tenantSlug}/dashboard`, { replace: true });
     }
   }, [user, navigate]);
 

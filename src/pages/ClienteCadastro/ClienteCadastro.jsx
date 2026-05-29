@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 
 const tok = () => sessionStorage.getItem('token');
@@ -27,6 +28,9 @@ const toApi = (v) => {
 
 export default function ClienteCadastro() {
   const navigate = useNavigate();
+  const { slug } = useParams();
+  const { user } = useAuth();
+  const tenantSlug = slug || user?.tenantSlug || '';
   const [form,    setForm]    = useState({ name: '', phone: '', birthDate: '' });
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
@@ -65,7 +69,7 @@ export default function ClienteCadastro() {
           <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
             {error}
             {error.includes('já pertence') && (
-              <button type="button" className="btn btn-ghost btn-sm" style={{ marginLeft: '0.75rem' }} onClick={() => navigate('/cliente-lista')}>
+              <button type="button" className="btn btn-ghost btn-sm" style={{ marginLeft: '0.75rem' }} onClick={() => navigate(`/${tenantSlug}/cliente-lista`)}>
                 Ver na lista
               </button>
             )}
@@ -87,7 +91,7 @@ export default function ClienteCadastro() {
               <input className="form-input" placeholder="DD/MM/AAAA" value={form.birthDate} onChange={e => set('birthDate', formatBirthInput(e.target.value))} maxLength={10} />
             </div>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => navigate('/cliente-lista')}>Cancelar</button>
+              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => navigate(`/${tenantSlug}/cliente-lista`)}>Cancelar</button>
               <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>{loading ? 'Salvando...' : 'Cadastrar'}</button>
             </div>
           </div>

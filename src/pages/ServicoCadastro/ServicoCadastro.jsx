@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 
 const tok = () => sessionStorage.getItem('token');
@@ -12,6 +13,9 @@ const formatDuration = (v) => {
 
 export default function ServicoCadastro() {
   const navigate = useNavigate();
+  const { slug } = useParams();
+  const { user } = useAuth();
+  const tenantSlug = slug || user?.tenantSlug || '';
   const [form,    setForm]    = useState({ name: '', tipo: '', price: '', duration: '' });
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
@@ -50,7 +54,7 @@ export default function ServicoCadastro() {
             <div className="form-group"><label className="form-label">Valor (R$)</label><input className="form-input" type="number" step="0.01" min="0" placeholder="0,00" value={form.price} onChange={e => set('price', e.target.value)} /></div>
             <div className="form-group"><label className="form-label">Duração (HH:MM)</label><input className="form-input" placeholder="00:30" value={form.duration} onChange={e => set('duration', formatDuration(e.target.value))} maxLength={5} /></div>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => navigate('/servico-lista')}>Cancelar</button>
+              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => navigate(`/${tenantSlug}/servico-lista`)}>Cancelar</button>
               <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>{loading ? 'Salvando...' : 'Cadastrar'}</button>
             </div>
           </div>

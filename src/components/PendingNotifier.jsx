@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { FiX } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
@@ -10,6 +11,9 @@ export default function PendingNotifier() {
   const [shown,   setShown]   = useState(false);
   const seenIds   = useRef(new Set());
   const navigate  = useNavigate();
+  const params    = useParams();
+  const { user }  = useAuth();
+  const slug      = params.slug || user?.tenantSlug || '';
 
   useEffect(() => {
     let mounted = true;
@@ -63,7 +67,7 @@ export default function PendingNotifier() {
       <button
         className="btn btn-warning btn-sm"
         style={{ marginTop: '0.75rem', width: '100%' }}
-        onClick={() => { setShown(false); navigate('/solicitacoes-pendentes'); }}
+        onClick={() => { setShown(false); navigate(`/${slug}/solicitacoes-pendentes`); }}
       >
         Ver solicitações
       </button>

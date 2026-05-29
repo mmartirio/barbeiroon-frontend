@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import PrivateRoute from './routes/PrivateRoute';
 import PendingNotifier from './components/PendingNotifier';
@@ -31,6 +31,15 @@ const PrimeiroAcesso     = lazy(() => import('./pages/PrimeiroAcesso/PrimeiroAce
 
 const Fallback = () => <div className="app-loading">Carregando...</div>;
 
+// Redirects old bookmarks (without slug) to the correct tenant URL
+function LegacyRedirect({ path }) {
+  const { user, authReady } = useAuth();
+  if (!authReady) return <Fallback />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!user.tenantSlug) return <Navigate to="/login" replace />;
+  return <Navigate to={`/${user.tenantSlug}/${path}`} replace />;
+}
+
 function AppRoutes() {
   const { user, authReady } = useAuth();
   const location = useLocation();
@@ -41,38 +50,62 @@ function AppRoutes() {
 
   if (!authReady) return <Fallback />;
 
+  const dashSlug = user?.tenantSlug;
+
   return (
     <>
       {user && <PendingNotifier />}
       <Suspense fallback={<Fallback />}>
         <Routes>
-          <Route path="/"          element={user ? <Navigate to="/dashboard" replace /> : <Landing />} />
-          <Route path="/login"     element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+          {/* Public */}
+          <Route path="/"          element={dashSlug ? <Navigate to={`/${dashSlug}/dashboard`} replace /> : <Landing />} />
+          <Route path="/login"     element={dashSlug ? <Navigate to={`/${dashSlug}/dashboard`} replace /> : <Login />} />
           <Route path="/recuperar-senha" element={<RecuperaSenha />} />
-          <Route path="/agendar/:slug"  element={<AgendamentoPublico />} />
-          <Route path="/registrar"      element={<Registrar />} />
+          <Route path="/agendar/:slug"   element={<AgendamentoPublico />} />
+          <Route path="/registrar"       element={<Registrar />} />
+          <Route path="/gestor/*"        element={<GestorApp />} />
 
-          <Route path="/dashboard"             element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/cliente-lista"         element={<PrivateRoute perm="canViewCustomers"><ClienteLista /></PrivateRoute>} />
-          <Route path="/cliente-cadastro"      element={<PrivateRoute perm="canCreateCustomer"><ClienteCadastro /></PrivateRoute>} />
-          <Route path="/servico-agendados"     element={<PrivateRoute perm="canViewAppointments"><ClientesAgendados /></PrivateRoute>} />
-          <Route path="/novo-agendamento"      element={<PrivateRoute perm="canCreateAppointment"><NovoAgendamento /></PrivateRoute>} />
-          <Route path="/solicitacoes-pendentes" element={<PrivateRoute perm="canViewAppointments"><SolicitacoesPendentes /></PrivateRoute>} />
-          <Route path="/servico-lista"         element={<PrivateRoute perm="canViewServices"><ServicoLista /></PrivateRoute>} />
-          <Route path="/servico-cadastro"      element={<PrivateRoute perm="canManageServices"><ServicoCadastro /></PrivateRoute>} />
-          <Route path="/usuario-lista"         element={<PrivateRoute perm="canViewUsers"><UsuarioLista /></PrivateRoute>} />
-          <Route path="/usuario-cadastro"      element={<PrivateRoute perm="canCreateUser"><UsuarioCadastro /></PrivateRoute>} />
-          <Route path="/grupo"                 element={<PrivateRoute perm="canManageGroups"><Grupo /></PrivateRoute>} />
-          <Route path="/agenda"                element={<PrivateRoute perm="canViewAgenda"><Agenda /></PrivateRoute>} />
-          <Route path="/promocoes"             element={<PrivateRoute perm="canManageServices"><Promocoes /></PrivateRoute>} />
-          <Route path="/relatorios"            element={<PrivateRoute perm="canViewReports"><Relatorios /></PrivateRoute>} />
-          <Route path="/perfil"                element={<PrivateRoute><Perfil /></PrivateRoute>} />
-          <Route path="/conta"                 element={<PrivateRoute perm="canManageTenant"><Conta /></PrivateRoute>} />
-          <Route path="/tela-cliente"          element={<PrivateRoute perm="canViewCustomers"><TelaCliente /></PrivateRoute>} />
-          <Route path="/primeiro-acesso"       element={<PrivateRoute><PrimeiroAcesso /></PrivateRoute>} />
-          <Route path="/gestor/*"              element={<GestorApp />} />
+          {/* Tenant-scoped private routes */}
+          <Route path="/:slug/dashboard"              element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/:slug/cliente-lista"          element={<PrivateRoute perm="canViewCustomers"><ClienteLista /></PrivateRoute>} />
+          <Route path="/:slug/cliente-cadastro"       element={<PrivateRoute perm="canCreateCustomer"><ClienteCadastro /></PrivateRoute>} />
+          <Route path="/:slug/servico-agendados"      element={<PrivateRoute perm="canViewAppointments"><ClientesAgendados /></PrivateRoute>} />
+          <Route path="/:slug/novo-agendamento"       element={<PrivateRoute perm="canCreateAppointment"><NovoAgendamento /></PrivateRoute>} />
+          <Route path="/:slug/solicitacoes-pendentes" element={<PrivateRoute perm="canViewAppointments"><SolicitacoesPendentes /></PrivateRoute>} />
+          <Route path="/:slug/servico-lista"          element={<PrivateRoute perm="canViewServices"><ServicoLista /></PrivateRoute>} />
+          <Route path="/:slug/servico-cadastro"       element={<PrivateRoute perm="canManageServices"><ServicoCadastro /></PrivateRoute>} />
+          <Route path="/:slug/usuario-lista"          element={<PrivateRoute perm="canViewUsers"><UsuarioLista /></PrivateRoute>} />
+          <Route path="/:slug/usuario-cadastro"       element={<PrivateRoute perm="canCreateUser"><UsuarioCadastro /></PrivateRoute>} />
+          <Route path="/:slug/grupo"                  element={<PrivateRoute perm="canManageGroups"><Grupo /></PrivateRoute>} />
+          <Route path="/:slug/agenda"                 element={<PrivateRoute perm="canViewAgenda"><Agenda /></PrivateRoute>} />
+          <Route path="/:slug/promocoes"              element={<PrivateRoute perm="canManageServices"><Promocoes /></PrivateRoute>} />
+          <Route path="/:slug/relatorios"             element={<PrivateRoute perm="canViewReports"><Relatorios /></PrivateRoute>} />
+          <Route path="/:slug/perfil"                 element={<PrivateRoute><Perfil /></PrivateRoute>} />
+          <Route path="/:slug/conta"                  element={<PrivateRoute perm="canManageTenant"><Conta /></PrivateRoute>} />
+          <Route path="/:slug/tela-cliente"           element={<PrivateRoute perm="canViewCustomers"><TelaCliente /></PrivateRoute>} />
+          <Route path="/:slug/primeiro-acesso"        element={<PrivateRoute><PrimeiroAcesso /></PrivateRoute>} />
 
-          <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
+          {/* Legacy redirects — keep old bookmarks working */}
+          <Route path="/dashboard"              element={<LegacyRedirect path="dashboard" />} />
+          <Route path="/cliente-lista"          element={<LegacyRedirect path="cliente-lista" />} />
+          <Route path="/cliente-cadastro"       element={<LegacyRedirect path="cliente-cadastro" />} />
+          <Route path="/servico-agendados"      element={<LegacyRedirect path="servico-agendados" />} />
+          <Route path="/novo-agendamento"       element={<LegacyRedirect path="novo-agendamento" />} />
+          <Route path="/solicitacoes-pendentes" element={<LegacyRedirect path="solicitacoes-pendentes" />} />
+          <Route path="/servico-lista"          element={<LegacyRedirect path="servico-lista" />} />
+          <Route path="/servico-cadastro"       element={<LegacyRedirect path="servico-cadastro" />} />
+          <Route path="/usuario-lista"          element={<LegacyRedirect path="usuario-lista" />} />
+          <Route path="/usuario-cadastro"       element={<LegacyRedirect path="usuario-cadastro" />} />
+          <Route path="/grupo"                  element={<LegacyRedirect path="grupo" />} />
+          <Route path="/agenda"                 element={<LegacyRedirect path="agenda" />} />
+          <Route path="/promocoes"              element={<LegacyRedirect path="promocoes" />} />
+          <Route path="/relatorios"             element={<LegacyRedirect path="relatorios" />} />
+          <Route path="/perfil"                 element={<LegacyRedirect path="perfil" />} />
+          <Route path="/conta"                  element={<LegacyRedirect path="conta" />} />
+          <Route path="/tela-cliente"           element={<LegacyRedirect path="tela-cliente" />} />
+          <Route path="/primeiro-acesso"        element={<LegacyRedirect path="primeiro-acesso" />} />
+
+          <Route path="*" element={<Navigate to={dashSlug ? `/${dashSlug}/dashboard` : '/login'} replace />} />
         </Routes>
       </Suspense>
     </>

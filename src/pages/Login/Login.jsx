@@ -27,7 +27,8 @@ export default function Login() {
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(d.message || 'Credenciais inválidas');
       login(d.token);
-      navigate(d.mustSetup ? '/primeiro-acesso' : '/dashboard', { replace: true });
+      const slug = d.tenant?.slug;
+      navigate(d.mustSetup ? `/${slug}/primeiro-acesso` : `/${slug}/dashboard`, { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
