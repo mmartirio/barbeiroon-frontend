@@ -36,7 +36,7 @@ function AppRoutes() {
   const location = useLocation();
 
   useEffect(() => {
-    document.title = 'Barbeiro On';
+    document.title = 'Barbeiro ON';
   }, []);
 
   if (!authReady) return <Fallback />;

@@ -40,7 +40,7 @@ export default function Login() {
       <div className={s.card}>
         <div className={s.brand}>
           <img src="/icon.png" alt="Barbeiro ON" style={{ height: 64, marginBottom: '1rem' }} />
-          <h1 className={s.brandTitle}>Barbeiro <em>On</em></h1>
+          <h1 className={s.brandTitle}>Barbeiro <em>ON</em></h1>
           <p className={s.brandSub}>Bem-vindo</p>
         </div>
 
