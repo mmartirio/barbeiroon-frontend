@@ -12,10 +12,12 @@ export default function Login() {
   const [showPwd,  setShowPwd]  = useState(false);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
+  const [disabled, setDisabled] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setDisabled(false);
     if (!email.trim() || !password) { setError('Preencha e-mail e senha'); return; }
     setLoading(true);
     try {
@@ -25,7 +27,10 @@ export default function Login() {
         body: JSON.stringify({ email: email.toLowerCase().trim(), password }),
       });
       const d = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(d.message || 'Credenciais inválidas');
+      if (!res.ok) {
+        if (d.accountDisabled) setDisabled(true);
+        throw new Error(d.message || 'Credenciais inválidas');
+      }
       login(d.token);
       const slug = d.tenant?.slug;
       navigate(d.mustSetup ? `/${slug}/primeiro-acesso` : `/${slug}/dashboard`, { replace: true });
@@ -46,7 +51,16 @@ export default function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className={s.form}>
-          {error && <div className="alert alert-error">{error}</div>}
+          {error && (
+            <div className={`alert ${disabled ? 'alert-warning' : 'alert-error'}`} style={disabled ? { textAlign: 'center', lineHeight: 1.5 } : undefined}>
+              {error}
+              {disabled && (
+                <div style={{ marginTop: '0.5rem', fontSize: '0.82rem', opacity: 0.85 }}>
+                  Para reativar, entre em contato: <strong>suporte@barbeiroon.com</strong>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="form-group">
             <label className="form-label">E-mail</label>

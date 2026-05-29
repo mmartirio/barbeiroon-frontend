@@ -36,6 +36,9 @@ select, input, textarea { font-family: inherit; font-size: inherit; color: inher
   border-radius: var(--radius-sm);
   font-size: 0.875rem;
   font-weight: 500;
+  color: var(--color);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
   transition: opacity 0.15s, background 0.15s;
   white-space: nowrap;
 }
