@@ -37,7 +37,7 @@ export default function Layout() {
     <div className="layout">
       <aside className={`sidebar ${open ? 'sidebar--open' : ''}`}>
         <div className="sidebar-logo">
-          <img src="/logo.png" alt="Barbeiro ON" style={{ height: 32 }} />
+          <img src="/icon.png" alt="Barbeiro ON" style={{ height: 32 }} />
           <span>Painel Gestor</span>
         </div>
 

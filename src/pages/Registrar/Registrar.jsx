@@ -22,7 +22,7 @@ O presente termo regula a prestação de serviços de acesso à plataforma Barbe
 2.1. O serviço é cobrado mensalmente (ou anualmente, conforme opção selecionada) por meio de PIX.
 2.2. A cobrança será enviada via WhatsApp para o número informado no cadastro, na data de vencimento escolhida.
 2.3. O não pagamento até 5 (cinco) dias após o vencimento poderá resultar na suspensão temporária do acesso à plataforma.
-2.4. Não há cobrança automática — o contratante recebe o aviso de cobrança via WhatsApp e realiza o pagamento voluntariamente.
+2.4. Não há cobrança automática — o contratante recebe o aviso de cobrança por meio dos nossos canais de atendimento e realiza o pagamento voluntariamente.
 
 3. SEM FIDELIDADE
 3.1. Não há prazo mínimo de fidelidade. O serviço pode ser cancelado pelo contratante a qualquer momento.
@@ -88,7 +88,7 @@ function Footer() {
     <footer className="reg-footer">
       <div className="reg-footer-inner">
         <div className="reg-footer-brand">
-          <img src="/logo.png" alt="Barbeiro ON" style={{ height: 36 }} />
+          <img src="/icon.png" alt="Barbeiro ON" style={{ height: 36 }} />
         </div>
         <div className="reg-footer-badges">
           <span className="reg-footer-badge"><RiShieldCheckLine size={13} /> Sem fidelidade</span>
@@ -107,7 +107,7 @@ function Navbar() {
   return (
     <nav className="reg-nav">
       <div className="reg-nav-brand">
-        <img src="/logo.png" alt="Barbeiro ON" style={{ height: 40 }} />
+        <img src="/icon.png" alt="Barbeiro ON" style={{ height: 40 }} />
         <div>
           Barbeiro <em>ON</em>
           <small>Plataforma de gestão para barbearias</small>
@@ -348,7 +348,7 @@ export default function Registrar() {
             <h2>Cadastro realizado!</h2>
             <p>
               Sua barbearia foi cadastrada com sucesso. Em breve você receberá
-              os detalhes de cobrança via WhatsApp.
+              os detalhes pelos nossos canais de atendimento.
             </p>
             {t && (
               <div className="reg-success-box">

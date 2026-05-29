@@ -144,7 +144,7 @@ export default function Landing() {
       {/* ── Nav ── */}
       <nav className="lp-nav">
         <div className="lp-nav-logo">
-          <img src="/logo.png" alt="Barbeiro ON" style={{ height: 38 }} />
+          <img src="/icon.png" alt="Barbeiro ON" style={{ height: 38 }} />
           <span>Barbeiro <span><em>ON</em></span></span>
         </div>
 
@@ -250,7 +250,7 @@ export default function Landing() {
         <div className="lp-bottom-inner">
           <div className="lp-bottom-brand">
             <div className="lp-bottom-brand-icon" style={{ background: 'none', border: 'none', padding: 0 }}>
-              <img src="/logo.png" alt="Barbeiro ON" style={{ height: 48 }} />
+              <img src="/icon.png" alt="Barbeiro ON" style={{ height: 48 }} />
             </div>
             <div className="lp-bottom-brand-text">
               <p>Barbearia organizada.</p>

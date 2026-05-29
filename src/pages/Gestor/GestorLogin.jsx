@@ -31,7 +31,7 @@ export default function Login() {
       <div className="card" style={{ width: '100%', maxWidth: 380 }}>
         <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', paddingBottom: '0.5rem' }}>
-            <img src="/logo.png" alt="Barbeiro ON" style={{ height: 56 }} />
+            <img src="/icon.png" alt="Barbeiro ON" style={{ height: 56 }} />
             <h1 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Painel Gestor</h1>
             <p style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>Acesso restrito a administradores</p>
           </div>
