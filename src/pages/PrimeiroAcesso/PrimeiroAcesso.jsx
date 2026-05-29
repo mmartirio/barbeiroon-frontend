@@ -41,7 +41,7 @@ export default function PrimeiroAcesso() {
     try {
       // Busca o grupo Administrador
       const token = sessionStorage.getItem('token');
-      const gRes  = await fetch('/api/groups', {
+      const gRes  = await fetch('/api/group', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const gData = await gRes.json().catch(() => ({}));
@@ -50,7 +50,7 @@ export default function PrimeiroAcesso() {
       );
       if (!adminGroup) throw new Error('Grupo Administrador não encontrado.');
 
-      const res = await fetch('/api/users/register', {
+      const res = await fetch('/api/user/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
