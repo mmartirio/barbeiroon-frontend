@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '../../components/Layout/Layout';
-import { FiChevronDown, FiUpload, FiTrash2 } from 'react-icons/fi';
+import { FiChevronDown, FiUpload, FiTrash2, FiAlertTriangle } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const tok = () => sessionStorage.getItem('token');
 
@@ -13,17 +15,29 @@ const PLANOS = {
   enterprise: { label: 'Enterprise', color: '#059669', desc: 'Usuários ilimitados' },
 };
 
+const daysUntil = (dateStr) => {
+  if (!dateStr) return null;
+  const diff = new Date(dateStr) - new Date();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+};
+
 export default function Conta() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '', companyName: '', cnpj: '', phone: '',
     address: '', neighborhood: '', city: '', state: '', logo: '',
   });
-  const [planType,     setPlanType]     = useState('free');
-  const [loading,      setLoading]      = useState(true);
-  const [saving,       setSaving]       = useState(false);
-  const [error,        setError]        = useState('');
-  const [success,      setSuccess]      = useState('');
-  const [showEstados,  setShowEstados]  = useState(false);
+  const [planType,          setPlanType]          = useState('free');
+  const [scheduledDeleteAt, setScheduledDeleteAt] = useState(null);
+  const [loading,           setLoading]           = useState(true);
+  const [saving,            setSaving]            = useState(false);
+  const [error,             setError]             = useState('');
+  const [success,           setSuccess]           = useState('');
+  const [showEstados,       setShowEstados]       = useState(false);
+  const [deleteModal,       setDeleteModal]       = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteLoading,     setDeleteLoading]     = useState(false);
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -44,6 +58,7 @@ export default function Conta() {
         logo:         data.logo         || '',
       });
       setPlanType(data.planType || 'free');
+      setScheduledDeleteAt(data.scheduledDeleteAt || null);
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
   }, []);
@@ -77,6 +92,46 @@ export default function Conta() {
   };
 
   const plano = PLANOS[planType] || PLANOS.free;
+
+  const handleRequestDelete = async () => {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch('/api/tenant/me/request-delete', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${tok()}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || 'Erro ao solicitar exclusão');
+      setScheduledDeleteAt(data.scheduledDeleteAt);
+      setDeleteModal(false);
+      setDeleteConfirmText('');
+      logout();
+      navigate('/login', { replace: true });
+    } catch (err) {
+      setError(err.message);
+      setDeleteModal(false);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleCancelDelete = async () => {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch('/api/tenant/me/cancel-delete', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${tok()}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || 'Erro ao cancelar exclusão');
+      setScheduledDeleteAt(null);
+      setSuccess('Exclusão cancelada. Conta reativada com sucesso!');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   if (loading) return <Layout title="Conta"><div className="empty-state"><p>Carregando...</p></div></Layout>;
 
@@ -193,7 +248,103 @@ export default function Conta() {
         <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ alignSelf: 'stretch' }}>
           {saving ? 'Salvando...' : 'Salvar Alterações'}
         </button>
+
+        {/* Danger zone */}
+        <div className="card" style={{ border: '1px solid rgba(220,38,38,0.35)' }}>
+          <div className="card-body">
+            <h3 style={{ color: '#f87171', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <FiAlertTriangle size={16} /> Zona de Perigo
+            </h3>
+
+            {scheduledDeleteAt ? (
+              <>
+                <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: 'var(--radius-xs)', padding: '0.85rem 1rem', marginBottom: '0.75rem' }}>
+                  <p style={{ color: '#f87171', fontWeight: 700, marginBottom: '0.25rem' }}>
+                    Conta agendada para exclusão
+                  </p>
+                  <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>
+                    Sua conta e todos os dados serão excluídos permanentemente em{' '}
+                    <strong style={{ color: 'var(--color)' }}>{daysUntil(scheduledDeleteAt)} dia(s)</strong>{' '}
+                    ({new Date(scheduledDeleteAt).toLocaleDateString('pt-BR')}).
+                  </p>
+                </div>
+                <button
+                  className="btn btn-ghost"
+                  onClick={handleCancelDelete}
+                  disabled={deleteLoading}
+                  style={{ borderColor: 'var(--border)' }}
+                >
+                  {deleteLoading ? 'Cancelando...' : 'Cancelar exclusão e reativar conta'}
+                </button>
+              </>
+            ) : (
+              <>
+                <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+                  Ao solicitar a exclusão, sua conta ficará desativada por <strong>30 dias</strong>.
+                  Após esse período todos os dados serão removidos permanentemente e não poderão ser recuperados.
+                  Você pode cancelar a exclusão durante esse prazo.
+                </p>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => { setDeleteModal(true); setDeleteConfirmText(''); }}
+                  style={{ fontSize: '0.875rem' }}
+                >
+                  <FiTrash2 size={14} /> Solicitar exclusão da conta
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Modal de confirmação */}
+      {deleteModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="card" style={{ width: '100%', maxWidth: 420, border: '1px solid rgba(220,38,38,0.4)' }}>
+            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f87171' }}>
+                <FiAlertTriangle size={20} />
+                <h3 style={{ color: '#f87171' }}>Confirmar exclusão da conta</h3>
+              </div>
+              <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                Esta ação irá <strong style={{ color: 'var(--color)' }}>desativar sua conta imediatamente</strong>.
+                Após 30 dias, todos os dados — agendamentos, clientes, serviços e configurações —
+                serão excluídos permanentemente. Você poderá cancelar dentro desse prazo.
+              </p>
+              <div className="form-group">
+                <label className="form-label">
+                  Digite <strong>EXCLUIR</strong> para confirmar
+                </label>
+                <input
+                  className="form-input"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  placeholder="EXCLUIR"
+                  autoFocus
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="btn btn-danger"
+                  style={{ flex: 1 }}
+                  onClick={handleRequestDelete}
+                  disabled={deleteConfirmText !== 'EXCLUIR' || deleteLoading}
+                >
+                  {deleteLoading ? 'Aguarde...' : 'Confirmar exclusão'}
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  style={{ flex: 1 }}
+                  onClick={() => setDeleteModal(false)}
+                  disabled={deleteLoading}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
