@@ -121,10 +121,10 @@
 }
 
 .reg-step-item.active .reg-step-circle {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #fff;
-  box-shadow: 0 0 12px rgba(37,99,235,0.5);
+  background: #00FF00;
+  border-color: #00FF00;
+  color: #000;
+  box-shadow: 0 0 12px rgba(0,255,0,0.5);
 }
 
 .reg-step-item.done .reg-step-circle {
@@ -185,7 +185,7 @@
   position: relative;
   width: 44px;
   height: 24px;
-  background: #2563eb;
+  background: #00FF00;
   border-radius: 12px;
   border: none;
   padding: 0;
@@ -244,14 +244,14 @@
 }
 
 .plan-card:hover {
-  border-color: rgba(37,99,235,0.45);
+  border-color: rgba(0,255,0,0.35);
   transform: translateY(-3px);
   box-shadow: 0 12px 40px rgba(0,0,0,0.5);
 }
 
 .plan-card.selected {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 1px rgba(37,99,235,0.3), 0 12px 40px rgba(37,99,235,0.15);
+  border-color: #00FF00;
+  box-shadow: 0 0 0 1px rgba(0,255,0,0.3), 0 12px 40px rgba(0,255,0,0.12);
 }
 
 .plan-card-header {
@@ -370,10 +370,10 @@
 }
 
 .plan-card.selected .plan-select-btn {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #fff;
-  box-shadow: 0 0 16px rgba(37,99,235,0.4);
+  background: #00FF00;
+  border-color: #00FF00;
+  color: #000;
+  box-shadow: 0 0 16px rgba(0,255,0,0.35);
 }
 
 /* Continue button (step 1) */
@@ -389,20 +389,20 @@
   align-items: center;
   gap: 10px;
   padding: 14px 36px;
-  background: #16a34a;
-  color: #fff;
+  background: #00FF00;
+  color: #000;
   border: none;
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 800;
   transition: all 0.15s;
-  box-shadow: 0 0 24px rgba(22,163,74,0.35);
+  box-shadow: 0 0 24px rgba(0,255,0,0.3);
 }
 
 .reg-continue-btn:hover:not(:disabled) {
-  background: #15803d;
+  background: #00cc00;
   transform: translateY(-2px);
-  box-shadow: 0 6px 28px rgba(22,163,74,0.45);
+  box-shadow: 0 6px 28px rgba(0,255,0,0.4);
 }
 
 .reg-continue-btn:disabled {
@@ -514,9 +514,9 @@
 .reg-field input:focus,
 .reg-field select:focus {
   outline: none;
-  border-color: #2563eb;
-  background: rgba(37,99,235,0.06);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  border-color: #00FF00;
+  background: rgba(0,255,0,0.04);
+  box-shadow: 0 0 0 3px rgba(0,255,0,0.12);
 }
 
 .reg-field select option { background: #0d1120; color: #e2e8f0; }
@@ -554,13 +554,13 @@
 }
 
 .billing-option:hover {
-  border-color: rgba(37,99,235,0.4);
-  background: rgba(37,99,235,0.06);
+  border-color: rgba(0,255,0,0.35);
+  background: rgba(0,255,0,0.04);
 }
 
 .billing-option.selected {
-  border-color: #2563eb;
-  background: rgba(37,99,235,0.12);
+  border-color: #00FF00;
+  background: rgba(0,255,0,0.08);
 }
 
 .billing-option-label {
@@ -625,7 +625,7 @@
   width: 18px; height: 18px;
   flex-shrink: 0;
   margin-top: 2px;
-  accent-color: #2563eb;
+  accent-color: #00FF00;
   cursor: pointer;
 }
 
