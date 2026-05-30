@@ -7,7 +7,7 @@ import {
   FiUser, FiUserPlus, FiList, FiMonitor, FiBriefcase,
   FiSettings, FiLogOut, FiMenu, FiX,
   FiChevronDown, FiChevronRight, FiSmartphone, FiTag,
-  FiPlusCircle, FiAlertCircle, FiClock,
+  FiPlusCircle, FiAlertCircle, FiClock, FiHelpCircle,
 } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
@@ -64,7 +64,7 @@ function SubItem({ to, icon, label, onClick }) {
   );
 }
 
-export default function Sidebar({ onWhatsApp }) {
+export default function Sidebar({ onWhatsApp, onSupport }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -159,6 +159,8 @@ export default function Sidebar({ onWhatsApp }) {
           {p('canViewReports')    && <NavItem to={`/${slug}/relatorios`} icon={<FiBarChart2 size={15} />} label="Relatórios" />}
 
           <li className={s.divider} />
+
+          <NavItem onClick={onSupport} icon={<FiHelpCircle size={15} />} label="Suporte" />
 
           <NavItem to={`/${slug}/perfil`} icon={<FiUser size={15} />} label="Perfil" />
 

@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import s from './Layout.module.css';
 import Sidebar from '../Sidebar/Sidebar';
+import SuporteModal from '../Suporte/SuporteModal';
 
 const tok = () => sessionStorage.getItem('token');
 
 export default function Layout({ children, title }) {
+  const [suporteOpen,  setSuporteOpen]  = useState(false);
   const [whatsappOpen, setWhatsappOpen] = useState(false);
   const [tab, setTab]         = useState('qr'); // 'qr' | 'code'
   const [qrState, setQrState] = useState('idle'); // idle | loading | qr | connected | error | pending
@@ -77,13 +79,15 @@ export default function Layout({ children, title }) {
 
   return (
     <div className={s.shell}>
-      <Sidebar onWhatsApp={() => setWhatsappOpen(true)} />
+      <Sidebar onWhatsApp={() => setWhatsappOpen(true)} onSupport={() => setSuporteOpen(true)} />
       <main className={s.main}>
         <div className={s.content}>
           {title && <h1 className={s.pageTitle}>{title}</h1>}
           {children}
         </div>
       </main>
+
+      {suporteOpen && <SuporteModal onClose={() => setSuporteOpen(false)} />}
 
       {whatsappOpen && (
         <div className="modal-overlay" onClick={closeModal}>

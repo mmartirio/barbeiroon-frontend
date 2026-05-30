@@ -11,6 +11,7 @@ const GestorPlans     = lazy(() => import('./GestorPlans'));
 const GestorCompanies = lazy(() => import('./GestorCompanies'));
 const GestorMonitor   = lazy(() => import('./GestorMonitor'));
 const GestorBilling   = lazy(() => import('./GestorBilling'));
+const GestorSupport   = lazy(() => import('./GestorSupport'));
 
 const Fallback = () => <div className="app-loading">Carregando...</div>;
 
@@ -30,6 +31,7 @@ function GestorRoutes() {
           <Route path="planos"        element={<GestorPlans />} />
           <Route path="cobrancas"     element={<GestorBilling />} />
           <Route path="admins"        element={<GestorAdmins />} />
+          <Route path="suporte"       element={<GestorSupport />} />
         </Route>
       </Routes>
     </Suspense>

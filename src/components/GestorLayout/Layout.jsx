@@ -10,6 +10,7 @@ import {
   RiMenuLine,
   RiCloseLine,
   RiComputerLine,
+  RiCustomerService2Line,
 } from 'react-icons/ri';
 import { useGestorAuth } from '../../context/GestorAuthContext';
 import './Layout.css';
@@ -20,7 +21,8 @@ const NAV = [
   { to: '/gestor/monitoramento',  icon: RiComputerLine,    label: 'Monitoramento' },
   { to: '/gestor/planos',         icon: RiPriceTag3Line,   label: 'Planos' },
   { to: '/gestor/cobrancas',      icon: RiBankCardLine,    label: 'Cobranças' },
-  { to: '/gestor/admins',         icon: RiUserSettingsLine, label: 'Admins' },
+  { to: '/gestor/admins',         icon: RiUserSettingsLine,     label: 'Admins' },
+  { to: '/gestor/suporte',        icon: RiCustomerService2Line, label: 'Chamados' },
 ];
 
 export default function Layout() {
