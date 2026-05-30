@@ -84,7 +84,26 @@ export default function Agenda() {
   useEffect(() => { loadBarbers(); }, []);
   useEffect(() => { if (profId) loadExpediente(profId); }, [profId]);
 
-  const toggleDia = (v) => setDiasSel(p => p.includes(v) ? p.filter(d => d !== v) : [...p, v]);
+  const toggleDia = (v) => {
+    setDiasSel(p => p.includes(v) ? p.filter(d => d !== v) : [...p, v]);
+  };
+
+  // Gera todos os dias do ano corrente que correspondem aos dias da semana selecionados
+  const applyDefaultSchedule = (checked, diasSelecionados) => {
+    if (!checked) { setDiasCal([]); return; }
+    const year = new Date().getFullYear();
+    const dates = [];
+    for (let m = 0; m < 12; m++) {
+      const daysInMonth = new Date(year, m + 1, 0).getDate();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(year, m, d);
+        if (diasSelecionados.includes(date.getDay())) {
+          dates.push(`${year}-${String(m + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+        }
+      }
+    }
+    setDiasCal(dates);
+  };
 
   const toggleCalDay = (isoDate) =>
     setDiasCal(p => p.includes(isoDate) ? p.filter(x => x !== isoDate) : [...p, isoDate].sort());
@@ -201,8 +220,11 @@ export default function Agenda() {
               ))}
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', marginBottom: '1rem' }}>
-              <input type="checkbox" checked={todosDias} onChange={e => setTodosDias(e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} />
-              <span style={{ fontSize: '0.875rem' }}>Agendamento padrão (todos os dias do ano)</span>
+              <input type="checkbox" checked={todosDias} onChange={e => {
+                setTodosDias(e.target.checked);
+                applyDefaultSchedule(e.target.checked, diasSel);
+              }} style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} />
+              <span style={{ fontSize: '0.875rem' }}>Agendamento padrão — marca no calendário todos os dias do ano conforme dias selecionados</span>
             </label>
 
             {/* ── Calendário interativo ── */}
