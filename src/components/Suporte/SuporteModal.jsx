@@ -129,15 +129,17 @@ export default function SuporteModal({ onClose }) {
   };
 
   return (
-    <div className={s.overlay}>
-      <div className={s.modal}>
+    <div className={s.overlay} onClick={onClose}>
+      <div className={s.modal} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className={s.header}>
           <div className={s.headerLeft}>
             <FiMessageCircle size={18} />
             <span>Suporte Barbeiro ON</span>
           </div>
-          <button className={s.closeBtn} onClick={onClose}><FiX size={18} /></button>
+          <button className={s.closeBtn} onClick={onClose} title="Fechar">
+            <FiX size={20} />
+          </button>
         </div>
 
         {/* Messages */}

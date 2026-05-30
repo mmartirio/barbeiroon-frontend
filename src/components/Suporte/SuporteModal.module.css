@@ -51,12 +51,15 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--color-muted);
-  padding: 4px;
+  color: var(--color);
+  padding: 6px;
   border-radius: 6px;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
-.closeBtn:hover { background: var(--bg-input); }
+.closeBtn:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
 .body {
   flex: 1;
