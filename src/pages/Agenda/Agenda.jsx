@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '../../components/Layout/Layout';
-import { FiChevronDown, FiX } from 'react-icons/fi';
+import { FiChevronDown, FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
 
@@ -28,7 +28,8 @@ export default function Agenda() {
   const [diasSel,      setDiasSel]      = useState([]);
   const [todosDias,    setTodosDias]    = useState(false);
   const [diasCal,      setDiasCal]      = useState([]);
-  const [calInput,     setCalInput]     = useState('');
+  const [calYear,      setCalYear]      = useState(() => new Date().getFullYear());
+  const [calMonth,     setCalMonth]     = useState(() => new Date().getMonth()); // 0-11
 
   const [inicio,       setInicio]       = useState('08:00');
   const [fim,          setFim]          = useState('18:00');
@@ -85,11 +86,26 @@ export default function Agenda() {
 
   const toggleDia = (v) => setDiasSel(p => p.includes(v) ? p.filter(d => d !== v) : [...p, v]);
 
-  const addCalDay = () => {
-    const d = toIsoDate(calInput);
-    if (!d) { setError('Data inválida. Use o formato AAAA-MM-DD'); return; }
-    setDiasCal(p => p.includes(d) ? p : [...p, d].sort());
-    setCalInput('');
+  const toggleCalDay = (isoDate) =>
+    setDiasCal(p => p.includes(isoDate) ? p.filter(x => x !== isoDate) : [...p, isoDate].sort());
+
+  const prevMonth = () => {
+    if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); }
+    else setCalMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); }
+    else setCalMonth(m => m + 1);
+  };
+
+  // Gera os dias do mês atual para o calendário
+  const buildCalGrid = () => {
+    const firstDay = new Date(calYear, calMonth, 1).getDay(); // dia da semana do 1º
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < firstDay; i++) cells.push(null); // vazios iniciais
+    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+    return cells;
   };
 
   const saveExpediente = async () => {
@@ -184,27 +200,68 @@ export default function Agenda() {
                 >{d.label}</button>
               ))}
             </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', marginBottom: '0.75rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', marginBottom: '1rem' }}>
               <input type="checkbox" checked={todosDias} onChange={e => setTodosDias(e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} />
               <span style={{ fontSize: '0.875rem' }}>Agendamento padrão (todos os dias do ano)</span>
             </label>
-            <div className="form-group">
-              <label className="form-label">Adicionar dia específico (AAAA-MM-DD)</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input className="form-input" value={calInput} onChange={e => setCalInput(e.target.value)} placeholder="2026-12-25" style={{ flex: 1 }} />
-                <button className="btn btn-ghost btn-sm" onClick={addCalDay}>Adicionar</button>
+
+            {/* ── Calendário interativo ── */}
+            <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+              {/* Cabeçalho navegação */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.75rem', background: 'var(--bg-input)', borderBottom: '1px solid var(--border)' }}>
+                <button className="btn btn-ghost btn-xs" onClick={prevMonth} style={{ padding: '4px 8px' }}><FiChevronLeft size={14} /></button>
+                <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                  {new Date(calYear, calMonth).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
+                </span>
+                <button className="btn btn-ghost btn-xs" onClick={nextMonth} style={{ padding: '4px 8px' }}><FiChevronRight size={14} /></button>
               </div>
-            </div>
-            {diasCal.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.5rem' }}>
-                {diasCal.map(d => (
-                  <div key={d} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-input)', borderRadius: 'var(--radius-xs)', padding: '0.4rem 0.75rem', fontSize: '0.85rem' }}>
-                    <span>{d}</span>
-                    <button className="btn btn-ghost btn-xs" onClick={() => setDiasCal(p => p.filter(x => x !== d))}><FiX size={12} /></button>
-                  </div>
+
+              {/* Dias da semana */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'var(--bg-input)' }}>
+                {['D','S','T','Q','Q','S','S'].map((d, i) => (
+                  <div key={i} style={{ textAlign: 'center', fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', padding: '0.35rem 0', borderBottom: '1px solid var(--border)' }}>{d}</div>
                 ))}
               </div>
-            )}
+
+              {/* Células do mês */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: 'var(--border)', padding: 1 }}>
+                {buildCalGrid().map((day, i) => {
+                  if (!day) return <div key={i} style={{ background: 'var(--bg)', minHeight: 36 }} />;
+                  const iso = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                  const marked = diasCal.includes(iso);
+                  const today = iso === new Date().toISOString().slice(0, 10);
+                  return (
+                    <button key={i} onClick={() => toggleCalDay(iso)} title={marked ? 'Clique para remover expediente' : 'Clique para adicionar expediente'}
+                      style={{
+                        background: marked ? 'var(--accent)' : 'var(--bg)',
+                        color:      marked ? '#000' : today ? 'var(--accent)' : 'var(--color)',
+                        border:     today && !marked ? '1px solid var(--accent)' : 'none',
+                        borderRadius: 4,
+                        minHeight: 36,
+                        fontSize: '0.82rem',
+                        fontWeight: marked || today ? 700 : 400,
+                        cursor: 'pointer',
+                        transition: 'background 0.1s',
+                      }}>
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Legenda + contagem */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem', fontSize: '0.78rem', color: 'var(--color-muted)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--accent)', display: 'inline-block' }} />
+                Com expediente
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--bg-input)', border: '1px solid var(--border)', display: 'inline-block' }} />
+                Sem expediente
+              </span>
+              {diasCal.length > 0 && <span style={{ marginLeft: 'auto', color: 'var(--accent)', fontWeight: 600 }}>{diasCal.length} dia(s) marcado(s)</span>}
+            </div>
           </div>
         </div>
 
