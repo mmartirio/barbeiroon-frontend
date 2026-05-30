@@ -41,8 +41,10 @@ export default function GestorSupport() {
   const [filter,   setFilter]   = useState('');
   const [selected, setSelected] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [reply,    setReply]    = useState('');
-  const [sending,  setSending]  = useState(false);
+  const [reply,       setReply]       = useState('');
+  const [sending,     setSending]     = useState(false);
+  const [resolveText, setResolveText] = useState('');
+  const [showResolve, setShowResolve] = useState(false);
   const [reports,  setReports]  = useState(null);
   const [view,     setView]     = useState('list'); // list | detail | reports
 
@@ -76,6 +78,33 @@ export default function GestorSupport() {
     });
     setSelected(prev => ({ ...prev, status }));
     load();
+  };
+
+  const resolveTicket = async () => {
+    if (!resolveText.trim() || !selected) return;
+    setSending(true);
+    try {
+      // Envia o texto de resolução como mensagem
+      await fetch(`/api/gestor/support/tickets/${selected.id}/reply`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${gTok()}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: `✅ Resolução: ${resolveText.trim()}` }),
+      });
+      // Muda status para resolvido
+      await fetch(`/api/gestor/support/tickets/${selected.id}/status`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${gTok()}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'resolved' }),
+      });
+      // Recarrega conversa
+      const r = await fetch(`/api/gestor/support/tickets/${selected.id}`, { headers: { Authorization: `Bearer ${gTok()}` } });
+      const d = await r.json();
+      setMessages(d.messages || []);
+      setSelected(d.ticket || selected);
+      setResolveText('');
+      setShowResolve(false);
+      load();
+    } finally { setSending(false); }
   };
 
   const sendReply = async () => {
@@ -188,21 +217,38 @@ export default function GestorSupport() {
 
       {/* Status actions */}
       <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-        {[['attending','Em atendimento'],['paused','Pausar'],['resolved','Resolver'],['canceled','Cancelar']].map(([st, lbl]) => (
-          selected.status !== st && (
-            <button key={st} className={`btn btn-sm ${st === 'resolved' ? 'btn-success' : st === 'canceled' ? 'btn-danger' : 'btn-ghost'}`}
-              onClick={() => updateStatus(selected.id, st)}>
-              {lbl}
-            </button>
-          )
-        ))}
+        {selected.status !== 'attending' && <button className="btn btn-ghost btn-sm" onClick={() => updateStatus(selected.id, 'attending')}>Em atendimento</button>}
+        {selected.status !== 'paused'    && <button className="btn btn-ghost btn-sm" onClick={() => updateStatus(selected.id, 'paused')}>Pausar</button>}
+        {!['resolved','canceled'].includes(selected.status) && (
+          <button className="btn btn-success btn-sm" onClick={() => { setShowResolve(v => !v); setResolveText(''); }}>
+            {showResolve ? '↩ Cancelar resolução' : '✅ Resolver'}
+          </button>
+        )}
+        {selected.status !== 'canceled' && !['resolved'].includes(selected.status) && (
+          <button className="btn btn-danger btn-sm" onClick={() => updateStatus(selected.id, 'canceled')}>Cancelar</button>
+        )}
         {selected.userEmail && (
           <a href={`https://wa.me/${SUPPORT_WA}?text=${encodeURIComponent(`Chamado #${selected.id} — ${selected.userEmail}`)}`}
             target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ textDecoration: 'none' }}>
-            📱 WhatsApp cliente
+            📱 WhatsApp
           </a>
         )}
       </div>
+
+      {/* Formulário de resolução */}
+      {showResolve && (
+        <div className="card" style={{ border: '1px solid var(--success)', borderRadius: 'var(--radius-sm)' }}>
+          <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label className="form-label" style={{ color: '#4ade80' }}>✅ Texto de resolução</label>
+            <textarea className="form-input" rows={3} placeholder="Descreva como o problema foi resolvido..."
+              value={resolveText} onChange={e => setResolveText(e.target.value)}
+              style={{ resize: 'vertical', fontSize: '0.875rem' }} autoFocus />
+            <button className="btn btn-success" onClick={resolveTicket} disabled={sending || !resolveText.trim()}>
+              {sending ? 'Salvando...' : 'Confirmar resolução'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Conversation */}
       <div className="card" style={{ maxHeight: 320, overflowY: 'auto', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
