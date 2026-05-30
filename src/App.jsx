@@ -51,6 +51,7 @@ function AppRoutes() {
   if (!authReady) return <Fallback />;
 
   const dashSlug = user?.tenantSlug;
+  const mustSetup = user && /^cliente\..+@barbeiroon\.com$/.test(user.email);
 
   return (
     <>
@@ -59,7 +60,7 @@ function AppRoutes() {
         <Routes>
           {/* Public */}
           <Route path="/"          element={dashSlug ? <Navigate to={`/${dashSlug}/dashboard`} replace /> : <Landing />} />
-          <Route path="/login"     element={dashSlug ? <Navigate to={`/${dashSlug}/dashboard`} replace /> : <Login />} />
+          <Route path="/login"     element={dashSlug ? <Navigate to={mustSetup ? `/${dashSlug}/primeiro-acesso` : `/${dashSlug}/dashboard`} replace /> : <Login />} />
           <Route path="/recuperar-senha" element={<RecuperaSenha />} />
           <Route path="/agendar/:slug"   element={<AgendamentoPublico />} />
           <Route path="/registrar"       element={<Registrar />} />
