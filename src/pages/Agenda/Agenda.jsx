@@ -206,42 +206,43 @@ export default function Agenda() {
             </label>
 
             {/* ── Calendário interativo ── */}
-            <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
-              {/* Cabeçalho navegação */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.75rem', background: 'var(--bg-input)', borderBottom: '1px solid var(--border)' }}>
-                <button className="btn btn-ghost btn-xs" onClick={prevMonth} style={{ padding: '4px 8px' }}><FiChevronLeft size={14} /></button>
-                <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-                  {new Date(calYear, calMonth).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
+            <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', maxWidth: 280 }}>
+              {/* Cabeçalho */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.3rem 0.5rem', background: 'var(--bg-input)', borderBottom: '1px solid var(--border)' }}>
+                <button className="btn btn-ghost btn-xs" onClick={prevMonth}><FiChevronLeft size={13} /></button>
+                <span style={{ fontWeight: 600, fontSize: '0.78rem' }}>
+                  {new Date(calYear, calMonth).toLocaleString('pt-BR', { month: 'short', year: 'numeric' })}
                 </span>
-                <button className="btn btn-ghost btn-xs" onClick={nextMonth} style={{ padding: '4px 8px' }}><FiChevronRight size={14} /></button>
+                <button className="btn btn-ghost btn-xs" onClick={nextMonth}><FiChevronRight size={13} /></button>
               </div>
 
               {/* Dias da semana */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'var(--bg-input)' }}>
                 {['D','S','T','Q','Q','S','S'].map((d, i) => (
-                  <div key={i} style={{ textAlign: 'center', fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', padding: '0.35rem 0', borderBottom: '1px solid var(--border)' }}>{d}</div>
+                  <div key={i} style={{ textAlign: 'center', fontSize: '0.65rem', fontWeight: 700, color: 'var(--color-muted)', padding: '0.2rem 0', borderBottom: '1px solid var(--border)' }}>{d}</div>
                 ))}
               </div>
 
-              {/* Células do mês */}
+              {/* Células */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: 'var(--border)', padding: 1 }}>
                 {buildCalGrid().map((day, i) => {
-                  if (!day) return <div key={i} style={{ background: 'var(--bg)', minHeight: 36 }} />;
+                  if (!day) return <div key={i} style={{ background: 'var(--bg)', minHeight: 28 }} />;
                   const iso = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                   const marked = diasCal.includes(iso);
-                  const today = iso === new Date().toISOString().slice(0, 10);
+                  const today  = iso === new Date().toISOString().slice(0, 10);
                   return (
-                    <button key={i} onClick={() => toggleCalDay(iso)} title={marked ? 'Clique para remover expediente' : 'Clique para adicionar expediente'}
+                    <button key={i} onClick={() => toggleCalDay(iso)} title={iso}
                       style={{
                         background: marked ? 'var(--accent)' : 'var(--bg)',
                         color:      marked ? '#000' : today ? 'var(--accent)' : 'var(--color)',
                         border:     today && !marked ? '1px solid var(--accent)' : 'none',
-                        borderRadius: 4,
-                        minHeight: 36,
-                        fontSize: '0.82rem',
+                        borderRadius: 3,
+                        minHeight: 28,
+                        fontSize: '0.75rem',
                         fontWeight: marked || today ? 700 : 400,
                         cursor: 'pointer',
                         transition: 'background 0.1s',
+                        padding: 0,
                       }}>
                       {day}
                     </button>
@@ -250,17 +251,12 @@ export default function Agenda() {
               </div>
             </div>
 
-            {/* Legenda + contagem */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem', fontSize: '0.78rem', color: 'var(--color-muted)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--accent)', display: 'inline-block' }} />
-                Com expediente
+            {/* Legenda */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.4rem', fontSize: '0.72rem', color: 'var(--color-muted)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--accent)', display: 'inline-block' }} /> Com expediente
               </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--bg-input)', border: '1px solid var(--border)', display: 'inline-block' }} />
-                Sem expediente
-              </span>
-              {diasCal.length > 0 && <span style={{ marginLeft: 'auto', color: 'var(--accent)', fontWeight: 600 }}>{diasCal.length} dia(s) marcado(s)</span>}
+              {diasCal.length > 0 && <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{diasCal.length} dia(s)</span>}
             </div>
           </div>
         </div>
