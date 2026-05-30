@@ -182,7 +182,7 @@
     justify-content: center;
     width: 220px;
     padding: 13px 20px;
-    background: #00FF00;
+    background: #33FF77;
     color: #000;
     border: none;
     border-radius: 8px;
@@ -193,7 +193,7 @@
 }
 
 .portal-btn:hover:not(:disabled) {
-    background: #00cc00;
+    background: #29CC5F;
     transform: translateY(-1px);
 }
 
@@ -258,14 +258,14 @@
 }
 
 .service-card:hover {
-    background: rgba(0,255,0,0.1);
-    border-color: #00FF00;
+    background: rgba(51,255,119,0.1);
+    border-color: #33FF77;
 }
 
 .service-card.selected {
-    background: rgba(0,255,0,0.15);
-    border-color: #00FF00;
-    box-shadow: 0 4px 16px rgba(0,255,0,0.25);
+    background: rgba(51,255,119,0.15);
+    border-color: #33FF77;
+    box-shadow: 0 4px 16px rgba(51,255,119,0.25);
 }
 
 .service-card-name {
@@ -315,13 +315,13 @@
 }
 
 .professional-item-card:hover {
-    background: rgba(0,255,0,0.1);
-    border-color: #00FF00;
+    background: rgba(51,255,119,0.1);
+    border-color: #33FF77;
 }
 
 .professional-item-card.selected {
-    background: rgba(0,255,0,0.15);
-    border-color: #00FF00;
+    background: rgba(51,255,119,0.15);
+    border-color: #33FF77;
 }
 
 .professional-avatar-fallback {

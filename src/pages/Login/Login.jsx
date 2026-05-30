@@ -104,6 +104,7 @@ export default function Login() {
 
         <div className={s.links}>
           <Link to="/recuperar-senha" className={s.link}>Esqueceu sua senha?</Link>
+          <Link to="/registrar" className={s.link} style={{ fontWeight: '600' }}>Registre-se</Link>
         </div>
       </div>
     </div>

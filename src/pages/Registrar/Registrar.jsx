@@ -28,10 +28,9 @@ O presente termo regula a prestação de serviços de acesso à plataforma Barbe
 3.1. Não há prazo mínimo de fidelidade. O serviço pode ser cancelado pelo contratante a qualquer momento.
 
 4. CANCELAMENTO
-4.1. Para solicitar o cancelamento, o contratante deve comunicar formalmente via WhatsApp, com antecedência mínima de 5 (cinco) dias úteis antes da próxima data de vencimento.
-4.2. Caso o cancelamento não seja comunicado no prazo previsto, a cobrança do período subsequente será gerada e permanecerá devida.
-4.3. O cancelamento não gera direito à restituição de valores já pagos por períodos em curso.
-4.4. O acesso à plataforma será encerrado ao término do período já pago.
+4.1. Caso o cancelamento não seja comunicado no prazo previsto, a cobrança do período subsequente será gerada e permanecerá devida.
+4.2. O cancelamento não gera direito à restituição de valores já pagos por períodos em curso.
+4.3. O acesso à plataforma será encerrado ao término do período já pago.
 
 5. RESPONSABILIDADES
 5.1. A Barbeiro On se compromete a manter a plataforma disponível e operacional, ressalvadas manutenções programadas e eventos de força maior.
@@ -255,7 +254,6 @@ export default function Registrar() {
               aria-label="Alternar período de cobrança"
             />
             <span className={priceView === 'annual' ? 'active-label' : ''}>Anual</span>
-            {priceView === 'annual' && <span className="annual-badge">2 meses grátis</span>}
           </div>
 
           {loadingPlans && <div className="reg-loading">Carregando planos...</div>}
@@ -523,7 +521,7 @@ export default function Registrar() {
               <div className="billing-options">
                 {[
                   { val: 'monthly', label: 'Mensal',  note: `R$ ${fmtPrice(Number(selectedPlan?.priceMonthly || 0)).full}/mês` },
-                  { val: 'annual',  label: 'Anual',   note: `R$ ${fmtPrice(Number(selectedPlan?.priceAnnual  || 0)).full}/ano (2 meses grátis)` },
+                  { val: 'annual',  label: 'Anual',   note: `R$ ${fmtPrice(Number(selectedPlan?.priceAnnual  || 0)).full}/ano` },
                 ].map(opt => (
                   <div key={opt.val} className={`billing-option ${form.billingCycle === opt.val ? 'selected' : ''}`}
                     onClick={() => set('billingCycle', opt.val)}>

@@ -47,8 +47,8 @@ select, input, textarea { font-family: inherit; font-size: inherit; color: inher
 .btn-xs { padding: 0.2rem 0.5rem; font-size: 0.75rem; }
 .btn-primary  { background: var(--accent);   color: #000; }
 .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
-.btn-success  { background: var(--success);  color: #fff; }
-.btn-success:hover:not(:disabled) { opacity: 0.85; }
+.btn-success  { background: var(--accent);   color: #000; }
+.btn-success:hover:not(:disabled) { background: var(--accent-hover); }
 .btn-danger   { background: var(--danger);   color: #fff; }
 .btn-danger:hover:not(:disabled) { opacity: 0.85; }
 .btn-warning  { background: var(--warning);  color: #000; }
