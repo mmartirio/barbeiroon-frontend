@@ -66,6 +66,7 @@ export default function AgendamentoPublico() {
     const [voucherAgendamento, setVoucherAgendamento] = useState('');
     const [pendingRequest, setPendingRequest] = useState(null);
     const [confirmCancel, setConfirmCancel] = useState({ open: false, appointment: null });
+    const [whatsappConnected, setWhatsappConnected] = useState(false);
 
     const loadTenant = async () => {
         setLoading(true);
@@ -74,6 +75,10 @@ export default function AgendamentoPublico() {
             if (!r.ok) { setError(`Barbearia "${slug}" não encontrada.`); return; }
             const d = await r.json();
             setTenant({ id: d.id, name: d.name || '', logo: normalizeUrl(d.logo), backgroundImage: normalizeUrl(d.backgroundImage), phone: d.phone || '' });
+            fetch(`/api/public/whatsapp/status?tenantId=${d.id}`)
+                .then(res => res.json())
+                .then(ws => setWhatsappConnected(ws.connected === true))
+                .catch(() => {});
         } catch { setError('Erro ao conectar com o servidor.'); }
         finally { setLoading(false); }
     };
@@ -490,7 +495,7 @@ export default function AgendamentoPublico() {
                                     <p><strong>Data:</strong> {formatDateBr(appointmentData.date)}</p>
                                     <p><strong>Horário:</strong> {appointmentData.time}</p>
                                 </div>
-                                {tenant.phone && (
+                                {tenant.phone && !whatsappConnected && (
                                     <div className="button-group">
                                         <a href={buildWhatsappUrl()} target="_blank" rel="noopener noreferrer" className="portal-btn" style={{ textDecoration: 'none' }}>
                                             📲 Avisar pelo WhatsApp
