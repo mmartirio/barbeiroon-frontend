@@ -561,9 +561,9 @@
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 12px;
-    padding: 12px;
+    padding: 16px;
     user-select: none;
-    max-width: 340px;
+    max-width: 420px;
     margin: 8px auto 0;
 }
 
@@ -628,13 +628,14 @@
     aspect-ratio: 1;
     border: none;
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 500;
     cursor: pointer;
     transition: background 0.15s, color 0.15s, transform 0.1s;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 40px;
 }
 .portal-cal-empty {
     background: transparent;
