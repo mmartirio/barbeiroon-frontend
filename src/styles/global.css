@@ -176,6 +176,34 @@ textarea.form-input { resize: vertical; min-height: 80px; }
   border-radius: 99px; font-size: 0.75rem; color: var(--color-muted);
 }
 
+/* ── Light theme overrides ───────────────────────────────── */
+/* Botões: accent vira azul → texto branco */
+[data-theme="light"] .btn-primary,
+[data-theme="light"] .btn-success { color: #fff; }
+
+/* Hover de hover em fundos claros */
+[data-theme="light"] .data-table tbody tr:hover { background: rgba(0,0,0,0.025); }
+[data-theme="light"] .modal-close:hover { background: var(--bg-input); }
+
+/* Alertas — texto visível em fundo claro */
+[data-theme="light"] .alert-error   { color: #991b1b; }
+[data-theme="light"] .alert-success { color: #14532d; }
+[data-theme="light"] .alert-warning { color: #92400e; }
+
+/* Badges — saturação adequada em fundo branco */
+[data-theme="light"] .badge-blue   { background: rgba(37,99,235,0.12);  color: #1d4ed8; }
+[data-theme="light"] .badge-green  { background: rgba(21,128,61,0.12);  color: #15803d; }
+[data-theme="light"] .badge-red    { background: rgba(220,38,38,0.12);  color: #b91c1c; }
+[data-theme="light"] .badge-amber  { background: rgba(180,83,9,0.12);   color: #b45309; }
+[data-theme="light"] .badge-gray   { background: rgba(107,114,128,0.12);color: #4b5563; }
+[data-theme="light"] .badge-orange { background: rgba(238,76,2,0.12);   color: #c2410c; }
+
+/* Scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: #c4c9d4; }
+
+/* Select options */
+[data-theme="light"] select.form-input option { background: #fff; color: #111827; }
+
 /* ── Animations ──────────────────────────────────────────── */
 @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

@@ -8,7 +8,18 @@ import {
   FiSettings, FiLogOut, FiMenu, FiX,
   FiChevronDown, FiChevronRight, FiSmartphone, FiTag,
   FiPlusCircle, FiAlertCircle, FiClock, FiHelpCircle,
+  FiSun, FiMoon,
 } from 'react-icons/fi';
+
+function useTheme() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+  const toggle = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+  return [theme, toggle];
+}
 
 const tok = () => sessionStorage.getItem('token');
 
@@ -66,6 +77,7 @@ function SubItem({ to, icon, label, onClick }) {
 
 export default function Sidebar({ onWhatsApp, onSupport }) {
   const { user, logout } = useAuth();
+  const [theme, toggleTheme] = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
@@ -173,6 +185,10 @@ export default function Sidebar({ onWhatsApp, onSupport }) {
         </ul>
 
         <div className={s.bottom}>
+          <button className={s.themeBtn} onClick={toggleTheme} title={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}>
+            {theme === 'dark' ? <FiSun size={15} /> : <FiMoon size={15} />}
+            {theme === 'dark' ? 'Tema Claro' : 'Tema Escuro'}
+          </button>
           <button className={s.logoutBtn} onClick={logout}>
             <FiLogOut size={15} /> Sair
           </button>
