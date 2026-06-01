@@ -382,6 +382,10 @@ export default function AgendamentoPublico() {
 
     const getServiceDiscount = (service) => {
         const applicable = promotions.filter(p => {
+            if (p.discountType === 'combo_servico') {
+                return p.rewardServiceName &&
+                    service.name.toLowerCase().includes(p.rewardServiceName.toLowerCase());
+            }
             if (p.discountType !== 'desconto_compra') return false;
             const hasSvcX = (p.criteria || []).includes('servico_x');
             if (hasSvcX) return p.serviceX && service.name.toLowerCase().includes(p.serviceX.toLowerCase());
@@ -390,9 +394,14 @@ export default function AgendamentoPublico() {
         if (!applicable.length) return null;
         const promo = applicable[0];
         const orig = Number(service.price) || 0;
-        const discounted = promo.priceType === 'percentual'
-            ? orig * (1 - Number(promo.price) / 100)
-            : Math.max(0, orig - Number(promo.price));
+        let discounted;
+        if (promo.priceType === 'gratis') {
+            discounted = 0;
+        } else if (promo.priceType === 'percentual') {
+            discounted = orig * (1 - Number(promo.price) / 100);
+        } else {
+            discounted = Math.max(0, orig - Number(promo.price));
+        }
         return { discounted: Math.round(discounted * 100) / 100, promo };
     };
 
@@ -538,7 +547,10 @@ export default function AgendamentoPublico() {
                                                             <FiDollarSign size={12} /> R$ {Number(s.price).toFixed(2)}
                                                         </div>
                                                         <div className="service-card-info" style={{ color: '#4ade80', fontWeight: 700 }}>
-                                                            <FiDollarSign size={12} /> R$ {disc.discounted.toFixed(2)}
+                                                            {disc.discounted === 0
+                                                                ? '🎁 GRÁTIS'
+                                                                : <><FiDollarSign size={12} /> R$ {disc.discounted.toFixed(2)}</>
+                                                            }
                                                         </div>
                                                     </>
                                                 ) : (

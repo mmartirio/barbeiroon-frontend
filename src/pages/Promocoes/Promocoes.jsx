@@ -24,6 +24,7 @@ const INITIAL = {
   nome: '', preco: '', tipoPreco: 'fixo', tipo: 'desconto_compra',
   validadeInicio: '', validadeFim: '', criterios: [],
   xCompras: '', servicoX: '', numClientes: '', clienteId: TARGET_ALL, repetir: 0,
+  comboServicos: '', servicoPremiado: '',
 };
 
 const parseTarget = (criteria = []) => {
@@ -77,25 +78,38 @@ export default function Promocoes() {
     if (form.criterios.includes('x_compras') && (!form.xCompras || Number(form.xCompras) < 1)) return 'Informe a quantidade de compras.';
     if (form.criterios.includes('servico_x') && !form.servicoX.trim()) return 'Informe o nome do serviço.';
     if (form.criterios.includes('num_clientes') && (!form.numClientes || Number(form.numClientes) < 1)) return 'Informe o número de clientes.';
-    const precoNum = Number((form.preco || '0').replace(',', '.'));
-    if (form.tipoPreco === 'percentual' && (precoNum <= 0 || precoNum > 100)) return 'Para percentual, informe um valor entre 1 e 100.';
+    if (form.tipo === 'combo_servico') {
+      if (!form.comboServicos.trim()) return 'Informe ao menos um serviço necessário para o combo.';
+      if (!form.servicoPremiado.trim()) return 'Informe o serviço premiado.';
+    }
+    if (form.tipoPreco !== 'gratis') {
+      const precoNum = Number((form.preco || '0').replace(',', '.'));
+      if (form.tipoPreco === 'percentual' && (precoNum <= 0 || precoNum > 100)) return 'Para percentual, informe um valor entre 1 e 100.';
+    }
     return null;
   };
 
   const buildPayload = () => {
     const targetCrit = form.clienteId === TARGET_ALL ? TARGET_ALL : `${TARGET_PFX}${form.clienteId}`;
+    const isCombo = form.tipo === 'combo_servico';
+    // Converte textarea (uma por linha) em array JSON
+    const comboArray = isCombo
+      ? form.comboServicos.split('\n').map(s => s.trim()).filter(Boolean)
+      : null;
     return {
-      nome:         form.nome.trim(),
-      preco:        Number((form.preco || '0').replace(',', '.')),
-      tipoPreco:    form.tipoPreco,
-      tipo:         form.tipo,
+      nome:           form.nome.trim(),
+      preco:          form.tipoPreco === 'gratis' ? 0 : Number((form.preco || '0').replace(',', '.')),
+      tipoPreco:      form.tipoPreco,
+      tipo:           form.tipo,
       validadeInicio: form.validadeInicio ? toApiDate(form.validadeInicio) : null,
       validadeFim:    form.validadeFim ? toApiDate(form.validadeFim) : null,
-      criterios:    [...form.criterios, targetCrit],
-      xCompras:     form.criterios.includes('x_compras') ? Number(form.xCompras) : null,
-      servicoX:     form.criterios.includes('servico_x') ? form.servicoX.trim() : null,
-      numClientes:  form.criterios.includes('num_clientes') ? Number(form.numClientes) : null,
-      repetir:      form.repetir,
+      criterios:      [...form.criterios, targetCrit],
+      xCompras:       form.criterios.includes('x_compras') ? Number(form.xCompras) : null,
+      servicoX:       form.criterios.includes('servico_x') ? form.servicoX.trim() : null,
+      numClientes:    form.criterios.includes('num_clientes') ? Number(form.numClientes) : null,
+      comboServicos:  comboArray,
+      servicoPremiado: isCombo ? form.servicoPremiado.trim() : null,
+      repetir:        form.repetir,
     };
   };
 
@@ -135,6 +149,8 @@ export default function Promocoes() {
       numClientes:    item.customerCount != null ? String(item.customerCount) : '',
       clienteId,
       repetir:        item.repetir != null ? Number(item.repetir) : 0,
+      comboServicos:  Array.isArray(item.comboServices) ? item.comboServices.join('\n') : (item.comboServices || ''),
+      servicoPremiado: item.rewardServiceName || '',
     });
     setError(''); setSuccess('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -210,17 +226,37 @@ export default function Promocoes() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <div className="form-group">
                 <label className="form-label">Preço</label>
-                <input className="form-input" value={form.preco} onChange={e => setF('preco', e.target.value)} placeholder={form.tipoPreco === 'percentual' ? '10' : '0,00'} />
-                <p style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.25rem' }}>{form.tipoPreco === 'percentual' ? 'Ex.: 10 (1 a 100)' : 'Ex.: 25,00'}</p>
+                {form.tipoPreco === 'gratis'
+                  ? <p style={{ padding: '0.6rem 0.75rem', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)', color: 'var(--success)', fontSize: '0.875rem' }}>Grátis (sem cobrança)</p>
+                  : <>
+                      <input className="form-input" value={form.preco} onChange={e => setF('preco', e.target.value)} placeholder={form.tipoPreco === 'percentual' ? '10' : '0,00'} />
+                      <p style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.25rem' }}>{form.tipoPreco === 'percentual' ? 'Ex.: 10 (1 a 100)' : 'Ex.: 25,00'}</p>
+                    </>
+                }
               </div>
               <div>
-                <Sel label="Tipo de Preço" value={form.tipoPreco === 'fixo' ? 'Fixo (R$)' : 'Percentual (%)'} onClick={() => setShowTipoP(p => !p)} />
-                <DropMenu show={showTipoP} items={[{label:'Fixo (R$)', value:'fixo'},{label:'Percentual (%)',value:'percentual'}]} onSelect={item=>{setF('tipoPreco',item.value);setShowTipoP(false);}} />
+                <Sel label="Tipo de Preço" value={
+                  form.tipoPreco === 'fixo' ? 'Fixo (R$)' :
+                  form.tipoPreco === 'gratis' ? 'Grátis' : 'Percentual (%)'
+                } onClick={() => setShowTipoP(p => !p)} />
+                <DropMenu show={showTipoP} items={[
+                  {label:'Fixo (R$)', value:'fixo'},
+                  {label:'Percentual (%)',value:'percentual'},
+                  {label:'Grátis',value:'gratis'},
+                ]} onSelect={item=>{setF('tipoPreco',item.value);setShowTipoP(false);}} />
               </div>
             </div>
 
-            <Sel label="Tipo" value={form.tipo === 'desconto_compra' ? 'Desconto na compra' : 'Desconto na próxima compra'} onClick={() => setShowTipo(p => !p)} />
-            <DropMenu show={showTipo} items={[{label:'Desconto na compra',value:'desconto_compra'},{label:'Desconto na próxima compra',value:'desconto_proxima'}]} onSelect={item=>{setF('tipo',item.value);setShowTipo(false);}} />
+            <Sel label="Tipo" value={
+              form.tipo === 'desconto_compra' ? 'Desconto na compra' :
+              form.tipo === 'desconto_proxima' ? 'Desconto na próxima compra' :
+              'Combo de Serviços (ganhe serviço)'
+            } onClick={() => setShowTipo(p => !p)} />
+            <DropMenu show={showTipo} items={[
+              {label:'Desconto na compra',value:'desconto_compra'},
+              {label:'Desconto na próxima compra',value:'desconto_proxima'},
+              {label:'Combo de Serviços (ganhe serviço)',value:'combo_servico'},
+            ]} onSelect={item=>{setF('tipo',item.value);setShowTipo(false);}} />
 
             <Sel label="Usuário da Promoção" value={custName} onClick={() => setShowCust(p => !p)} />
             {showCust && (
@@ -295,6 +331,34 @@ export default function Promocoes() {
               </div>
             )}
 
+            {form.tipo === 'combo_servico' && (
+              <div style={{ background: 'var(--bg-input)', border: '1px solid var(--accent)', borderRadius: 'var(--radius-xs)', padding: '0.75rem', marginBottom: '0.5rem' }}>
+                <p style={{ fontSize: '0.78rem', color: 'var(--accent)', fontWeight: 600, marginBottom: '0.5rem' }}>🎁 Configuração do Combo</p>
+                <div className="form-group">
+                  <label className="form-label">Serviços necessários (um por linha)</label>
+                  <textarea
+                    className="form-input"
+                    rows={3}
+                    value={form.comboServicos}
+                    onChange={e => setF('comboServicos', e.target.value)}
+                    placeholder={'Corte degradê\nBarba\nSobrancelha'}
+                    style={{ resize: 'vertical', fontFamily: 'inherit' }}
+                  />
+                  <p style={{ fontSize: '0.72rem', color: 'var(--color-muted)', marginTop: 4 }}>O cliente precisa ter concluído todos esses serviços nos últimos 30 dias.</p>
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Serviço premiado</label>
+                  <input
+                    className="form-input"
+                    value={form.servicoPremiado}
+                    onChange={e => setF('servicoPremiado', e.target.value)}
+                    placeholder="Ex: Hidratação"
+                  />
+                  <p style={{ fontSize: '0.72rem', color: 'var(--color-muted)', marginTop: 4 }}>Nome do serviço que o cliente ganhará grátis ou com desconto.</p>
+                </div>
+              </div>
+            )}
+
             <div style={{ display:'flex', gap:'0.75rem', marginTop:'0.5rem' }}>
               {editingId && <button className="btn btn-ghost" style={{ flex:1 }} onClick={resetForm}>Cancelar</button>}
               <button className="btn btn-primary" style={{ flex:1 }} onClick={save} disabled={saving}>{saving ? 'Salvando...' : editingId ? 'Salvar Edição' : 'Criar Promoção'}</button>
@@ -323,7 +387,10 @@ export default function Promocoes() {
                       <div style={{ flex:1, minWidth:0 }}>
                         <p style={{ fontWeight:700, marginBottom:'0.3rem' }}>{item.name || '-'}</p>
                         <p style={{ fontSize:'0.78rem', color:'var(--color-muted)' }}>
-                          {item.priceType === 'percentual' ? `${Math.round(Number(item.price))}%` : fmtP(item.price)} de desconto · {custN}
+                          {item.discountType === 'combo_servico'
+                            ? <>🎁 Combo → <strong style={{ color: 'var(--color)' }}>{item.rewardServiceName || '?'}</strong> {item.priceType === 'gratis' ? 'grátis' : item.priceType === 'percentual' ? `${Math.round(Number(item.price))}% off` : `−${fmtP(item.price)}`}</>
+                            : <>{item.priceType === 'gratis' ? 'Grátis' : item.priceType === 'percentual' ? `${Math.round(Number(item.price))}%` : fmtP(item.price)} de desconto · {custN}</>
+                          }
                         </p>
                         <p style={{ fontSize:'0.78rem', color:'var(--color-muted)' }}>{toBrDate(item.validFrom)} – {item.validUntil ? toBrDate(item.validUntil) : 'indeterminado'}</p>
                         <label style={{ display:'flex', alignItems:'center', gap:'0.4rem', cursor:'pointer', marginTop:'0.4rem' }}>
