@@ -208,12 +208,13 @@ export default function AgendamentoPublico() {
         } catch { /* silent */ }
     };
 
-    const fetchAvailableDays = async (professionalId, year, month, tenantId) => {
+    const fetchAvailableDays = async (professionalId, year, month, tenantId, serviceId) => {
         if (!professionalId || !tenantId) { setAvailableDays([]); return; }
         setLoadingDays(true);
         setAvailableDays([]);
         try {
             const params = new URLSearchParams({ professionalId, year, month, tenantId });
+            if (serviceId) params.set('serviceId', serviceId);
             const r = await fetch(`/api/public/appointment/available-days?${params}`);
             const d = await r.json().catch(() => ({}));
             setAvailableDays(d.availableDays || []);
@@ -324,7 +325,7 @@ export default function AgendamentoPublico() {
     // Fetch available days when professional or month changes
     useEffect(() => {
         if (step === 4 && appointmentData.professionalId && tenant.id) {
-            fetchAvailableDays(appointmentData.professionalId, calendarYear, calendarMonth, tenant.id);
+            fetchAvailableDays(appointmentData.professionalId, calendarYear, calendarMonth, tenant.id, appointmentData.serviceId);
         } else {
             setAvailableDays([]);
         }
@@ -448,7 +449,6 @@ export default function AgendamentoPublico() {
                         {tenant.logo && <div className="customer-portal-logo"><img src={tenant.logo} alt={tenant.name} /></div>}
                         <h1 className="login-title">{tenant.name || 'Agendamento Online'}</h1>
                         <p className="login-subtitle">Agende seu horário de forma rápida e fácil</p>
-                        {tenant.phone && <p style={{ marginTop: 8, color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>📞 {tenant.phone}</p>}
                     </div>
 
                     <div className="portal-progress">
