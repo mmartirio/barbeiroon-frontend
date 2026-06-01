@@ -56,19 +56,19 @@ function OptionList({ items, selected, onSelect }) {
   );
 }
 
-function BarChart({ data, color }) {
-  const entries = Object.entries(data).sort((a,b) => b[1].count - a[1].count).slice(0, 6);
+function BarChart({ data, color, max: maxOverride }) {
+  const entries = Object.entries(data).sort((a,b) => b[1].count - a[1].count).slice(0, 8);
   if (!entries.length) return <p style={{ color:'var(--color-muted)', fontSize:'0.85rem' }}>Sem dados</p>;
-  const max = Math.max(1, ...entries.map(([,v]) => v.count));
+  const max = maxOverride ?? Math.max(1, ...entries.map(([,v]) => v.count));
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem' }}>
       {entries.map(([name, { count }]) => (
         <div key={name} style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
-          <span style={{ width:90, fontSize:'0.78rem', color:'var(--color-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flexShrink:0 }}>{name}</span>
+          <span style={{ width:110, fontSize:'0.78rem', color:'var(--color-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flexShrink:0 }}>{name}</span>
           <div style={{ flex:1, height:14, background:'var(--bg-input)', borderRadius:7, overflow:'hidden' }}>
-            <div style={{ height:'100%', width:`${Math.round(count/max*100)}%`, background:color, borderRadius:7 }} />
+            <div style={{ height:'100%', width:`${Math.round(count/max*100)}%`, background:color, borderRadius:7, transition:'width 0.4s ease' }} />
           </div>
-          <span style={{ width:28, fontSize:'0.78rem', color:'var(--color-muted)', textAlign:'right' }}>{count}x</span>
+          <span style={{ width:32, fontSize:'0.78rem', fontWeight:700, color:'var(--color)', textAlign:'right' }}>{count}x</span>
         </div>
       ))}
     </div>
@@ -145,6 +145,15 @@ export default function Relatorios() {
   const byStatus  = groupBy(dados, i => i.status);
   const byProf    = groupBy(dados, i => i.profissional?.nome);
   const byServico = groupBy(dados, i => i.servico?.nome);
+
+  // Dados específicos do cliente selecionado
+  const clienteNome    = clientePhone ? (clientes.find(c => c.phone === clientePhone)?.name || clientePhone) : null;
+  const dadosCliente   = clientePhone ? [...dados].sort((a, b) => {
+    const da = new Date(String(a.data).split('T')[0] + 'T' + (String(a.horario||'00:00').slice(0,5)));
+    const db = new Date(String(b.data).split('T')[0] + 'T' + (String(b.horario||'00:00').slice(0,5)));
+    return db - da;
+  }) : [];
+  const byServicoCliente = groupBy(dadosCliente, i => i.servico?.nome);
 
   const exportarPdf = useCallback(async () => {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -353,6 +362,63 @@ export default function Relatorios() {
                   </div>
                 </div>
               </div>
+
+              {/* Client history section — shown only when a specific client is selected */}
+              {clientePhone && dadosCliente.length > 0 && (
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <h3 style={{ marginBottom: '1rem', fontSize: '1rem', color: 'var(--accent)' }}>
+                    Histórico de {clienteNome}
+                  </h3>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    {/* Last services table */}
+                    <div className="card">
+                      <div className="card-body">
+                        <h4 style={{ marginBottom: '0.75rem' }}>Últimos Serviços</h4>
+                        <div className="table-wrap" style={{ maxHeight: 280, overflowY: 'auto' }}>
+                          <table className="data-table">
+                            <thead>
+                              <tr><th>Data</th><th>Serviço</th><th>Profissional</th><th>Valor</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                              {dadosCliente.slice(0, 15).map((item, i) => {
+                                const sc = STATUS_COLORS[item.status] || '#8b8b93';
+                                return (
+                                  <tr key={item.id ?? i}>
+                                    <td style={{ fontSize:'0.82rem', whiteSpace:'nowrap' }}>{fmtDate(item.data)}</td>
+                                    <td style={{ fontWeight:600, fontSize:'0.85rem' }}>{item.servico?.nome || '—'}</td>
+                                    <td style={{ fontSize:'0.82rem', color:'var(--color-muted)' }}>{item.profissional?.nome || '—'}</td>
+                                    <td style={{ color:'var(--success)', fontWeight:700, fontSize:'0.82rem' }}>{fmtP(item.valor)}</td>
+                                    <td>
+                                      <span style={{ background:`${sc}22`, color:sc, border:`1px solid ${sc}`, borderRadius:999, padding:'0.1rem 0.45rem', fontSize:'0.68rem', fontWeight:800, textTransform:'uppercase', whiteSpace:'nowrap' }}>
+                                        {STATUS_LABELS[item.status]||item.status||'—'}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Service frequency chart */}
+                    <div className="card">
+                      <div className="card-body">
+                        <h4 style={{ marginBottom: '0.75rem' }}>Serviços Mais Solicitados</h4>
+                        <BarChart data={byServicoCliente} color="#7c3aed" />
+                        <p style={{ marginTop:'0.75rem', fontSize:'0.72rem', color:'var(--color-muted)' }}>
+                          Total de visitas: <strong style={{ color:'var(--color)' }}>{dadosCliente.filter(d => d.status === 'concluido').length}</strong> concluídas
+                          {dadosCliente.length > dadosCliente.filter(d => d.status === 'concluido').length && (
+                            <span> · {dadosCliente.length - dadosCliente.filter(d => d.status === 'concluido').length} outros</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Table */}
               <div className="table-wrap" style={{ marginBottom: '1.25rem' }}>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const GestorAuthContext = createContext(null);
 const TOKEN_KEY   = 'gestor_token';
@@ -8,9 +8,23 @@ function parseJwt(token) {
   try { return JSON.parse(atob(token.split('.')[1])); } catch { return null; }
 }
 
+function isTokenExpired(token) {
+  if (!token) return true;
+  const decoded = parseJwt(token);
+  if (!decoded?.exp) return true;
+  return decoded.exp * 1000 < Date.now();
+}
+
 export function GestorAuthProvider({ children }) {
-  const [token,     setToken]     = useState(() => sessionStorage.getItem(TOKEN_KEY));
-  const [user,      setUser]      = useState(() => { const t = sessionStorage.getItem(TOKEN_KEY); return t ? parseJwt(t) : null; });
+  const [token,     setToken]     = useState(() => {
+    const t = sessionStorage.getItem(TOKEN_KEY);
+    return t && !isTokenExpired(t) ? t : null;
+  });
+  const [user,      setUser]      = useState(() => {
+    const t = sessionStorage.getItem(TOKEN_KEY);
+    if (!t || isTokenExpired(t)) { sessionStorage.removeItem(TOKEN_KEY); return null; }
+    return parseJwt(t);
+  });
   const [mustSetup, setMustSetup] = useState(() => sessionStorage.getItem(SETUP_KEY) === 'true');
 
   const login = useCallback(async (email, password) => {
@@ -48,8 +62,25 @@ export function GestorAuthProvider({ children }) {
     setMustSetup(false);
   }, []);
 
-  const authFetch = useCallback((url, opts = {}) => {
-    return fetch(url, {
+  // Verifica expiração periodicamente (a cada minuto)
+  useEffect(() => {
+    if (!token) return;
+    const check = () => {
+      if (isTokenExpired(token)) logout();
+    };
+    check();
+    const id = setInterval(check, 60_000);
+    return () => clearInterval(id);
+  }, [token, logout]);
+
+  const authFetch = useCallback(async (url, opts = {}) => {
+    // Rejeita imediatamente se token expirado
+    if (!token || isTokenExpired(token)) {
+      logout();
+      return new Response(JSON.stringify({ message: 'Sessão expirada. Faça login novamente.' }), { status: 401 });
+    }
+
+    const res = await fetch(url, {
       ...opts,
       headers: {
         'Content-Type': 'application/json',
@@ -57,7 +88,14 @@ export function GestorAuthProvider({ children }) {
         ...(opts.headers || {}),
       },
     });
-  }, [token]);
+
+    // Token inválido ou usuário desabilitado → deslogar
+    if (res.status === 401 || res.status === 403) {
+      logout();
+    }
+
+    return res;
+  }, [token, logout]);
 
   return (
     <GestorAuthContext.Provider value={{ token, user, mustSetup, login, logout, clearSetup, authFetch }}>
