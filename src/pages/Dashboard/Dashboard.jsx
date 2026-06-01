@@ -20,10 +20,11 @@ export default function Dashboard() {
 
   const load = useCallback(async () => {
     try {
+      const h = { Authorization: `Bearer ${tok()}`, 'Cache-Control': 'no-cache' };
       const [sRes, pRes, ownRes] = await Promise.all([
-        fetch('/api/dashboard/stats', { headers: { Authorization: `Bearer ${tok()}` } }),
-        fetch('/api/appointment/requests/pending/own', { headers: { Authorization: `Bearer ${tok()}` } }),
-        fetch('/api/appointment/own', { headers: { Authorization: `Bearer ${tok()}` } }),
+        fetch('/api/dashboard/stats', { headers: h, cache: 'no-cache' }),
+        fetch('/api/appointment/requests/pending/own', { headers: h, cache: 'no-cache' }),
+        fetch('/api/appointment/own', { headers: h, cache: 'no-cache' }),
       ]);
       const sd = await sRes.json().catch(() => ({}));
       const pd = await pRes.json().catch(() => ({}));
@@ -45,7 +46,13 @@ export default function Dashboard() {
     } finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { load(); const id = setInterval(load, 15_000); return () => clearInterval(id); }, [load]);
+  useEffect(() => {
+    load();
+    const id = setInterval(load, 15_000);
+    const onVisible = () => { if (!document.hidden) load(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisible); };
+  }, [load]);
 
   const s = stats || {};
   const birthdays = s.birthdays || [];
