@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { FiX, FiSend, FiMessageCircle } from 'react-icons/fi';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { FiX, FiSend, FiMessageCircle, FiMove } from 'react-icons/fi';
 import s from './SuporteModal.module.css';
 
 const tok = () => sessionStorage.getItem('token');
@@ -50,16 +50,63 @@ const FAQ = {
 };
 
 export default function SuporteModal({ onClose }) {
-  const [phase, setPhase]         = useState('category'); // category | faq | resolved | ticket | done
-  const [category, setCategory]   = useState(null);
-  const [messages, setMessages]   = useState([
+  const [phase, setPhase]       = useState('category');
+  const [category, setCategory] = useState(null);
+  const [messages, setMessages] = useState([
     { sender: 'bot', content: 'Olá! 👋 Sou o assistente do Barbeiro ON. Como posso te ajudar hoje?' },
   ]);
-  const [description, setDesc]    = useState('');
-  const [ticketId, setTicketId]   = useState(null);
-  const [sending, setSending]     = useState(false);
+  const [description, setDesc] = useState('');
+  const [ticketId, setTicketId] = useState(null);
+  const [sending, setSending]   = useState(false);
   const bottomRef = useRef(null);
+  const modalRef  = useRef(null);
 
+  // ── Drag state ────────────────────────────────────────────
+  const [pos, setPos]       = useState(null); // null = CSS default (bottom-right)
+  const dragging            = useRef(false);
+  const dragStart           = useRef({ mx: 0, my: 0, rx: 0, ry: 0 });
+
+  const startDrag = useCallback((clientX, clientY) => {
+    if (!modalRef.current) return;
+    const rect = modalRef.current.getBoundingClientRect();
+    dragging.current = true;
+    dragStart.current = { mx: clientX, my: clientY, rx: rect.left, ry: rect.top };
+  }, []);
+
+  const moveDrag = useCallback((clientX, clientY) => {
+    if (!dragging.current) return;
+    const dx = clientX - dragStart.current.mx;
+    const dy = clientY - dragStart.current.my;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const mw = modalRef.current?.offsetWidth  || 400;
+    const mh = modalRef.current?.offsetHeight || 560;
+    setPos({
+      x: Math.max(8, Math.min(vw - mw - 8, dragStart.current.rx + dx)),
+      y: Math.max(8, Math.min(vh - mh - 8, dragStart.current.ry + dy)),
+    });
+  }, []);
+
+  const stopDrag = useCallback(() => { dragging.current = false; }, []);
+
+  useEffect(() => {
+    const onMove = (e) => moveDrag(e.clientX, e.clientY);
+    const onTouch = (e) => {
+      if (e.touches[0]) moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup',   stopDrag);
+    document.addEventListener('touchmove', onTouch, { passive: true });
+    document.addEventListener('touchend',  stopDrag);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup',   stopDrag);
+      document.removeEventListener('touchmove', onTouch);
+      document.removeEventListener('touchend',  stopDrag);
+    };
+  }, [moveDrag, stopDrag]);
+
+  // ── Scroll to bottom on new message ──────────────────────
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   const addMsg = (msg) => setMessages(prev => [...prev, msg]);
@@ -69,10 +116,7 @@ export default function SuporteModal({ onClose }) {
     addMsg({ sender: 'user', content: cat.label });
     const faqMsgs = FAQ[cat.key] || FAQ.other;
     let delay = 400;
-    faqMsgs.forEach(m => {
-      setTimeout(() => addMsg(m), delay);
-      delay += 600;
-    });
+    faqMsgs.forEach(m => { setTimeout(() => addMsg(m), delay); delay += 600; });
     setTimeout(() => {
       if (cat.key === 'pagamento' || cat.key === 'other') {
         setPhase('ticket');
@@ -102,23 +146,16 @@ export default function SuporteModal({ onClose }) {
     setSending(true);
     addMsg({ sender: 'user', content: description });
     try {
-      const chatHistory = messages
-        .filter(m => m.sender === 'bot')
-        .map(m => ({ sender: 'bot', content: m.content }));
-
+      const chatHistory = messages.filter(m => m.sender === 'bot').map(m => ({ sender: 'bot', content: m.content }));
       const res = await fetch('/api/support/ticket', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
         body: JSON.stringify({ category: category?.key || 'other', description, chatHistory }),
       });
-      const d = await res.json();
+      const d  = await res.json();
       const id = d.ticket?.id;
       setTicketId(id);
-
-      addMsg({
-        sender: 'bot',
-        content: `✅ Chamado #${id} aberto com sucesso!\n\nNossa equipe foi notificada via WhatsApp e entrará em contato em breve.`,
-      });
+      addMsg({ sender: 'bot', content: `✅ Chamado #${id} aberto com sucesso!\n\nNossa equipe foi notificada via WhatsApp e entrará em contato em breve.` });
       setPhase('done');
       setDesc('');
     } catch {
@@ -128,70 +165,79 @@ export default function SuporteModal({ onClose }) {
     }
   };
 
+  const modalStyle = pos
+    ? { position: 'fixed', left: pos.x, top: pos.y, bottom: 'auto', right: 'auto' }
+    : {};
+
   return (
-    <div className={s.overlay} onClick={onClose}>
-      <div className={s.modal} onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className={s.header}>
-          <div className={s.headerLeft}>
-            <FiMessageCircle size={18} />
-            <span>Suporte Barbeiro ON</span>
+    <div
+      ref={modalRef}
+      className={s.modal}
+      style={modalStyle}
+      onClick={e => e.stopPropagation()}
+    >
+      {/* Header — drag handle */}
+      <div
+        className={s.header}
+        onMouseDown={e => { e.preventDefault(); startDrag(e.clientX, e.clientY); }}
+        onTouchStart={e => { if (e.touches[0]) startDrag(e.touches[0].clientX, e.touches[0].clientY); }}
+      >
+        <div className={s.headerLeft}>
+          <FiMove size={14} style={{ opacity: 0.5 }} />
+          <FiMessageCircle size={18} />
+          <span>Suporte Barbeiro ON</span>
+        </div>
+        <button className={s.closeBtn} onClick={onClose} title="Fechar" onMouseDown={e => e.stopPropagation()}>
+          <FiX size={20} />
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className={s.body}>
+        {messages.map((m, i) => (
+          <div key={i} className={`${s.bubble} ${s[m.sender]}`}>
+            <p className={s.bubbleText}>{m.content}</p>
           </div>
-          <button className={s.closeBtn} onClick={onClose} title="Fechar">
-            <FiX size={20} />
-          </button>
-        </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
 
-        {/* Messages */}
-        <div className={s.body}>
-          {messages.map((m, i) => (
-            <div key={i} className={`${s.bubble} ${s[m.sender]}`}>
-              <p className={s.bubbleText}>{m.content}</p>
-            </div>
-          ))}
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Actions */}
-        <div className={s.footer}>
-          {phase === 'category' && (
-            <div className={s.categories}>
-              {CATEGORIES.map(c => (
-                <button key={c.key} className={s.catBtn} onClick={() => selectCategory(c)}>
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {phase === 'resolved' && (
-            <div className={s.resolvedBtns}>
-              <button className={s.btnYes} onClick={() => handleResolved(true)}>✅ Sim, resolveu!</button>
-              <button className={s.btnNo}  onClick={() => handleResolved(false)}>❌ Não, preciso de ajuda</button>
-            </div>
-          )}
-
-          {phase === 'ticket' && (
-            <div className={s.ticketForm}>
-              <textarea
-                className={s.textarea}
-                placeholder="Descreva seu problema em detalhes..."
-                value={description}
-                onChange={e => setDesc(e.target.value)}
-                rows={3}
-              />
-              <button className={s.sendBtn} onClick={submitTicket} disabled={sending || !description.trim()}>
-                {sending ? 'Enviando...' : <><FiSend size={14} /> Abrir chamado</>}
+      {/* Actions */}
+      <div className={s.footer}>
+        {phase === 'category' && (
+          <div className={s.categories}>
+            {CATEGORIES.map(c => (
+              <button key={c.key} className={s.catBtn} onClick={() => selectCategory(c)}>
+                {c.label}
               </button>
-            </div>
-          )}
-
-          {phase === 'done' && (
-            <div style={{ textAlign: 'center', padding: '0.75rem', color: 'var(--color-muted)', fontSize: '0.8rem' }}>
-              Conversa encerrada. Obrigado pelo contato!
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
+        {phase === 'resolved' && (
+          <div className={s.resolvedBtns}>
+            <button className={s.btnYes} onClick={() => handleResolved(true)}>✅ Sim, resolveu!</button>
+            <button className={s.btnNo}  onClick={() => handleResolved(false)}>❌ Não, preciso de ajuda</button>
+          </div>
+        )}
+        {phase === 'ticket' && (
+          <div className={s.ticketForm}>
+            <textarea
+              className={s.textarea}
+              placeholder="Descreva seu problema em detalhes..."
+              value={description}
+              onChange={e => setDesc(e.target.value)}
+              rows={3}
+            />
+            <button className={s.sendBtn} onClick={submitTicket} disabled={sending || !description.trim()}>
+              {sending ? 'Enviando...' : <><FiSend size={14} /> Abrir chamado</>}
+            </button>
+          </div>
+        )}
+        {phase === 'done' && (
+          <div style={{ textAlign: 'center', padding: '0.75rem', color: 'var(--color-muted)', fontSize: '0.8rem' }}>
+            Conversa encerrada. Obrigado pelo contato!
+          </div>
+        )}
       </div>
     </div>
   );

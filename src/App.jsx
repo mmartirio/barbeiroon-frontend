@@ -28,6 +28,7 @@ const GestorApp          = lazy(() => import('./pages/Gestor/GestorApp'));
 const Registrar          = lazy(() => import('./pages/Registrar/Registrar'));
 const Landing            = lazy(() => import('./pages/Landing/Landing'));
 const PrimeiroAcesso     = lazy(() => import('./pages/PrimeiroAcesso/PrimeiroAcesso'));
+const AgendaRegras       = lazy(() => import('./pages/AgendaRegras/AgendaRegras'));
 
 const Fallback = () => <div className="app-loading">Carregando...</div>;
 
@@ -79,6 +80,7 @@ function AppRoutes() {
           <Route path="/:slug/usuario-cadastro"       element={<PrivateRoute perm="canCreateUser"><UsuarioCadastro /></PrivateRoute>} />
           <Route path="/:slug/grupo"                  element={<PrivateRoute perm="canManageGroups"><Grupo /></PrivateRoute>} />
           <Route path="/:slug/agenda"                 element={<PrivateRoute perm="canViewAgenda"><Agenda /></PrivateRoute>} />
+          <Route path="/:slug/agenda-regras"          element={<PrivateRoute perm="canViewAgenda"><AgendaRegras /></PrivateRoute>} />
           <Route path="/:slug/promocoes"              element={<PrivateRoute perm="canManageServices"><Promocoes /></PrivateRoute>} />
           <Route path="/:slug/relatorios"             element={<PrivateRoute perm="canViewReports"><Relatorios /></PrivateRoute>} />
           <Route path="/:slug/perfil"                 element={<PrivateRoute><Perfil /></PrivateRoute>} />

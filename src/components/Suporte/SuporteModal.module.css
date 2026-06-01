@@ -1,26 +1,20 @@
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  z-index: 1000;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding: 1rem;
-}
-
+/* Modal flutuante — não bloqueia o resto da interface */
 .modal {
-  width: 100%;
-  max-width: 400px;
-  height: 560px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 380px;
+  height: 520px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 14px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+  z-index: 1200;
   animation: slideUp 0.2s ease;
+  user-select: none;
 }
 
 @keyframes slideUp {
@@ -32,11 +26,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 1rem;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  cursor: grab;
 }
+.header:active { cursor: grabbing; }
 
 .headerLeft {
   display: flex;
@@ -193,6 +189,5 @@
 .sendBtn:not(:disabled):hover { opacity: 0.85; }
 
 @media (max-width: 480px) {
-  .overlay { padding: 0; align-items: flex-end; justify-content: center; }
-  .modal { max-width: 100%; border-radius: 14px 14px 0 0; height: 70vh; }
+  .modal { width: calc(100vw - 16px); right: 8px; bottom: 8px; height: 70vh; }
 }

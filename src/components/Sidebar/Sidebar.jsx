@@ -8,7 +8,7 @@ import {
   FiSettings, FiLogOut, FiMenu, FiX,
   FiChevronDown, FiChevronRight, FiSmartphone, FiTag,
   FiPlusCircle, FiAlertCircle, FiClock, FiHelpCircle,
-  FiSun, FiMoon,
+  FiSun, FiMoon, FiSliders,
 } from 'react-icons/fi';
 
 function useTheme() {
@@ -164,6 +164,7 @@ export default function Sidebar({ onWhatsApp, onSupport }) {
             <SubMenu icon={<FiCalendar size={15} />} label="Agenda" menuKey="agenda" open={openMenus.agenda} onToggle={toggle}>
               <SubItem to={`/${slug}/agenda`}           icon={<FiClock size={14} />}     label="Expediente" />
               {p('canViewAppointments') && <SubItem to={`/${slug}/servico-agendados`} icon={<FiCalendar size={14} />} label="Agendados" />}
+              <SubItem to={`/${slug}/agenda-regras`}    icon={<FiSliders size={14} />}   label="Regras" />
             </SubMenu>
           )}
 
