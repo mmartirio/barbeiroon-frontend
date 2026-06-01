@@ -555,3 +555,189 @@
     .button-group { flex-direction: column; align-items: center; }
     .service-cards-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ── Calendário ────────────────────────────────────────────────── */
+.portal-calendar {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 12px;
+    user-select: none;
+    max-width: 340px;
+    margin: 8px auto 0;
+}
+
+.portal-calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.portal-cal-month-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    letter-spacing: 0.02em;
+}
+
+.portal-cal-nav-btn {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    transition: background 0.15s, color 0.15s;
+}
+.portal-cal-nav-btn:hover:not(:disabled) {
+    background: rgba(96,165,250,0.15);
+    color: #60a5fa;
+}
+.portal-cal-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.portal-calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 6px;
+}
+.portal-calendar-weekdays span {
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    padding: 4px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.portal-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.portal-cal-day {
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.portal-cal-empty {
+    background: transparent;
+}
+.portal-cal-day--off {
+    background: transparent;
+    color: rgba(255,255,255,0.2);
+    cursor: default;
+}
+.portal-cal-day--on {
+    background: rgba(255,255,255,0.06);
+    color: #cbd5e1;
+}
+.portal-cal-day--on:hover {
+    background: rgba(96,165,250,0.18);
+    color: #60a5fa;
+    transform: scale(1.08);
+}
+.portal-cal-day--selected {
+    background: #60a5fa !important;
+    color: #0f172a !important;
+    font-weight: 700;
+    transform: scale(1.08);
+}
+
+.portal-cal-loading {
+    text-align: center;
+    padding: 24px 0;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.85rem;
+}
+.portal-cal-no-days {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.82rem;
+    margin-top: 8px;
+}
+.portal-cal-hint {
+    color: rgba(255,255,255,0.35);
+    font-size: 0.85rem;
+    margin: 8px 0 16px;
+    font-style: italic;
+}
+
+/* ── Grid de horários ──────────────────────────────────────────── */
+.portal-slots-date {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.8rem;
+    font-weight: 400;
+}
+.portal-slots-loading,
+.portal-slots-error {
+    font-size: 0.85rem;
+    margin: 8px 0;
+    text-align: center;
+}
+.portal-slots-loading { color: rgba(255,255,255,0.4); }
+.portal-slots-error   { color: #f87171; }
+
+.portal-timeslots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 6px;
+}
+
+.timeslot-btn {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 14px;
+    min-width: 72px;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+}
+.timeslot-btn:hover {
+    background: rgba(96,165,250,0.15);
+    border-color: rgba(96,165,250,0.4);
+    color: #60a5fa;
+    transform: scale(1.04);
+}
+.timeslot-btn--selected {
+    background: #60a5fa !important;
+    border-color: #60a5fa !important;
+    color: #0f172a !important;
+    font-weight: 700;
+}
+.timeslot-btn--overflow {
+    border-color: rgba(251,191,36,0.3);
+    color: #fbbf24;
+}
+.timeslot-btn--overflow:hover {
+    background: rgba(251,191,36,0.12);
+    border-color: rgba(251,191,36,0.5);
+    color: #fbbf24;
+}
+
+.portal-slots-overflow-note {
+    color: rgba(251,191,36,0.7);
+    font-size: 0.76rem;
+    margin-top: 8px;
+    text-align: center;
+}

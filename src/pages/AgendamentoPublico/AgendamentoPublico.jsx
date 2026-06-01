@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { FiScissors, FiClock, FiDollarSign } from 'react-icons/fi';
+import { FiScissors, FiClock, FiDollarSign, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import './AgendamentoPublico.css';
+
+const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const WEEK_LABELS = ['D','S','T','Q','Q','S','S'];
 
 const formatPhone = (v) => {
     const d = (v || '').replace(/\D/g, '');
@@ -42,6 +45,67 @@ const FeedbackMessage = ({ message, type, onClose, duration = 5000 }) => {
     );
 };
 
+function MiniCalendar({ year, month, availableDays, selectedDate, onSelect, loadingDays, onPrev, onNext, canGoPrev }) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const firstWeekday = new Date(year, month - 1, 1).getDay();
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    const cells = [];
+    for (let i = 0; i < firstWeekday; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+    while (cells.length % 7 !== 0) cells.push(null);
+
+    return (
+        <div className="portal-calendar">
+            <div className="portal-calendar-nav">
+                <button type="button" className="portal-cal-nav-btn" onClick={onPrev} disabled={!canGoPrev}>
+                    <FiChevronLeft size={16} />
+                </button>
+                <span className="portal-cal-month-label">{MONTH_NAMES[month - 1]} {year}</span>
+                <button type="button" className="portal-cal-nav-btn" onClick={onNext}>
+                    <FiChevronRight size={16} />
+                </button>
+            </div>
+            <div className="portal-calendar-weekdays">
+                {WEEK_LABELS.map((l, i) => <span key={i}>{l}</span>)}
+            </div>
+            {loadingDays ? (
+                <div className="portal-cal-loading">Carregando dias...</div>
+            ) : (
+                <div className="portal-calendar-grid">
+                    {cells.map((day, i) => {
+                        if (!day) return <span key={i} className="portal-cal-day portal-cal-empty" />;
+                        const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                        const dateObj = new Date(year, month - 1, day);
+                        const isPast = dateObj < today;
+                        const isAvailable = !isPast && availableDays.includes(dateStr);
+                        const isSelected = selectedDate === dateStr;
+
+                        let cls = 'portal-cal-day';
+                        if (isPast || !isAvailable) cls += ' portal-cal-day--off';
+                        else cls += ' portal-cal-day--on';
+                        if (isSelected) cls += ' portal-cal-day--selected';
+
+                        return (
+                            <button
+                                key={i}
+                                type="button"
+                                className={cls}
+                                disabled={isPast || !isAvailable}
+                                onClick={() => onSelect(dateStr)}
+                            >
+                                {day}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function AgendamentoPublico() {
     const { slug } = useParams();
     const [step, setStep] = useState(1);
@@ -59,7 +123,7 @@ export default function AgendamentoPublico() {
     const [availableTimes, setAvailableTimes] = useState([]);
     const [overflowTimes, setOverflowTimes] = useState([]);
     const [loadingTimes, setLoadingTimes] = useState(false);
-    const [timesError,  setTimesError]  = useState('');
+    const [timesError, setTimesError] = useState('');
     const [promotions, setPromotions] = useState([]);
     const [voucherAlert, setVoucherAlert] = useState('');
     const [voucherDisplayed, setVoucherDisplayed] = useState(false);
@@ -67,6 +131,14 @@ export default function AgendamentoPublico() {
     const [pendingRequest, setPendingRequest] = useState(null);
     const [confirmCancel, setConfirmCancel] = useState({ open: false, appointment: null });
     const [whatsappConnected, setWhatsappConnected] = useState(false);
+
+    // Calendar state
+    const now = new Date();
+    const [calendarYear, setCalendarYear] = useState(now.getFullYear());
+    const [calendarMonth, setCalendarMonth] = useState(now.getMonth() + 1);
+    const [availableDays, setAvailableDays] = useState([]);
+    const [loadingDays, setLoadingDays] = useState(false);
+    const timeSlotsRef = useRef(null);
 
     const loadTenant = async () => {
         setLoading(true);
@@ -136,6 +208,19 @@ export default function AgendamentoPublico() {
         } catch { /* silent */ }
     };
 
+    const fetchAvailableDays = async (professionalId, year, month, tenantId) => {
+        if (!professionalId || !tenantId) { setAvailableDays([]); return; }
+        setLoadingDays(true);
+        setAvailableDays([]);
+        try {
+            const params = new URLSearchParams({ professionalId, year, month, tenantId });
+            const r = await fetch(`/api/public/appointment/available-days?${params}`);
+            const d = await r.json().catch(() => ({}));
+            setAvailableDays(d.availableDays || []);
+        } catch { setAvailableDays([]); }
+        finally { setLoadingDays(false); }
+    };
+
     const fetchTimes = async (professionalId, date, serviceId, tenantId) => {
         if (!professionalId || !date || !serviceId) return;
         setLoadingTimes(true);
@@ -156,7 +241,6 @@ export default function AgendamentoPublico() {
                 }
             }
         } catch (err) {
-            console.error('fetchTimes error:', err);
             setTimesError('Não foi possível carregar os horários. Verifique sua conexão.');
             setAvailableTimes([]);
             setOverflowTimes([]);
@@ -183,6 +267,8 @@ export default function AgendamentoPublico() {
     const handleAppointmentSubmit = async (e) => {
         e.preventDefault();
         if (!appointmentData.professionalId) { alert('Selecione um profissional para continuar.'); return; }
+        if (!appointmentData.date) { alert('Selecione uma data para continuar.'); return; }
+        if (!appointmentData.time) { alert('Selecione um horário para continuar.'); return; }
         setLoading(true);
         try {
             const r = await fetch('/api/public/appointment/create', {
@@ -218,15 +304,46 @@ export default function AgendamentoPublico() {
         } catch { alert('Não foi possível cancelar o agendamento.'); }
     };
 
+    const handlePrevMonth = () => {
+        const todayNow = new Date();
+        if (calendarYear === todayNow.getFullYear() && calendarMonth === todayNow.getMonth() + 1) return;
+        if (calendarMonth === 1) { setCalendarYear(y => y - 1); setCalendarMonth(12); }
+        else setCalendarMonth(m => m - 1);
+    };
+    const handleNextMonth = () => {
+        if (calendarMonth === 12) { setCalendarYear(y => y + 1); setCalendarMonth(1); }
+        else setCalendarMonth(m => m + 1);
+    };
+
+    const canGoPrev = !(calendarYear === now.getFullYear() && calendarMonth === now.getMonth() + 1);
+
     useEffect(() => { if (slug) loadTenant(); }, [slug]);
     useEffect(() => { if (tenant.id) loadServices(tenant.id); }, [tenant.id]);
     useEffect(() => { if (tenant.id && step === 4) loadProfessionals(tenant.id); }, [tenant.id, step]);
+
+    // Fetch available days when professional or month changes
+    useEffect(() => {
+        if (step === 4 && appointmentData.professionalId && tenant.id) {
+            fetchAvailableDays(appointmentData.professionalId, calendarYear, calendarMonth, tenant.id);
+        } else {
+            setAvailableDays([]);
+        }
+    }, [appointmentData.professionalId, calendarYear, calendarMonth, tenant.id, step]);
+
+    // Fetch time slots when date changes
     useEffect(() => {
         setAvailableTimes([]);
         setOverflowTimes([]);
         setTimesError('');
         fetchTimes(appointmentData.professionalId, appointmentData.date, appointmentData.serviceId, tenant.id);
     }, [appointmentData.professionalId, appointmentData.date, appointmentData.serviceId, tenant.id]);
+
+    // Scroll to time slots when they load
+    useEffect(() => {
+        if (appointmentData.date && !loadingTimes && timeSlotsRef.current) {
+            setTimeout(() => timeSlotsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+        }
+    }, [appointmentData.date, loadingTimes]);
 
     useEffect(() => {
         if (step === 3 && voucherAlert && !voucherDisplayed) {
@@ -237,23 +354,17 @@ export default function AgendamentoPublico() {
 
     useEffect(() => {
         if (!pendingRequest || !customer || !tenant.id) return;
-
         const poll = setInterval(async () => {
             try {
                 const r = await fetch(`/api/public/appointment/request/${pendingRequest.id}?customerPhone=${encodeURIComponent(customer.phone)}&tenantId=${tenant.id}`);
                 const d = await r.json();
-                if (d.status === 'approved') {
-                    clearInterval(poll);
-                    setPendingRequest(null);
-                    setStep(5);
-                } else if (d.status === 'rejected' || d.status === 'expired') {
-                    clearInterval(poll);
-                    setPendingRequest(null);
+                if (d.status === 'approved') { clearInterval(poll); setPendingRequest(null); setStep(5); }
+                else if (d.status === 'rejected' || d.status === 'expired') {
+                    clearInterval(poll); setPendingRequest(null);
                     alert(d.status === 'expired' ? 'O tempo de confirmação expirou. Tente outro horário.' : 'Sua solicitação foi recusada. Tente outro horário.');
                 }
             } catch { /* silent */ }
         }, 5000);
-
         return () => clearInterval(poll);
     }, [pendingRequest]);
 
@@ -272,9 +383,7 @@ export default function AgendamentoPublico() {
         const applicable = promotions.filter(p => {
             if (p.discountType !== 'desconto_compra') return false;
             const hasSvcX = (p.criteria || []).includes('servico_x');
-            if (hasSvcX) {
-                return p.serviceX && service.name.toLowerCase().includes(p.serviceX.toLowerCase());
-            }
+            if (hasSvcX) return p.serviceX && service.name.toLowerCase().includes(p.serviceX.toLowerCase());
             return true;
         });
         if (!applicable.length) return null;
@@ -296,11 +405,15 @@ export default function AgendamentoPublico() {
         setAppointmentData({ serviceId: '', professionalId: '', date: '', time: '' });
         setAvailableTimes([]);
         setOverflowTimes([]);
+        setAvailableDays([]);
         setPromotions([]);
         setVoucherAlert('');
         setVoucherDisplayed(false);
         setVoucherAgendamento('');
         setPendingRequest(null);
+        const n = new Date();
+        setCalendarYear(n.getFullYear());
+        setCalendarMonth(n.getMonth() + 1);
     };
 
     const bgStyle = tenant.backgroundImage
@@ -446,11 +559,17 @@ export default function AgendamentoPublico() {
                             <div className="customer-portal-step">
                                 <h2>Agendar Serviço</h2>
                                 <form onSubmit={handleAppointmentSubmit}>
-                                    <div className="form-group" style={{ alignItems: 'center' }}>
+                                    {/* Profissional */}
+                                    <div className="form-group">
                                         <label>Profissional *</label>
                                         <div className="professional-list-grid">
                                             {professionals.map(prof => (
-                                                <button key={prof.id} type="button" className={`professional-item-card${String(appointmentData.professionalId) === String(prof.id) ? ' selected' : ''}`} onClick={() => setAppointmentData(p => ({ ...p, professionalId: prof.id }))}>
+                                                <button
+                                                    key={prof.id}
+                                                    type="button"
+                                                    className={`professional-item-card${String(appointmentData.professionalId) === String(prof.id) ? ' selected' : ''}`}
+                                                    onClick={() => setAppointmentData(p => ({ ...p, professionalId: prof.id, date: '', time: '' }))}
+                                                >
                                                     {prof.imageUrl
                                                         ? <img src={prof.imageUrl} alt={prof.name} className="professional-avatar-img" />
                                                         : <div className="professional-avatar-fallback">{prof.name?.charAt(0).toUpperCase()}</div>}
@@ -459,22 +578,80 @@ export default function AgendamentoPublico() {
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="form-group">
-                                        <label>Data *</label>
-                                        <input type="date" value={appointmentData.date} min={new Date().toISOString().split('T')[0]} onChange={e => setAppointmentData(p => ({ ...p, date: e.target.value }))} required />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Horário *</label>
-                                        <select value={appointmentData.time} onChange={e => setAppointmentData(p => ({ ...p, time: e.target.value }))} required disabled={loadingTimes || (availableTimes.length === 0 && overflowTimes.length === 0)}>
-                                            <option value="">{loadingTimes ? 'Carregando...' : 'Selecione um horário'}</option>
-                                            {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
-                                            {overflowTimes.map(t => <option key={t} value={t}>{t} (pendente)</option>)}
-                                        </select>
-                                        {timesError && <p style={{ color: '#f87171', fontSize: '0.8rem', marginTop: 4 }}>{timesError}</p>}
-                                    </div>
+
+                                    {/* Calendário */}
+                                    {appointmentData.professionalId ? (
+                                        <div className="form-group">
+                                            <label>Data *</label>
+                                            <MiniCalendar
+                                                year={calendarYear}
+                                                month={calendarMonth}
+                                                availableDays={availableDays}
+                                                selectedDate={appointmentData.date}
+                                                onSelect={(dateStr) => setAppointmentData(p => ({ ...p, date: dateStr, time: '' }))}
+                                                loadingDays={loadingDays}
+                                                onPrev={handlePrevMonth}
+                                                onNext={handleNextMonth}
+                                                canGoPrev={canGoPrev}
+                                            />
+                                            {!loadingDays && availableDays.length === 0 && (
+                                                <p className="portal-cal-no-days">Nenhum dia disponível neste mês.</p>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <p className="portal-cal-hint">Selecione um profissional para ver o calendário.</p>
+                                    )}
+
+                                    {/* Horários */}
+                                    {appointmentData.date && (
+                                        <div className="form-group" ref={timeSlotsRef}>
+                                            <label>
+                                                Horário * <span className="portal-slots-date">— {formatDateBr(appointmentData.date)}</span>
+                                            </label>
+                                            {loadingTimes ? (
+                                                <p className="portal-slots-loading">Carregando horários...</p>
+                                            ) : timesError ? (
+                                                <p className="portal-slots-error">{timesError}</p>
+                                            ) : (
+                                                <div className="portal-timeslots">
+                                                    {availableTimes.map(t => (
+                                                        <button
+                                                            key={t}
+                                                            type="button"
+                                                            className={`timeslot-btn${appointmentData.time === t ? ' timeslot-btn--selected' : ''}`}
+                                                            onClick={() => setAppointmentData(p => ({ ...p, time: t }))}
+                                                        >
+                                                            {t}
+                                                        </button>
+                                                    ))}
+                                                    {overflowTimes.map(t => (
+                                                        <button
+                                                            key={t}
+                                                            type="button"
+                                                            className={`timeslot-btn timeslot-btn--overflow${appointmentData.time === t ? ' timeslot-btn--selected' : ''}`}
+                                                            onClick={() => setAppointmentData(p => ({ ...p, time: t }))}
+                                                            title="Excede o expediente — sujeito à confirmação"
+                                                        >
+                                                            {t} *
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {overflowTimes.length > 0 && (
+                                                <p className="portal-slots-overflow-note">* Horários fora do expediente estão sujeitos à confirmação do profissional.</p>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <div className="button-group">
                                         <button type="button" className="portal-btn portal-btn-secondary" onClick={() => setStep(3)}>Voltar</button>
-                                        <button type="submit" className="portal-btn" disabled={loading}>Confirmar</button>
+                                        <button
+                                            type="submit"
+                                            className="portal-btn"
+                                            disabled={loading || !appointmentData.date || !appointmentData.time}
+                                        >
+                                            Confirmar
+                                        </button>
                                     </div>
                                 </form>
                             </div>
