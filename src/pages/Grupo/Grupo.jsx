@@ -21,10 +21,12 @@ const PERMISSOES = [
     { key: 'canDeleteCustomer',  label: 'Excluir' },
   ]},
   { categoria: 'Agendamento', perms: [
-    { key: 'canViewAppointments',   label: 'Visualizar' },
-    { key: 'canCreateAppointment',  label: 'Criar' },
-    { key: 'canEditAppointment',    label: 'Editar' },
-    { key: 'canDeleteAppointment',  label: 'Excluir' },
+    { key: 'canViewAppointments',    label: 'Visualizar' },
+    { key: 'canCreateAppointment',   label: 'Criar' },
+    { key: 'canEditAppointment',     label: 'Permitir editar agendados' },
+    { key: 'canCancelAppointment',   label: 'Permitir cancelar agendamentos' },
+    { key: 'canDeleteAppointment',   label: 'Excluir (remover permanentemente)' },
+    { key: 'maxAppointmentsPerDay',  label: 'Limite de agendamentos por dia por profissional', type: 'number', placeholder: 'Sem limite' },
   ]},
   { categoria: 'Conta', perms: [
     { key: 'canManageTenant', label: 'Gerenciar conta' },
@@ -51,7 +53,9 @@ const PERMISSOES = [
 
 const emptyPerms = () => {
   const p = {};
-  PERMISSOES.forEach(cat => cat.perms.forEach(perm => { p[perm.key] = false; }));
+  PERMISSOES.forEach(cat => cat.perms.forEach(perm => {
+    p[perm.key] = perm.type === 'number' ? '' : false;
+  }));
   return p;
 };
 
@@ -66,7 +70,13 @@ export default function Grupo() {
   const [perms,       setPerms]       = useState(emptyPerms());
   const [editingId,   setEditingId]   = useState(null);
 
-  const selectedCount = useMemo(() => Object.values(perms).filter(Boolean).length, [perms]);
+  const selectedCount = useMemo(() => {
+    let count = 0;
+    PERMISSOES.forEach(cat => cat.perms.forEach(perm => {
+      if (perm.type !== 'number' && perms[perm.key]) count++;
+    }));
+    return count;
+  }, [perms]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -93,7 +103,13 @@ export default function Grupo() {
     setEditingId(g.id);
     setGroupName(g.name || '');
     const next = emptyPerms();
-    PERMISSOES.forEach(cat => cat.perms.forEach(perm => { next[perm.key] = !!g[perm.key]; }));
+    PERMISSOES.forEach(cat => cat.perms.forEach(perm => {
+      if (perm.type === 'number') {
+        next[perm.key] = g[perm.key] != null ? String(g[perm.key]) : '';
+      } else {
+        next[perm.key] = !!g[perm.key];
+      }
+    }));
     setPerms(next);
     setError('');
     setSuccess('');
@@ -104,11 +120,22 @@ export default function Grupo() {
     if (!groupName.trim()) { setError('Nome do grupo obrigatório'); return; }
     setSaving(true); setError(''); setSuccess('');
     try {
+      // Converte campos numéricos de string para number|null antes de enviar
+      const payload = { name: groupName.trim(), description: `Grupo ${groupName.trim()}` };
+      PERMISSOES.forEach(cat => cat.perms.forEach(perm => {
+        if (perm.type === 'number') {
+          const v = String(perms[perm.key] || '').trim();
+          payload[perm.key] = v === '' ? null : Number(v);
+        } else {
+          payload[perm.key] = perms[perm.key];
+        }
+      }));
+
       const url = editingId ? `/api/group/${editingId}` : '/api/group';
       const res = await fetch(url, {
         method: editingId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
-        body: JSON.stringify({ name: groupName.trim(), description: `Grupo ${groupName.trim()}`, ...perms }),
+        body: JSON.stringify(payload),
       });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(d.message || 'Erro ao salvar');
@@ -157,10 +184,25 @@ export default function Grupo() {
                 <h4 style={{ marginBottom: '0.75rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border)' }}>{cat.categoria}</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {cat.perms.map(perm => (
-                    <label key={perm.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '0.4rem 0' }}>
-                      <span style={{ fontSize: '0.875rem' }}>{perm.label}</span>
-                      <input type="checkbox" checked={!!perms[perm.key]} onChange={() => togglePerm(perm.key)} style={{ width: 18, height: 18, accentColor: 'var(--accent)' }} />
-                    </label>
+                    perm.type === 'number' ? (
+                      <div key={perm.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.4rem 0', gap: '0.75rem' }}>
+                        <span style={{ fontSize: '0.875rem', flex: 1 }}>{perm.label}</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="999"
+                          placeholder={perm.placeholder}
+                          value={perms[perm.key]}
+                          onChange={e => setPerms(p => ({ ...p, [perm.key]: e.target.value }))}
+                          style={{ width: 90, background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)', padding: '0.3rem 0.5rem', color: 'var(--color)', fontSize: '0.875rem', textAlign: 'center' }}
+                        />
+                      </div>
+                    ) : (
+                      <label key={perm.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '0.4rem 0' }}>
+                        <span style={{ fontSize: '0.875rem' }}>{perm.label}</span>
+                        <input type="checkbox" checked={!!perms[perm.key]} onChange={() => togglePerm(perm.key)} style={{ width: 18, height: 18, accentColor: 'var(--accent)' }} />
+                      </label>
+                    )
                   ))}
                 </div>
               </div>
