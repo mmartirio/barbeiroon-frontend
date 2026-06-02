@@ -108,7 +108,12 @@ export default function Sidebar({ onWhatsApp, onSupport }) {
       });
   }, [user]);
 
-  const toggle = (k) => setOpenMenus(p => ({ ...p, [k]: !p[k] }));
+  const toggle = (k) => setOpenMenus(p => {
+    const isOpen = !!p[k];
+    // Fecha todos e abre apenas o clicado (ou fecha se já estava aberto)
+    const closed = Object.fromEntries(Object.keys(p).map(key => [key, false]));
+    return isOpen ? closed : { ...closed, [k]: true };
+  });
 
   const canClients  = any('canViewCustomers','canCreateCustomer','canEditCustomer','canDeleteCustomer');
   const canUsers    = any('canViewUsers','canCreateUser','canEditUser','canDeleteUser','canManageGroups');
