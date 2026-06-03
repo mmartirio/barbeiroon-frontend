@@ -708,7 +708,7 @@ export default function AgendamentoPublico() {
                                                         )}
                                                         <button
                                                             onClick={() => handleSubscribe(plan.id)}
-                                                            style={{ width: '100%', padding: '7px 10px', borderRadius: 6, background: '#f59e0b', color: '#000', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.78rem', lineHeight: 1.3 }}
+                                                            style={{ width: 'auto', padding: '7px 14px', borderRadius: 6, background: '#f59e0b', color: '#000', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.78rem', lineHeight: 1.3 }}
                                                         >
                                                             Contratar plano
                                                         </button>
