@@ -9,10 +9,9 @@ const tok = () => sessionStorage.getItem('token');
 const ESTADOS_BR = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 
 const PLANOS = {
-  free:       { label: 'Gratuito',   color: '#64748b', desc: 'Até 2 usuários' },
-  basic:      { label: 'Básico',     color: '#2563eb', desc: 'Até 5 usuários' },
-  premium:    { label: 'Premium',    color: '#7c3aed', desc: 'Até 15 usuários' },
-  enterprise: { label: 'Enterprise', color: '#059669', desc: 'Usuários ilimitados' },
+  free:    { label: 'Gratuito', color: '#64748b', desc: 'Até 2 usuários' },
+  basic:   { label: 'Básico',   color: '#2563eb', desc: 'Até 5 usuários' },
+  premium: { label: 'Premium',  color: '#7c3aed', desc: 'Até 15 usuários' },
 };
 
 const daysUntil = (dateStr) => {
@@ -86,7 +85,7 @@ export default function Conta() {
       const res  = await fetch('/api/tenant/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, planType }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || 'Erro ao salvar');
@@ -241,11 +240,23 @@ export default function Conta() {
         <div className="card">
           <div className="card-body">
             <h3 style={{ marginBottom: '1rem' }}>Plano Contratado</h3>
-            <div style={{ border: `1.5px solid ${plano.color}`, borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: `${plano.color}18`, marginBottom: '0.5rem' }}>
-              <span style={{ fontWeight: 800, color: plano.color, fontSize: '1.1rem' }}>{plano.label}</span>
-              <span style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>{plano.desc}</span>
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
+              <select
+                className="form-input"
+                value={planType}
+                onChange={e => setPlanType(e.target.value)}
+                style={{ width: '100%' }}
+              >
+                {Object.entries(PLANOS).map(([key, option]) => (
+                  <option key={key} value={key}>{option.label}</option>
+                ))}
+              </select>
+              <div style={{ border: `1.5px solid ${plano.color}`, borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: `${plano.color}18` }}>
+                <span style={{ fontWeight: 800, color: plano.color, fontSize: '1.1rem' }}>{plano.label}</span>
+                <span style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>{plano.desc}</span>
+              </div>
             </div>
-            <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', textAlign: 'center' }}>Para alterar o plano, entre em contato com o suporte.</p>
+            <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', textAlign: 'center' }}>Administrador pode alterar o plano diretamente aqui.</p>
           </div>
         </div>
 
