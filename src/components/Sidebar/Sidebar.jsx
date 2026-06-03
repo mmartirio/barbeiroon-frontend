@@ -85,6 +85,7 @@ export default function Sidebar({ onWhatsApp, onSupport }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tenantLogo, setTenantLogo] = useState('');
   const [tenantName, setTenantName] = useState('');
+  const [pendingPlanCount, setPendingPlanCount] = useState(0);
   const [openMenus, setOpenMenus] = useState(() => {
     try { return JSON.parse(sessionStorage.getItem('sb_menus') || '{}'); } catch { return {}; }
   });
@@ -106,6 +107,25 @@ export default function Sidebar({ onWhatsApp, onSupport }) {
         setTenantName(t.name || user?.name || 'Barbeiro On');
         setTenantLogo(t.logo || t.logoUrl || '');
       });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadPendingPlanCount = async () => {
+      try {
+        const params = new URLSearchParams({ status: 'pending_payment', page: '1', limit: '1' });
+        const res = await fetch(`/api/service-plans/client-plans/list?${params.toString()}`, { headers: { Authorization: `Bearer ${tok()}` } });
+        const data = await res.json().catch(() => ({}));
+        const count = Number(data.total ?? (Array.isArray(data.items) ? data.items.length : 0)) || 0;
+        setPendingPlanCount(count);
+      } catch {
+        setPendingPlanCount(0);
+      }
+    };
+
+    loadPendingPlanCount();
+    const interval = setInterval(loadPendingPlanCount, 30000);
+    return () => clearInterval(interval);
   }, [user]);
 
   const toggle = (k) => setOpenMenus(p => {
@@ -174,7 +194,16 @@ export default function Sidebar({ onWhatsApp, onSupport }) {
           )}
 
           {p('canManageServices') && <NavItem to={`/${slug}/promocoes`}     icon={<FiTag size={15} />}      label="Promoções" />}
-          {p('canManageServices') && <NavItem to={`/${slug}/planos-servico`} icon={<FiPackage size={15} />}  label="Planos" />}
+          {p('canManageServices') && <NavItem to={`/${slug}/planos-servico`} icon={<FiPackage size={15} />}  label={
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span>Planos</span>
+              {pendingPlanCount > 0 && (
+                <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: 99, background: '#f59e0b', color: '#000', fontWeight: 700 }}>
+                  {pendingPlanCount}
+                </span>
+              )}
+            </span>
+          } />}
           {p('canViewReports')    && <NavItem to={`/${slug}/relatorios`}    icon={<FiBarChart2 size={15} />} label="Relatórios" />}
 
           <li className={s.divider} />

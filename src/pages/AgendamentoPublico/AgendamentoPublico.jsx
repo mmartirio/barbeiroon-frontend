@@ -226,14 +226,16 @@ export default function AgendamentoPublico() {
         setSubscribeError('');
         setSubscribeResult(null);
         try {
+            const plan = availablePlans.find(p => String(p.id) === String(planId));
             const r = await fetch('/api/public/service-plans/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     customerPhone: customer.phone,
-                    planId,
-                    tenantId: tenant.id,
                     customerName: customer.name,
+                    planId,
+                    planName: plan?.name || '',
+                    tenantId: tenant.id,
                 }),
             });
             const d = await r.json().catch(() => ({}));
