@@ -668,7 +668,7 @@ export default function AgendamentoPublico() {
 
                                         {/* Resultado de contratação */}
                                         {subscribeResult && (
-                                            <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid #22c55e55', borderRadius: 12, padding: '1rem', marginBottom: '1.5rem' }}>
+                                            <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid #22c55e55', borderRadius: 12, padding: '1rem', margin: '0 auto 1.5rem', width: '100%', maxWidth: '280px' }}>
                                                 <p style={{ fontWeight: 600, marginBottom: 10 }}>✅ Plano contratado: {subscribeResult.plan?.name}</p>
                                                 
                                                 <div style={{ background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: 8, padding: '0.75rem', marginBottom: 10, fontSize: '0.82rem', color: '#fbbf24' }}>
