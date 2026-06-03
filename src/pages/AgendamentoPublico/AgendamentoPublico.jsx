@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { FiScissors, FiClock, FiDollarSign, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import './AgendamentoPublico.css';
+import apiFetch from '../../services/api';
 
 const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const WEEK_LABELS = ['D','S','T','Q','Q','S','S'];
@@ -132,6 +133,15 @@ export default function AgendamentoPublico() {
     const [confirmCancel, setConfirmCancel] = useState({ open: false, appointment: null });
     const [whatsappConnected, setWhatsappConnected] = useState(false);
 
+    // Planos de serviço
+    const [portalTab,      setPortalTab]      = useState('agendamentos'); // 'agendamentos' | 'planos'
+    const [clientPlans,    setClientPlans]     = useState([]);
+    const [availablePlans, setAvailablePlans]  = useState([]);
+    const [planLoading,    setPlanLoading]     = useState(false);
+    const [subscribeResult, setSubscribeResult] = useState(null); // {pixEmv, plan, clientPlanId}
+    const [subscribeError,  setSubscribeError]  = useState('');
+    const [copiedPix,      setCopiedPix]       = useState(false);
+
     // Calendar state
     const now = new Date();
     const [calendarYear, setCalendarYear] = useState(now.getFullYear());
@@ -192,6 +202,45 @@ export default function AgendamentoPublico() {
         } catch { setStep(3); }
     };
 
+    const loadPlans = async (phone, tenantId) => {
+        setPlanLoading(true);
+        try {
+            const [cpRes, apRes] = await Promise.all([
+                fetch(`/api/public/service-plans/client?customerPhone=${encodeURIComponent(phone)}&tenantId=${tenantId}`),
+                fetch(`/api/public/service-plans/available?tenantId=${tenantId}`),
+            ]);
+            const cpData = await cpRes.json().catch(() => ({}));
+            const apData = await apRes.json().catch(() => ({}));
+            setClientPlans(cpData.plans || []);
+            setAvailablePlans(apData.plans || []);
+        } catch { /* silent */ }
+        finally { setPlanLoading(false); }
+    };
+
+    const handleSubscribe = async (planId) => {
+        setSubscribeError('');
+        setSubscribeResult(null);
+        try {
+            const r = await fetch('/api/public/service-plans/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customerPhone: customer.phone,
+                    planId,
+                    tenantId: tenant.id,
+                    customerName: customer.name,
+                }),
+            });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(d.message || 'Erro ao contratar plano.');
+            setSubscribeResult(d);
+        } catch (e) { setSubscribeError(e.message); }
+    };
+
+    const copyPix = (text) => {
+        navigator.clipboard.writeText(text).then(() => { setCopiedPix(true); setTimeout(() => setCopiedPix(false), 2500); });
+    };
+
     const loadPromotions = async (phone, tenantId) => {
         try {
             const r = await fetch(`/api/public/promotion/available?customerPhone=${encodeURIComponent(phone)}&tenantId=${tenantId}`);
@@ -215,9 +264,14 @@ export default function AgendamentoPublico() {
         try {
             const params = new URLSearchParams({ professionalId, year, month, tenantId });
             if (serviceId) params.set('serviceId', serviceId);
-            const r = await fetch(`/api/public/appointment/available-days?${params}`);
+            const r = await apiFetch(`/api/public/appointment/available-days?${params}`);
             const d = await r.json().catch(() => ({}));
-            setAvailableDays(d.availableDays || []);
+            if (!r.ok) {
+                console.error('Erro ao buscar dias disponíveis:', r.status, d);
+                setAvailableDays([]);
+            } else {
+                setAvailableDays(d.availableDays || []);
+            }
         } catch { setAvailableDays([]); }
         finally { setLoadingDays(false); }
     };
@@ -228,9 +282,10 @@ export default function AgendamentoPublico() {
         setTimesError('');
         try {
             const params = new URLSearchParams({ professionalId, date, tenantId, serviceId });
-            const r = await fetch(`/api/public/appointment/available-times?${params}`);
+            const r = await apiFetch(`/api/public/appointment/available-times?${params}`);
             const d = await r.json().catch(() => ({}));
             if (!r.ok) {
+                console.error('Erro ao buscar horários disponíveis:', r.status, d);
                 setTimesError(d.message || 'Erro ao buscar horários disponíveis.');
                 setAvailableTimes([]);
                 setOverflowTimes([]);
@@ -261,7 +316,10 @@ export default function AgendamentoPublico() {
             if (d.needsName) { setShowExtraFields(true); return; }
             setCustomer(d.customer);
             await loadAppointments(d.customer.phone, tenant.id);
-            await loadPromotions(d.customer.phone, tenant.id);
+            await Promise.all([
+                loadPromotions(d.customer.phone, tenant.id),
+                loadPlans(d.customer.phone, tenant.id),
+            ]);
         } catch { alert('Não foi possível processar seus dados.'); }
     };
 
@@ -487,29 +545,175 @@ export default function AgendamentoPublico() {
                             </div>
                         )}
 
-                        {/* Step 2 — Agendamentos */}
+                        {/* Step 2 — Agendamentos + Planos */}
                         {step === 2 && (
                             <div className="customer-portal-step">
-                                <h2>Meus Agendamentos</h2>
-                                {appointments.length === 0
-                                    ? <p>Nenhum agendamento encontrado.</p>
-                                    : (
-                                        <div className="appointments-list">
-                                            {appointments.map(appt => (
-                                                <div key={appt.id} className="appointment-item">
-                                                    <div className="appointment-item-info">
-                                                        <strong>{appt.service?.name || 'Serviço'}</strong>
-                                                        <span>{appt.professionalName || appt.professional?.name}</span>
-                                                        <span>{formatDateBr(appt.appointmentDate)} {appt.appointmentTime}</span>
-                                                    </div>
-                                                    <button className="portal-btn portal-btn-danger" style={{ width: 'auto', padding: '10px 16px', fontSize: '0.85rem' }} onClick={() => setConfirmCancel({ open: true, appointment: appt })}>Cancelar</button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                <div className="button-group">
-                                    <button className="portal-btn" onClick={() => setStep(3)}>Novo agendamento</button>
+                                {/* Tab switcher */}
+                                <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid rgba(255,255,255,0.15)', marginBottom: '1.25rem' }}>
+                                    {[['agendamentos', 'Agendamentos'], ['planos', 'Meus Planos']].map(([key, label]) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => setPortalTab(key)}
+                                            style={{
+                                                flex: 1, padding: '0.55rem', fontSize: '0.88rem', fontWeight: 500,
+                                                color: portalTab === key ? '#f59e0b' : 'rgba(255,255,255,0.55)',
+                                                borderBottom: portalTab === key ? '2px solid #f59e0b' : '2px solid transparent',
+                                                background: 'none', border: 'none', borderRadius: 0, cursor: 'pointer', marginBottom: -1,
+                                            }}
+                                        >{label}{key === 'planos' && clientPlans.length > 0 && <span style={{ marginLeft: 5, fontSize: '0.72rem', background: '#22c55e', color: '#fff', borderRadius: 99, padding: '1px 7px' }}>{clientPlans.length}</span>}</button>
+                                    ))}
                                 </div>
+
+                                {/* ── Aba: Agendamentos ── */}
+                                {portalTab === 'agendamentos' && (
+                                    <>
+                                        <h2>Meus Agendamentos</h2>
+                                        {appointments.length === 0
+                                            ? <p>Nenhum agendamento encontrado.</p>
+                                            : (
+                                                <div className="appointments-list">
+                                                    {appointments.map(appt => (
+                                                        <div key={appt.id} className="appointment-item">
+                                                            <div className="appointment-item-info">
+                                                                <strong>{appt.service?.name || 'Serviço'}</strong>
+                                                                <span>{appt.professionalName || appt.professional?.name}</span>
+                                                                <span>{formatDateBr(appt.appointmentDate)} {appt.appointmentTime}</span>
+                                                            </div>
+                                                            <button className="portal-btn portal-btn-danger" style={{ width: 'auto', padding: '10px 16px', fontSize: '0.85rem' }} onClick={() => setConfirmCancel({ open: true, appointment: appt })}>Cancelar</button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        <div className="button-group">
+                                            <button className="portal-btn" onClick={() => setStep(3)}>Novo agendamento</button>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* ── Aba: Planos ── */}
+                                {portalTab === 'planos' && (
+                                    <div>
+                                        {/* Plano ativo */}
+                                        {clientPlans.length > 0 && (
+                                            <div style={{ marginBottom: '1.5rem' }}>
+                                                <h2 style={{ marginBottom: '0.75rem' }}>Plano Ativo</h2>
+                                                {clientPlans.map(cp => (
+                                                    <div key={cp.id} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '1rem', marginBottom: '0.75rem' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                                                            <div>
+                                                                <strong style={{ fontSize: '1rem' }}>{cp.servicePlan?.name}</strong>
+                                                                {cp.endDate && <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', margin: '2px 0 0' }}>Válido até {cp.endDate.split('-').reverse().join('/')}</p>}
+                                                            </div>
+                                                            <span style={{ fontSize: '0.72rem', padding: '3px 10px', borderRadius: 99, background: cp.status === 'active' ? '#22c55e33' : '#f59e0b33', color: cp.status === 'active' ? '#22c55e' : '#f59e0b', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                                                {cp.status === 'active' ? 'ATIVO' : 'AGUARDANDO PAGAMENTO'}
+                                                            </span>
+                                                        </div>
+                                                        {(cp.services || []).map((s, i) => {
+                                                            const pct = s.maxUsages ? Math.min(100, (s.usedCount / s.maxUsages) * 100) : 0;
+                                                            return (
+                                                                <div key={i} style={{ marginBottom: 8 }}>
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 3 }}>
+                                                                        <span>{s.serviceName}</span>
+                                                                        <span style={{ color: 'rgba(255,255,255,0.55)' }}>
+                                                                            {s.maxUsages === null ? 'Ilimitado' : `${s.usedCount}/${s.maxUsages} usos`}
+                                                                        </span>
+                                                                    </div>
+                                                                    {s.maxUsages !== null && (
+                                                                        <div style={{ height: 6, borderRadius: 99, background: 'rgba(255,255,255,0.15)', overflow: 'hidden' }}>
+                                                                            <div style={{ height: '100%', width: `${100 - pct}%`, background: pct >= 100 ? '#ef4444' : '#22c55e', borderRadius: 99, transition: 'width 0.3s' }} />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Resultado de contratação */}
+                                        {subscribeResult && (
+                                            <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid #22c55e55', borderRadius: 12, padding: '1rem', marginBottom: '1.5rem' }}>
+                                                <p style={{ fontWeight: 600, marginBottom: 6 }}>✅ Plano contratado: {subscribeResult.plan?.name}</p>
+                                                {subscribeResult.pixEmv ? (
+                                                    <>
+                                                        <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: 8 }}>
+                                                            Copie o código PIX abaixo para pagar. Após o pagamento, o barbeiro ativará seu plano.
+                                                        </p>
+                                                        <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 8, padding: '0.75rem', fontFamily: 'monospace', fontSize: '0.7rem', wordBreak: 'break-all', marginBottom: 8, color: '#fbbf24' }}>
+                                                            {subscribeResult.pixEmv}
+                                                        </div>
+                                                        <button
+                                                            onClick={() => copyPix(subscribeResult.pixEmv)}
+                                                            style={{ width: '100%', padding: '10px', borderRadius: 8, background: copiedPix ? '#22c55e' : '#f59e0b', color: '#000', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.88rem' }}
+                                                        >
+                                                            {copiedPix ? '✓ Código copiado!' : '📋 Copiar código PIX'}
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)' }}>
+                                                        Combine o pagamento diretamente com a barbearia. Após confirmação, seu plano será ativado.
+                                                    </p>
+                                                )}
+                                                <button onClick={() => { setSubscribeResult(null); loadPlans(customer.phone, tenant.id); }} style={{ marginTop: 10, background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline' }}>
+                                                    Fechar
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {subscribeError && (
+                                            <div style={{ color: '#f87171', background: 'rgba(239,68,68,0.1)', border: '1px solid #ef444444', borderRadius: 8, padding: '0.75rem', marginBottom: '1rem', fontSize: '0.85rem' }}>
+                                                {subscribeError}
+                                            </div>
+                                        )}
+
+                                        {/* Planos disponíveis */}
+                                        <h2 style={{ marginBottom: '0.75rem' }}>Planos disponíveis</h2>
+                                        {planLoading ? (
+                                            <p style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', padding: '1rem' }}>Carregando planos...</p>
+                                        ) : availablePlans.length === 0 ? (
+                                            <p style={{ color: 'rgba(255,255,255,0.45)', textAlign: 'center', padding: '1rem' }}>Nenhum plano disponível no momento.</p>
+                                        ) : (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                {availablePlans.map(plan => (
+                                                    <div key={plan.id} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '1rem' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                                                            <div>
+                                                                <strong style={{ fontSize: '0.95rem' }}>{plan.name}</strong>
+                                                                {plan.description && <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', margin: '3px 0 0' }}>{plan.description}</p>}
+                                                            </div>
+                                                            <div style={{ textAlign: 'right' }}>
+                                                                <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f59e0b' }}>
+                                                                    R$ {Number(plan.price).toFixed(2).replace('.', ',')}
+                                                                </div>
+                                                                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>
+                                                                    {plan.billingPeriod === 'monthly' ? '/mês' : plan.billingPeriod === 'annual' ? '/ano' : plan.billingPeriod === 'quarterly' ? '/trim.' : ''}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
+                                                            {(plan.services || []).map((s, i) => (
+                                                                <span key={i} style={{ fontSize: '0.72rem', padding: '2px 9px', borderRadius: 99, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                                                                    {s.serviceName} {s.maxUsages ? `× ${s.maxUsages}` : '∞'}
+                                                                </span>
+                                                            ))}
+                                                            {plan.validityDays && <span style={{ fontSize: '0.72rem', padding: '2px 9px', borderRadius: 99, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#fbbf24' }}>{plan.validityDays} dias</span>}
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleSubscribe(plan.id)}
+                                                            style={{ width: '100%', padding: '10px', borderRadius: 8, background: '#f59e0b', color: '#000', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.88rem' }}
+                                                        >
+                                                            Contratar plano
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <div style={{ marginTop: '1.5rem' }}>
+                                            <button className="portal-btn" onClick={() => setStep(3)}>Novo agendamento</button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 

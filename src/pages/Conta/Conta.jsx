@@ -27,6 +27,7 @@ export default function Conta() {
   const [form, setForm] = useState({
     name: '', companyName: '', cnpj: '', phone: '',
     address: '', neighborhood: '', city: '', state: '', logo: '',
+    pixKey: '', pixOwnerName: '', pixCity: '',
   });
   const [planType,          setPlanType]          = useState('free');
   const [scheduledDeleteAt, setScheduledDeleteAt] = useState(null);
@@ -56,6 +57,9 @@ export default function Conta() {
         city:         data.city         || '',
         state:        data.state        || '',
         logo:         data.logo         || '',
+        pixKey:       data.pixKey       || '',
+        pixOwnerName: data.pixOwnerName || '',
+        pixCity:      data.pixCity      || '',
       });
       setPlanType(data.planType || 'free');
       setScheduledDeleteAt(data.scheduledDeleteAt || null);
@@ -242,6 +246,33 @@ export default function Conta() {
               <span style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>{plano.desc}</span>
             </div>
             <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', textAlign: 'center' }}>Para alterar o plano, entre em contato com o suporte.</p>
+          </div>
+        </div>
+
+        {/* PIX para receber pagamentos de planos */}
+        <div className="card">
+          <div className="card-body">
+            <h3 style={{ marginBottom: '0.25rem' }}>PIX — Receber pagamentos de planos</h3>
+            <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', marginBottom: '1rem' }}>
+              Configure sua chave PIX para gerar cobranças automáticas quando clientes contratarem planos de serviço.
+            </p>
+            <div className="form-group">
+              <label className="form-label">Chave PIX</label>
+              <input className="form-input" value={form.pixKey} onChange={e => set('pixKey', e.target.value)} placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória" />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="form-group">
+                <label className="form-label">Nome no PIX <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>(máx. 25 caracteres)</span></label>
+                <input className="form-input" value={form.pixOwnerName} maxLength={25} onChange={e => set('pixOwnerName', e.target.value)} placeholder="Ex: João Barbearia" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Cidade <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>(máx. 15 caracteres)</span></label>
+                <input className="form-input" value={form.pixCity} maxLength={15} onChange={e => set('pixCity', e.target.value)} placeholder="Ex: Sao Paulo" />
+              </div>
+            </div>
+            {form.pixKey && (
+              <p style={{ fontSize: '0.78rem', color: '#22c55e' }}>✓ PIX configurado — clientes receberão código de pagamento ao contratar um plano.</p>
+            )}
           </div>
         </div>
 

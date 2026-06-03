@@ -8,7 +8,7 @@ import {
   FiSettings, FiLogOut, FiMenu, FiX,
   FiChevronDown, FiChevronRight, FiSmartphone, FiTag,
   FiPlusCircle, FiAlertCircle, FiClock, FiHelpCircle,
-  FiSun, FiMoon, FiSliders,
+  FiSun, FiMoon, FiSliders, FiPackage,
 } from 'react-icons/fi';
 
 function useTheme() {
@@ -173,8 +173,9 @@ export default function Sidebar({ onWhatsApp, onSupport }) {
             </SubMenu>
           )}
 
-          {p('canManageServices') && <NavItem to={`/${slug}/promocoes`}  icon={<FiTag size={15} />}      label="Promoções" />}
-          {p('canViewReports')    && <NavItem to={`/${slug}/relatorios`} icon={<FiBarChart2 size={15} />} label="Relatórios" />}
+          {p('canManageServices') && <NavItem to={`/${slug}/promocoes`}     icon={<FiTag size={15} />}      label="Promoções" />}
+          {p('canManageServices') && <NavItem to={`/${slug}/planos-servico`} icon={<FiPackage size={15} />}  label="Planos" />}
+          {p('canViewReports')    && <NavItem to={`/${slug}/relatorios`}    icon={<FiBarChart2 size={15} />} label="Relatórios" />}
 
           <li className={s.divider} />
 

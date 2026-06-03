@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push *)",
+      "Read(//c/Users/Martirio/Documents/Projetos/meu-barbeiro/backend/**)"
+    ]
+  }
+}
