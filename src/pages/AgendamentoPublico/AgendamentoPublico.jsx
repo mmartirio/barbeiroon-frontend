@@ -242,22 +242,6 @@ export default function AgendamentoPublico() {
         } catch (e) { setSubscribeError(e.message); }
     };
 
-    const goToBookingWithPlan = () => {
-        if (subscribeResult && subscribeResult.plan && subscribeResult.plan.services && subscribeResult.plan.services.length > 0) {
-            const firstPlanService = subscribeResult.plan.services[0];
-            const serviceObj = services.find(s => 
-                s.id === firstPlanService.serviceId || 
-                String(s.id) === String(firstPlanService.serviceId)
-            );
-            
-            if (serviceObj) {
-                setAppointmentData(prev => ({ ...prev, serviceId: serviceObj.id }));
-                setStep(4);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
-    };
-
     const copyPix = (text) => {
         navigator.clipboard.writeText(text).then(() => { setCopiedPix(true); setTimeout(() => setCopiedPix(false), 2500); });
     };
@@ -655,33 +639,34 @@ export default function AgendamentoPublico() {
                                         {/* Resultado de contratação */}
                                         {subscribeResult && (
                                             <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid #22c55e55', borderRadius: 12, padding: '1rem', marginBottom: '1.5rem' }}>
-                                                <p style={{ fontWeight: 600, marginBottom: 6 }}>✅ Plano contratado: {subscribeResult.plan?.name}</p>
+                                                <p style={{ fontWeight: 600, marginBottom: 10 }}>✅ Plano contratado: {subscribeResult.plan?.name}</p>
+                                                
+                                                <div style={{ background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: 8, padding: '0.75rem', marginBottom: 10, fontSize: '0.82rem', color: '#fbbf24' }}>
+                                                    ⏳ <strong>Aguardando aprovação do barbeiro</strong><br/>
+                                                    Após confirmar o pagamento, o barbeiro aprovará seu plano. Você poderá usá-lo para agendar após a aprovação.
+                                                </div>
+
                                                 {subscribeResult.pixEmv ? (
                                                     <>
                                                         <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: 8 }}>
-                                                            Copie o código PIX abaixo para pagar. Após o pagamento, o barbeiro ativará seu plano.
+                                                            📋 Código PIX para pagamento:
                                                         </p>
                                                         <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 8, padding: '0.75rem', fontFamily: 'monospace', fontSize: '0.7rem', wordBreak: 'break-all', marginBottom: 8, color: '#fbbf24' }}>
                                                             {subscribeResult.pixEmv}
                                                         </div>
                                                         <button
                                                             onClick={() => copyPix(subscribeResult.pixEmv)}
-                                                            style={{ width: '100%', padding: '10px', borderRadius: 8, background: copiedPix ? '#22c55e' : '#f59e0b', color: '#000', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.88rem' }}
+                                                            style={{ width: '100%', padding: '10px', borderRadius: 8, background: copiedPix ? '#22c55e' : '#f59e0b', color: '#000', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.88rem', marginBottom: 8 }}
                                                         >
                                                             {copiedPix ? '✓ Código copiado!' : '📋 Copiar código PIX'}
                                                         </button>
                                                     </>
                                                 ) : (
                                                     <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: 10 }}>
-                                                        Combine o pagamento diretamente com a barbearia. Após confirmação, seu plano será ativado.
+                                                        Combine o pagamento diretamente com a barbearia.
                                                     </p>
                                                 )}
-                                                <button 
-                                                    onClick={goToBookingWithPlan} 
-                                                    style={{ width: '100%', padding: '10px', borderRadius: 8, background: '#3b82f6', color: '#fff', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.88rem', marginBottom: 8 }}
-                                                >
-                                                    📅 Ir para agendamento
-                                                </button>
+                                                
                                                 <button onClick={() => { setSubscribeResult(null); loadPlans(customer.phone, tenant.id); }} style={{ width: '100%', background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline' }}>
                                                     Fechar
                                                 </button>
