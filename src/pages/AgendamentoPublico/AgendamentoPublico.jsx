@@ -679,34 +679,36 @@ export default function AgendamentoPublico() {
                                         ) : availablePlans.length === 0 ? (
                                             <p style={{ color: 'rgba(255,255,255,0.45)', textAlign: 'center', padding: '1rem' }}>Nenhum plano disponível no momento.</p>
                                         ) : (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                                 {availablePlans.map(plan => (
-                                                    <div key={plan.id} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '1rem' }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                                                    <div key={plan.id} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '0.65rem 0.75rem' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4, gap: '0.5rem' }}>
                                                             <div>
-                                                                <strong style={{ fontSize: '0.95rem' }}>{plan.name}</strong>
-                                                                {plan.description && <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', margin: '3px 0 0' }}>{plan.description}</p>}
+                                                                <strong style={{ fontSize: '0.85rem', lineHeight: 1.2 }}>{plan.name}</strong>
+                                                                {plan.description && <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', margin: '2px 0 0' }}>{plan.description}</p>}
                                                             </div>
-                                                            <div style={{ textAlign: 'right' }}>
-                                                                <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f59e0b' }}>
+                                                            <div style={{ textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                                                                <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f59e0b', lineHeight: 1.1 }}>
                                                                     R$ {Number(plan.price).toFixed(2).replace('.', ',')}
                                                                 </div>
-                                                                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>
+                                                                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1 }}>
                                                                     {plan.billingPeriod === 'monthly' ? '/mês' : plan.billingPeriod === 'annual' ? '/ano' : plan.billingPeriod === 'quarterly' ? '/trim.' : ''}
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
-                                                            {(plan.services || []).map((s, i) => (
-                                                                <span key={i} style={{ fontSize: '0.72rem', padding: '2px 9px', borderRadius: 99, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                                                                    {s.serviceName} {s.maxUsages ? `× ${s.maxUsages}` : '∞'}
-                                                                </span>
-                                                            ))}
-                                                            {plan.validityDays && <span style={{ fontSize: '0.72rem', padding: '2px 9px', borderRadius: 99, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#fbbf24' }}>{plan.validityDays} dias</span>}
-                                                        </div>
+                                                        {(plan.services || []).length > 0 && (
+                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 6 }}>
+                                                                {(plan.services || []).map((s, i) => (
+                                                                    <span key={i} style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: 99, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                                                                        {s.serviceName} {s.maxUsages ? `× ${s.maxUsages}` : '∞'}
+                                                                    </span>
+                                                                ))}
+                                                                {plan.validityDays && <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: 99, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#fbbf24' }}>{plan.validityDays} dias</span>}
+                                                            </div>
+                                                        )}
                                                         <button
                                                             onClick={() => handleSubscribe(plan.id)}
-                                                            style={{ width: '100%', padding: '10px', borderRadius: 8, background: '#f59e0b', color: '#000', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.88rem' }}
+                                                            style={{ width: '100%', padding: '7px 10px', borderRadius: 6, background: '#f59e0b', color: '#000', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.78rem', lineHeight: 1.3 }}
                                                         >
                                                             Contratar plano
                                                         </button>
