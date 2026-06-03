@@ -197,9 +197,14 @@ export default function AgendamentoPublico() {
         try {
             const r = await fetch(`/api/public/appointment/by-customer?customerPhone=${encodeURIComponent(phone)}&tenantId=${tenantId}`);
             const d = await r.json();
-            setAppointments(d.appointments || []);
-            setStep(d.appointments?.length > 0 ? 2 : 3);
-        } catch { setStep(3); }
+            const appointments = d.appointments || [];
+            setAppointments(appointments);
+            setPortalTab(appointments.length > 0 ? 'agendamentos' : 'planos');
+            setStep(2);
+        } catch {
+            setPortalTab('planos');
+            setStep(2);
+        }
     };
 
     const loadPlans = async (phone, tenantId) => {
