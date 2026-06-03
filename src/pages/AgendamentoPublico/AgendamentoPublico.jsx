@@ -603,38 +603,66 @@ export default function AgendamentoPublico() {
                                         {/* Plano ativo */}
                                         {clientPlans.length > 0 && (
                                             <div style={{ marginBottom: '1.5rem' }}>
-                                                <h2 style={{ marginBottom: '0.75rem' }}>Plano Ativo</h2>
-                                                {clientPlans.map(cp => (
-                                                    <div key={cp.id} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '1rem', marginBottom: '0.75rem' }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                                                            <div>
-                                                                <strong style={{ fontSize: '1rem' }}>{cp.servicePlan?.name}</strong>
-                                                                {cp.endDate && <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', margin: '2px 0 0' }}>Válido até {cp.endDate.split('-').reverse().join('/')}</p>}
-                                                            </div>
-                                                            <span style={{ fontSize: '0.72rem', padding: '3px 10px', borderRadius: 99, background: cp.status === 'active' ? '#22c55e33' : '#f59e0b33', color: cp.status === 'active' ? '#22c55e' : '#f59e0b', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                                                                {cp.status === 'active' ? 'ATIVO' : 'AGUARDANDO PAGAMENTO'}
-                                                            </span>
-                                                        </div>
-                                                        {(cp.services || []).map((s, i) => {
-                                                            const pct = s.maxUsages ? Math.min(100, (s.usedCount / s.maxUsages) * 100) : 0;
-                                                            return (
-                                                                <div key={i} style={{ marginBottom: 8 }}>
-                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 3 }}>
-                                                                        <span>{s.serviceName}</span>
-                                                                        <span style={{ color: 'rgba(255,255,255,0.55)' }}>
-                                                                            {s.maxUsages === null ? 'Ilimitado' : `${s.usedCount}/${s.maxUsages} usos`}
+                                                <h2 style={{ marginBottom: '0.75rem' }}>Planos Ativos</h2>
+                                                {clientPlans.map(cp => {
+                                                    const hasAvailable = (cp.services || []).some(s => s.maxUsages == null || Number(s.usedCount || 0) < Number(s.maxUsages || 0));
+                                                    return (
+                                                        <div key={cp.id} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '1rem', marginBottom: '0.75rem' }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, gap: '1rem' }}>
+                                                                <div>
+                                                                    <strong style={{ fontSize: '1rem' }}>{cp.servicePlan?.name}</strong>
+                                                                    {cp.endDate && <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', margin: '2px 0 0' }}>Válido até {cp.endDate.split('-').reverse().join('/')}</p>}
+                                                                </div>
+                                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                                                                    <span style={{ fontSize: '0.72rem', padding: '3px 10px', borderRadius: 99, background: cp.status === 'active' ? '#22c55e33' : '#f59e0b33', color: cp.status === 'active' ? '#22c55e' : '#f59e0b', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                                                        {cp.status === 'active' ? 'ATIVO' : 'AGUARDANDO PAGAMENTO'}
+                                                                    </span>
+                                                                    {cp.status === 'active' && (
+                                                                        <span style={{ fontSize: '0.7rem', color: hasAvailable ? '#a3e635' : '#f87171' }}>
+                                                                            {hasAvailable ? 'Serviços disponíveis' : 'Sem serviços disponíveis'}
                                                                         </span>
-                                                                    </div>
-                                                                    {s.maxUsages !== null && (
-                                                                        <div style={{ height: 6, borderRadius: 99, background: 'rgba(255,255,255,0.15)', overflow: 'hidden' }}>
-                                                                            <div style={{ height: '100%', width: `${100 - pct}%`, background: pct >= 100 ? '#ef4444' : '#22c55e', borderRadius: 99, transition: 'width 0.3s' }} />
-                                                                        </div>
                                                                     )}
                                                                 </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                ))}
+                                                            </div>
+                                                            {(cp.services || []).map((s, i) => {
+                                                                const pct = s.maxUsages ? Math.min(100, (s.usedCount / s.maxUsages) * 100) : 0;
+                                                                return (
+                                                                    <div key={i} style={{ marginBottom: 8 }}>
+                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 3 }}>
+                                                                            <span>{s.serviceName}</span>
+                                                                            <span style={{ color: 'rgba(255,255,255,0.55)' }}>
+                                                                                {s.maxUsages == null ? 'Ilimitado' : `${s.usedCount}/${s.maxUsages} usos`}
+                                                                            </span>
+                                                                        </div>
+                                                                        {s.maxUsages !== null && (
+                                                                            <div style={{ height: 6, borderRadius: 99, background: 'rgba(255,255,255,0.15)', overflow: 'hidden' }}>
+                                                                                <div style={{ height: '100%', width: `${100 - pct}%`, background: pct >= 100 ? '#ef4444' : '#22c55e', borderRadius: 99, transition: 'width 0.3s' }} />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                            {cp.status === 'active' && hasAvailable && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const firstAvailable = (cp.services || []).find(s => s.maxUsages == null || Number(s.usedCount || 0) < Number(s.maxUsages || 0));
+                                                                        const serviceObj = services.find(svc => String(svc.id) === String(firstAvailable.serviceId) || svc.name?.toLowerCase() === String(firstAvailable.serviceName || '').toLowerCase());
+                                                                        if (!serviceObj) {
+                                                                            alert('Serviço do plano não está disponível para agendamento.');
+                                                                            return;
+                                                                        }
+                                                                        setAppointmentData(prev => ({ ...prev, serviceId: serviceObj.id, date: '', time: '' }));
+                                                                        setStep(4);
+                                                                    }}
+                                                                    style={{ width: '100%', padding: '9px 12px', borderRadius: 8, background: '#3b82f6', color: '#fff', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.85rem', marginTop: 8 }}
+                                                                >
+                                                                    Agendar com plano
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         )}
 
