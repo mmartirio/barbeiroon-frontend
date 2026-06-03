@@ -242,6 +242,22 @@ export default function AgendamentoPublico() {
         } catch (e) { setSubscribeError(e.message); }
     };
 
+    const goToBookingWithPlan = () => {
+        if (subscribeResult && subscribeResult.plan && subscribeResult.plan.services && subscribeResult.plan.services.length > 0) {
+            const firstPlanService = subscribeResult.plan.services[0];
+            const serviceObj = services.find(s => 
+                s.id === firstPlanService.serviceId || 
+                String(s.id) === String(firstPlanService.serviceId)
+            );
+            
+            if (serviceObj) {
+                setAppointmentData(prev => ({ ...prev, serviceId: serviceObj.id }));
+                setStep(4);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    };
+
     const copyPix = (text) => {
         navigator.clipboard.writeText(text).then(() => { setCopiedPix(true); setTimeout(() => setCopiedPix(false), 2500); });
     };
@@ -656,11 +672,17 @@ export default function AgendamentoPublico() {
                                                         </button>
                                                     </>
                                                 ) : (
-                                                    <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)' }}>
+                                                    <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', marginBottom: 10 }}>
                                                         Combine o pagamento diretamente com a barbearia. Após confirmação, seu plano será ativado.
                                                     </p>
                                                 )}
-                                                <button onClick={() => { setSubscribeResult(null); loadPlans(customer.phone, tenant.id); }} style={{ marginTop: 10, background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline' }}>
+                                                <button 
+                                                    onClick={goToBookingWithPlan} 
+                                                    style={{ width: '100%', padding: '10px', borderRadius: 8, background: '#3b82f6', color: '#fff', fontWeight: 600, border: 'none', cursor: 'pointer', fontSize: '0.88rem', marginBottom: 8 }}
+                                                >
+                                                    📅 Ir para agendamento
+                                                </button>
+                                                <button onClick={() => { setSubscribeResult(null); loadPlans(customer.phone, tenant.id); }} style={{ width: '100%', background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline' }}>
                                                     Fechar
                                                 </button>
                                             </div>
