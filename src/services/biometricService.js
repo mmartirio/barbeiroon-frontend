@@ -9,7 +9,8 @@ export const BiometricService = {
   isSupported() {
     return typeof window !== 'undefined' &&
       'credentials' in navigator &&
-      typeof window.PasswordCredential !== 'undefined';
+      typeof window.PasswordCredential !== 'undefined' &&
+      window.location.protocol === 'https:';
   },
 
   // Salva as credenciais após login bem-sucedido para acesso biométrico futuro
