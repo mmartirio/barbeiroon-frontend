@@ -9,7 +9,7 @@ const tok = () => sessionStorage.getItem('token');
 function LayoutInner({ children, title }) {
   const [suporteOpen,  setSuporteOpen]  = useState(false);
   const [whatsappOpen, setWhatsappOpen] = useState(false);
-  const { sidebarOpen, closeSidebar } = useSidebar();
+  const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
   const [tab, setTab]         = useState('qr'); // 'qr' | 'code'
   const [qrState, setQrState] = useState('idle'); // idle | loading | qr | connected | error | pending
   const [qrCode,  setQrCode]  = useState('');
@@ -88,6 +88,12 @@ function LayoutInner({ children, title }) {
         onExternalClose={closeSidebar}
       />
       <main className={s.main}>
+        <div className={s.mobileTopBar}>
+          <button className={s.hamburger} onClick={openSidebar} aria-label="Abrir menu">
+            <span /><span /><span />
+          </button>
+          <span className={s.hamburgerLabel}>Painel</span>
+        </div>
         <div className={s.content}>
           {title && <h1 className={s.pageTitle}>{title}</h1>}
           {children}

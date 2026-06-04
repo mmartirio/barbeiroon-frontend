@@ -30,9 +30,44 @@
   .content { padding: 1.25rem 1rem; padding-top: calc(var(--header-h) + 0.5rem); }
 }
 
+/* ── Mobile top bar com hamburger ───────────────────── */
+.mobileTopBar { display: none; }
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--color);
+  border-radius: 2px;
+}
+.hamburgerLabel {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color);
+}
+
 /* Mobile */
 @media (max-width: 768px) {
   .main { margin-left: 0; }
-  .content { padding: 1rem 0.75rem; padding-top: 0.75rem; }
+  .content { padding: 1rem 0.75rem; padding-top: 0; }
   .pageTitle { font-size: 1.15rem; margin-bottom: 1rem; }
+
+  .mobileTopBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.75rem 0.75rem 0;
+  }
 }
