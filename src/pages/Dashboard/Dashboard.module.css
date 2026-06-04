@@ -150,11 +150,9 @@
     white-space: nowrap;
   }
 
-  /* Botão full-width verde */
+  /* Botão full-width */
   .newApptBtn {
     width: 100% !important;
-    background: #00c951 !important;
-    color: #000 !important;
     font-weight: 800 !important;
     font-size: 1rem !important;
     height: 54px !important;
@@ -162,8 +160,6 @@
     border-radius: 14px !important;
     justify-content: center !important;
     margin-bottom: 20px !important;
-    border: none !important;
-    box-shadow: 0 4px 16px rgba(0, 201, 81, 0.35) !important;
     min-height: unset !important;
   }
 
