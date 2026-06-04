@@ -136,6 +136,11 @@ function PhoneBack() {
   );
 }
 
+const scrollTo = (id) => {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
 export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -149,7 +154,13 @@ export default function Landing() {
         </div>
 
         <div className="lp-nav-links">
-          {NAV_LINKS.map(l => <a key={l} href={`#${l.toLowerCase().replace(' ','-')}`}>{l}</a>)}
+          {NAV_LINKS.map(l => (
+            <a
+              key={l}
+              href={`#${l.toLowerCase().replace(/ /g, '-')}`}
+              onClick={e => { e.preventDefault(); scrollTo(l.toLowerCase().replace(/ /g, '-')); }}
+            >{l}</a>
+          ))}
         </div>
 
         <div className="lp-nav-cta">
@@ -164,7 +175,13 @@ export default function Landing() {
 
       {/* Mobile menu */}
       <div className={`lp-nav-mobile ${menuOpen ? 'open' : ''}`}>
-        {NAV_LINKS.map(l => <a key={l} href="#" onClick={() => setMenuOpen(false)}>{l}</a>)}
+        {NAV_LINKS.map(l => (
+          <a
+            key={l}
+            href={`#${l.toLowerCase().replace(/ /g, '-')}`}
+            onClick={e => { e.preventDefault(); setMenuOpen(false); scrollTo(l.toLowerCase().replace(/ /g, '-')); }}
+          >{l}</a>
+        ))}
         <Link to="/login" onClick={() => setMenuOpen(false)} style={{ color: '#94a3b8' }}>Entrar</Link>
       </div>
 
