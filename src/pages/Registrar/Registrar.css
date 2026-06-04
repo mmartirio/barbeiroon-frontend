@@ -780,6 +780,47 @@
 
 .reg-login-btn:hover { background: #15803d; transform: translateY(-1px); }
 
+/* ── App download section (success) ──────────────────────────────── */
+.reg-app-section {
+  width: 100%;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: left;
+  margin-top: 1.5rem;
+}
+.reg-app-section h3 { color: #e2e8f0; font-size: 1.05rem; font-weight: 800; margin: 0 0 0.25rem; text-align: center; }
+.reg-app-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.reg-app-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 1.1rem;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.reg-app-card strong { color: #e2e8f0; font-size: 0.92rem; }
+.reg-app-btn {
+  display: flex; align-items: center; justify-content: center;
+  padding: 9px 16px; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 700;
+  text-decoration: none; text-align: center;
+  transition: opacity 0.15s; margin-top: 8px;
+}
+.reg-app-btn:hover { opacity: 0.85; }
+.reg-app-btn-android { background: #22c55e; color: #000; }
+.reg-app-btn-ios     { background: rgba(37,99,235,0.12); color: #60a5fa; border: 1px solid rgba(37,99,235,0.3); }
+.reg-pwa-steps { display: flex; flex-direction: column; gap: 5px; margin-bottom: 4px; }
+.reg-pwa-step  { display: flex; align-items: flex-start; gap: 6px; font-size: 0.76rem; color: #94a3b8; line-height: 1.45; }
+.reg-pwa-num {
+  min-width: 18px; height: 18px;
+  background: rgba(37,99,235,0.2); border: 1px solid rgba(37,99,235,0.35);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 800; color: #93c5fd; flex-shrink: 0; margin-top: 1px;
+}
+.reg-pwa-step strong { color: #e2e8f0; }
+@media (max-width: 560px) { .reg-app-cards { grid-template-columns: 1fr; } }
+
 /* ── Footer ─────────────────────────────────────────────────────── */
 .reg-footer {
   border-top: 1px solid rgba(255,255,255,0.06);

@@ -375,6 +375,54 @@ export default function Registrar() {
             <Link to="/login" className="reg-login-btn">
               Ir para o login
             </Link>
+
+            {/* ── Download do App ── */}
+            <div className="reg-app-section">
+              <h3>📱 Instale o app no seu celular</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+                Gerencie sua barbearia de qualquer lugar.
+              </p>
+
+              <div className="reg-app-cards">
+                {/* Android */}
+                <div className="reg-app-card">
+                  <div style={{ fontSize: '1.75rem', marginBottom: 6 }}>🤖</div>
+                  <strong>Android</strong>
+                  <p style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Baixe o APK e instale diretamente</p>
+                  <a
+                    href="https://barbeiroon.com/downloads/barbeiroon_1.0.0.apk"
+                    className="reg-app-btn reg-app-btn-android"
+                    download
+                  >
+                    ⬇ Baixar APK
+                  </a>
+                </div>
+
+                {/* iOS */}
+                <div className="reg-app-card">
+                  <div style={{ fontSize: '1.75rem', marginBottom: 6 }}>🍎</div>
+                  <strong>iPhone (iOS)</strong>
+                  <p style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: 8 }}>Instale pelo Safari, sem App Store</p>
+                  <div className="reg-pwa-steps">
+                    {[
+                      ['1', <>Abra <strong>barbeiroon.com</strong> no <strong>Safari</strong></>],
+                      ['2', <>Toque no ícone <strong>⬆ Compartilhar</strong> (barra inferior)</>],
+                      ['3', <>Role e toque em <strong>"Adicionar à Tela de Início"</strong></>],
+                      ['4', <>Toque em <strong>"Adicionar"</strong> no canto superior direito</>],
+                      ['5', <>O ícone do app aparece na tela inicial 🎉</>],
+                    ].map(([n, text]) => (
+                      <div className="reg-pwa-step" key={n}>
+                        <span className="reg-pwa-num">{n}</span>
+                        <span>{text}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <a href="https://barbeiroon.com/login" className="reg-app-btn reg-app-btn-ios" target="_blank" rel="noopener noreferrer">
+                    Abrir no Safari
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <Footer />
