@@ -105,7 +105,7 @@ export default function Dashboard() {
           </div>
 
           {/* Compact info row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className={s.infoGrid}>
             {/* Next appointment */}
             <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/${tenantSlug}/servico-agendados`)}>
               <div className="card-header"><p className="card-title">Próximo agendamento</p></div>

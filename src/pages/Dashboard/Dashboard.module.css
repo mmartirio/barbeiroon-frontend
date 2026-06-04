@@ -41,26 +41,50 @@
   .statCard {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
-    padding: 0.9rem;
+    gap: 0.35rem;
+    padding: 0.85rem 0.75rem;
   }
 
+  /* Remove background colorido do ícone no mobile */
   .statIcon {
-    width: 36px; height: 36px;
-    border-radius: 9px;
+    background: none !important;
+    width: auto; height: auto;
+    border-radius: 0;
+    padding: 0;
   }
 
   .statLabel {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     margin-bottom: 0;
+    line-height: 1.3;
   }
 
   .statValue {
-    font-size: 1.5rem;
+    font-size: 1.45rem;
     font-weight: 800;
     line-height: 1.1;
   }
+}
+
+/* ── Grade de cards secundários (3 colunas no mobile) ────── */
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .infoGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .infoGrid .card-header { padding: 0.7rem 0.7rem 0; }
+  .infoGrid .card-body   { padding: 0.6rem 0.7rem 0.8rem; }
+  .infoGrid .card-title  { font-size: 0.65rem; }
 }
