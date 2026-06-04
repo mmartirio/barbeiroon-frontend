@@ -42,6 +42,11 @@ function LegacyRedirect({ path }) {
   return <Navigate to={`/${user.tenantSlug}/${path}`} replace />;
 }
 
+// Detecta se o app está rodando instalado como PWA (standalone)
+const isPwa = () =>
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true;
+
 function AppRoutes() {
   const { user, authReady } = useAuth();
   const location = useLocation();
@@ -61,7 +66,13 @@ function AppRoutes() {
       <Suspense fallback={<Fallback />}>
         <Routes>
           {/* Public */}
-          <Route path="/"          element={dashSlug ? <Navigate to={`/${dashSlug}/dashboard`} replace /> : <Landing />} />
+          <Route path="/" element={
+            dashSlug
+              ? <Navigate to={`/${dashSlug}/dashboard`} replace />
+              : isPwa()
+                ? <Navigate to="/login" replace />
+                : <Landing />
+          } />
           <Route path="/login"     element={dashSlug ? <Navigate to={mustSetup ? `/${dashSlug}/primeiro-acesso` : `/${dashSlug}/dashboard`} replace /> : <Login />} />
           <Route path="/recuperar-senha" element={<RecuperaSenha />} />
           <Route path="/agendar/:slug"   element={<AgendamentoPublico />} />
