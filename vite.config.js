@@ -89,7 +89,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://191.252.228.245:3001',
+        target: 'http://191.252.228.245',
         changeOrigin: true,
         configure: (proxy) => {
           proxy.on('proxyReq', (proxyReq) => {
@@ -98,7 +98,7 @@ export default defineConfig({
         },
       },
       '/uploads': {
-        target: 'http://191.252.228.245:3001',
+        target: 'http://191.252.228.245',
         changeOrigin: true,
       },
     },
