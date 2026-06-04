@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
+import s from './Dashboard.module.css';
 import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle, FiClock, FiAward, FiGift } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
@@ -11,7 +12,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { user } = useAuth();
-const tenantSlug = slug || user?.tenantSlug || '';
+  const tenantSlug = slug || user?.tenantSlug || '';
   const [stats,    setStats]    = useState(null);
   const [pending,  setPending]  = useState(0);
   const [nextAppt, setNextAppt] = useState(null);
@@ -54,26 +55,41 @@ const tenantSlug = slug || user?.tenantSlug || '';
     return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisible); };
   }, [load]);
 
-  const s = stats || {};
-  const birthdays = s.birthdays || [];
-  const topSvc    = s.topServices?.[0];
+  const st = stats || {};
+  const birthdays = st.birthdays || [];
+  const topSvc    = st.topServices?.[0];
 
   const STATS = [
-    { label: 'Total de Clientes',   value: s.totalClients      ?? '—', icon: FiUsers,       color: '#2563eb' },
-    { label: 'Agendamentos Hoje',   value: s.totalAppointments ?? '—', icon: FiCalendar,    color: '#7c3aed' },
-    { label: 'Faturamento Mensal',  value: fmtP(s.monthlyRevenue),     icon: FiDollarSign,  color: '#16a34a' },
-    { label: 'Serviços Realizados', value: s.servicesPerformed ?? '—', icon: FiScissors,    color: '#f59e0b' },
+    { label: 'Total de Clientes',   value: st.totalClients      ?? '—', icon: FiUsers,      color: '#7c3aed' },
+    { label: 'Agendamentos Hoje',   value: st.totalAppointments ?? '—', icon: FiCalendar,   color: '#7c3aed' },
+    { label: 'Faturamento Mensal',  value: fmtP(st.monthlyRevenue),     icon: FiDollarSign, color: '#f59e0b' },
+    { label: 'Serviços Realizados', value: st.servicesPerformed ?? '—', icon: FiScissors,   color: '#f59e0b' },
   ];
 
   return (
     <Layout>
+      {/* ── Seção de título — só no mobile ─────────────────── */}
+      <div className={s.mobileHero}>
+        <div>
+          <p className={s.mobileHeroTitle}>Painel do Administrador</p>
+          <p className={s.mobileHeroSub}>Bem-vindo de volta!{user?.name ? ` ${user.name}.` : ''} Aqui está o resumo de hoje.</p>
+        </div>
+        <div className={s.mobileHeroLogo}>
+          <img src="/icon.png" alt="Barbeiro ON" style={{ height: 44 }} />
+          <span className={s.mobileHeroLogoText}>Barbeiro ON</span>
+        </div>
+      </div>
 
-      <h2 style={{ marginBottom: 20, fontSize: '1.35rem', fontWeight: 700 }}>Dashboard</h2>
+      {/* ── Título desktop ──────────────────────────────────── */}
+      <h2 style={{ marginBottom: 20, fontSize: '1.35rem', fontWeight: 700 }} className={s.desktopTitle}>Dashboard</h2>
 
-      {/* Ações */}
+      {/* ── Ações ───────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-        <button className="btn btn-primary btn-sm" onClick={() => navigate(`/${tenantSlug}/novo-agendamento`)}>
-          <FiPlusCircle size={14} /> Novo Agendamento
+        <button
+          className={`btn btn-primary ${s.newApptBtn}`}
+          onClick={() => navigate(`/${tenantSlug}/novo-agendamento`)}
+        >
+          <FiPlusCircle size={16} /> + Novo Agendamento
         </button>
         {pending > 0 && (
           <button
@@ -89,79 +105,68 @@ const tenantSlug = slug || user?.tenantSlug || '';
         <p style={{ color: 'var(--color-muted)' }}>Carregando...</p>
       ) : (
         <>
-          {/* Stats */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginBottom: 28 }}>
+          {/* ── Stats ──────────────────────────────────────── */}
+          <div className={s.statsGrid}>
             {STATS.map(({ label, value, icon: Icon, color }) => (
-              <div key={label} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 38, height: 38, borderRadius: 8, background: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0 }}>
-                  <Icon size={17} />
+              <div key={label} className={s.statCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                {/* Mobile layout */}
+                <div className={s.statCardTop}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0 }}>
+                    <Icon size={16} />
+                  </div>
+                  <span className={s.statLabel}>{label}</span>
                 </div>
-                <div>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 700, lineHeight: 1 }}>{value}</div>
-                  <div style={{ fontSize: '0.73rem', color: 'var(--color-muted)', marginTop: 3 }}>{label}</div>
-                </div>
+                <span className={s.statValue}>{value}</span>
               </div>
             ))}
           </div>
 
-          {/* Info cards */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
+          {/* ── Info cards ─────────────────────────────────── */}
+          <div className={s.infoGrid}>
 
             {/* Próximo agendamento */}
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20, cursor: 'pointer' }}
+            <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', cursor: 'pointer' }}
                  onClick={() => navigate(`/${tenantSlug}/servico-agendados`)}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#2563eb22', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
-                  <FiClock size={14} />
-                </div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Próximo agendamento</span>
-              </div>
+              <span className={s.infoCardTitle}>Próximo agendamento</span>
+              <div style={{ color: '#2563eb' }}><FiClock size={22} /></div>
               {nextAppt ? (
-                <>
-                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{nextAppt.customer?.name || nextAppt.customerPhone || '—'}</div>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.78rem', marginTop: 4 }}>
-                    {nextAppt.service?.name || '—'} · {String(nextAppt.appointmentTime || '').slice(0, 5)}
-                  </div>
-                </>
-              ) : <p style={{ color: 'var(--color-muted)', fontSize: '0.84rem' }}>Nenhum agendamento hoje</p>}
+                <span className={s.infoCardValue}>
+                  {nextAppt.appointmentDate ? `Horário: ${new Date(nextAppt.appointmentDate + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}` : ''}{'\n'}
+                  Serviço: {nextAppt.service?.name || '—'}
+                </span>
+              ) : (
+                <span className={s.infoCardValue}>Nenhum agendamento hoje</span>
+              )}
             </div>
 
             {/* Serviço mais vendido */}
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#f59e0b22', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b' }}>
-                  <FiAward size={14} />
-                </div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Serviço mais vendido</span>
-              </div>
+            <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+              <span className={s.infoCardTitle}>Serviço mais vendido</span>
+              <div style={{ color: '#f59e0b' }}><FiScissors size={22} /></div>
               {topSvc ? (
-                <>
-                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{topSvc.name || topSvc.serviceName}</div>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.78rem', marginTop: 4 }}>{topSvc.count || topSvc.total || 0} atendimentos</div>
-                </>
-              ) : <p style={{ color: 'var(--color-muted)', fontSize: '0.84rem' }}>Sem dados</p>}
+                <span className={s.infoCardValue}>{topSvc.name || topSvc.serviceName}</span>
+              ) : (
+                <span className={s.infoCardValue}>Sem dados</span>
+              )}
             </div>
 
             {/* Aniversariantes */}
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20, cursor: birthdays.length > 0 ? 'pointer' : 'default' }}
+            <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', cursor: birthdays.length > 0 ? 'pointer' : 'default' }}
                  onClick={() => birthdays.length > 0 && setBdModal(true)}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#ec489922', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ec4899' }}>
-                  <FiGift size={14} />
-                </div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Aniversariantes do Mês</span>
-              </div>
-              {birthdays.length > 0
-                ? <div style={{ fontWeight: 600, color: 'var(--accent)', fontSize: '0.95rem' }}>{birthdays.length} cliente{birthdays.length > 1 ? 's' : ''} — clique para ver</div>
-                : <p style={{ color: 'var(--color-muted)', fontSize: '0.84rem' }}>Nenhum este mês</p>
-              }
+              <span className={s.infoCardTitle}>Aniversariantes do Mês</span>
+              <div style={{ color: '#7c3aed' }}><FiGift size={22} /></div>
+              {birthdays.length > 0 ? (
+                <span className={s.infoCardValue}>{birthdays.length} cliente{birthdays.length > 1 ? 's' : ''}</span>
+              ) : (
+                <span className={s.infoCardValue}>Nenhum aniversariante este mês</span>
+              )}
             </div>
 
           </div>
         </>
       )}
 
-      {/* Modal aniversariantes */}
+      {/* ── Modal aniversariantes ───────────────────────────── */}
       {bdModal && (
         <div className="modal-overlay" onClick={() => setBdModal(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>

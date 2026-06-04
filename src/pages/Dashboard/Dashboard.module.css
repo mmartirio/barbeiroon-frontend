@@ -1,7 +1,151 @@
-.mobile-only-header,
-[class*="mobile-only-header"] { display: none; }
-
+/* ── Mobile-only header (hamburger) ──────────────────── */
+.mobile-only-header { display: none; }
 @media (max-width: 768px) {
-  .mobile-only-header,
-  [class*="mobile-only-header"] { display: flex; }
+  .mobile-only-header { display: flex; }
+}
+
+/* ── Desktop: oculta seção de título mobile ─────────── */
+.mobileHero { display: none; }
+.desktopTitle { display: block; }
+
+/* ── Botão Novo Agendamento ──────────────────────────── */
+.newApptBtn { }
+
+/* ── Stats grid ──────────────────────────────────────── */
+.statsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+/* ── Info grid ───────────────────────────────────────── */
+.infoGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE  ≤ 768px
+══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Oculta título desktop no mobile */
+  .desktopTitle { display: none; }
+
+  /* Seção de título/boas-vindas */
+  .mobileHero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .mobileHeroTitle {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .mobileHeroSub {
+    font-size: 0.82rem;
+    color: var(--color-muted);
+    line-height: 1.4;
+  }
+  .mobileHeroLogo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .mobileHeroLogoText {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* Botão Novo Agendamento full-width verde */
+  .newApptBtn {
+    width: 100% !important;
+    background: #00c951 !important;
+    color: #000 !important;
+    font-weight: 800 !important;
+    font-size: 1rem !important;
+    padding: 0 !important;
+    height: 54px !important;
+    border-radius: 14px !important;
+    justify-content: center !important;
+    margin-bottom: 20px !important;
+    border: none !important;
+    box-shadow: 0 4px 16px rgba(0, 201, 81, 0.35) !important;
+    min-height: unset !important;
+  }
+
+  /* Stats: grade 2×2 */
+  .statsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* Stat card mobile — ícone + label uppercase + número grande */
+  .statCard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+    min-height: 120px;
+  }
+  .statCardTop {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .statLabel {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    line-height: 1.2;
+  }
+  .statValue {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--color);
+  }
+
+  /* Info cards: 3 colunas iguais */
+  .infoGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .infoCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 14px 8px !important;
+    border-radius: 16px !important;
+    gap: 8px;
+  }
+  .infoCardTitle {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--color);
+    line-height: 1.2;
+  }
+  .infoCardValue {
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    line-height: 1.3;
+  }
 }
