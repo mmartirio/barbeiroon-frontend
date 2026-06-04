@@ -12,6 +12,7 @@ import {
   RiComputerLine,
   RiTicketLine,
   RiWhatsappLine,
+  RiSmartphoneLine,
 } from 'react-icons/ri';
 import { useGestorAuth } from '../../context/GestorAuthContext';
 import './Layout.css';
@@ -25,7 +26,8 @@ const NAV = [
   { to: '/gestor/planos',        icon: RiPriceTag3Line,   label: 'Planos' },
   { to: '/gestor/cobrancas',     icon: RiBankCardLine,    label: 'Cobranças' },
   { to: '/gestor/admins',        icon: RiUserSettingsLine, label: 'Admins' },
-  { to: '/gestor/suporte',       icon: RiTicketLine,       label: 'Chamados' },
+  { to: '/gestor/suporte',       icon: RiTicketLine,        label: 'Chamados' },
+  { to: '/gestor/instaladores', icon: RiSmartphoneLine,    label: 'Instaladores' },
 ];
 
 /* ── WhatsApp QR + Pairing modal ── */

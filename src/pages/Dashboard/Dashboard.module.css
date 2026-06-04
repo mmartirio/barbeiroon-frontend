@@ -33,8 +33,8 @@
 
 /* ── Stats grid ─────────────────────────────────────────── */
 .statsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -68,6 +68,7 @@
 /* ── Mobile — grade 2 colunas estilo app nativo ─────────── */
 @media (max-width: 768px) {
   .statsGrid {
+    display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.6rem;
     margin-bottom: 1rem;
@@ -106,14 +107,15 @@
 
 /* ── Grade de cards secundários (3 colunas no mobile) ────── */
 .infoGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 @media (max-width: 768px) {
   .infoGrid {
+    display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
     margin-bottom: 1rem;
