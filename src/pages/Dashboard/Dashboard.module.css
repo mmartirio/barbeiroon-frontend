@@ -1,41 +1,24 @@
-/* ── Mobile-only header (hamburger) ──────────────────── */
-.mobile-only-header { display: none; }
-@media (max-width: 768px) {
-  .mobile-only-header { display: flex; }
-}
+/* ══════════════════════════════════════════════════════
+   DESKTOP (base)
+══════════════════════════════════════════════════════ */
 
-/* ── Top bar com hamburger (só mobile) ───────────────── */
-.mobileTopBar {
-  display: none;
-}
-
-/* ── Hamburger button ────────────────────────────────── */
+/* Top bar hamburger — só mobile */
+.mobileTopBar { display: none; }
 .hamburger {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  width: 36px;
-  height: 36px;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 5px; background: none; border: none; cursor: pointer; padding: 4px;
+  width: 36px; height: 36px;
 }
 .hamburger span {
-  display: block;
-  width: 22px;
-  height: 2px;
-  background: var(--color);
-  border-radius: 2px;
-  transition: background 0.15s;
+  display: block; width: 22px; height: 2px;
+  background: var(--color); border-radius: 2px;
 }
 
-/* ── Desktop: oculta seção de título mobile ─────────── */
-.mobileHero { display: none; }
-.desktopTitle { display: block; }
+/* Hero title — só mobile */
+.mobileHero    { display: none; }
+.desktopTitle  { display: block; }
 
-/* ── Botão Novo Agendamento ──────────────────────────── */
+/* Botão Novo Agendamento */
 .newApptBtn { }
 
 /* ── Stats grid ──────────────────────────────────────── */
@@ -46,6 +29,36 @@
   margin-bottom: 28px;
 }
 
+/* Stat card — desktop: ícone + texto lado a lado */
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 10px;
+}
+.statIcon {
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.statBody {
+  display: flex;
+  flex-direction: column;
+}
+.statValue {
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color);
+}
+.statLabel {
+  font-size: 0.73rem;
+  color: var(--color-muted);
+  margin-top: 3px;
+}
+
 /* ── Info grid ───────────────────────────────────────── */
 .infoGrid {
   display: flex;
@@ -53,15 +66,44 @@
   gap: 14px;
 }
 
+/* Info card — desktop */
+.infoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.infoCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.infoCardTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color);
+}
+.infoCardValue {
+  font-size: 0.84rem;
+  color: var(--color-muted);
+}
+.infoCardHighlight {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color);
+}
+
 /* ══════════════════════════════════════════════════════
    MOBILE  ≤ 768px
 ══════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* Oculta título desktop no mobile */
   .desktopTitle { display: none; }
 
-  /* Top bar com hamburger */
+  /* Top bar hamburger */
   .mobileTopBar {
     display: flex;
     align-items: center;
@@ -69,12 +111,12 @@
     margin-bottom: 16px;
   }
   .mobileTopBarTitle {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--color);
   }
 
-  /* Seção de título/boas-vindas */
+  /* Hero */
   .mobileHero {
     display: flex;
     align-items: flex-start;
@@ -83,7 +125,7 @@
     margin-bottom: 20px;
   }
   .mobileHeroTitle {
-    font-size: 1.5rem;
+    font-size: 1.45rem;
     font-weight: 800;
     color: var(--color);
     line-height: 1.2;
@@ -108,15 +150,15 @@
     white-space: nowrap;
   }
 
-  /* Botão Novo Agendamento full-width verde */
+  /* Botão full-width verde */
   .newApptBtn {
     width: 100% !important;
     background: #00c951 !important;
     color: #000 !important;
     font-weight: 800 !important;
     font-size: 1rem !important;
-    padding: 0 !important;
     height: 54px !important;
+    padding: 0 !important;
     border-radius: 14px !important;
     justify-content: center !important;
     margin-bottom: 20px !important;
@@ -133,59 +175,49 @@
     margin-bottom: 16px;
   }
 
-  /* Stat card mobile — ícone + label uppercase + número grande */
+  /* Stat card mobile — coluna, label uppercase, número grande */
   .statCard {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: column !important;
+    align-items: flex-start !important;
     padding: 16px 14px !important;
     border-radius: 16px !important;
     min-height: 120px;
+    gap: 8px !important;
   }
-  .statCardTop {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .statIcon {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .statBody { flex-direction: column-reverse; } /* label uppercase em cima, valor embaixo */
+  .statValue {
+    font-size: 2.2rem !important;
+    font-weight: 800 !important;
+    line-height: 1;
   }
   .statLabel {
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--color-muted);
-    line-height: 1.2;
-  }
-  .statValue {
-    font-size: 2.2rem;
-    font-weight: 800;
-    line-height: 1;
-    color: var(--color);
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    margin-top: 0 !important;
+    color: var(--color-muted) !important;
   }
 
-  /* Info cards: 3 colunas iguais */
+  /* Info cards: 3 colunas */
   .infoGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
   .infoCard {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: center !important;
+    text-align: center !important;
     padding: 14px 8px !important;
     border-radius: 16px !important;
-    gap: 8px;
+    gap: 6px !important;
   }
-  .infoCardTitle {
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: var(--color);
-    line-height: 1.2;
-  }
-  .infoCardValue {
-    font-size: 0.72rem;
-    color: var(--color-muted);
-    line-height: 1.3;
-  }
+  .infoCardHeader { flex-direction: column; gap: 6px; margin-bottom: 0; }
+  .infoCardTitle  { font-size: 0.65rem !important; }
+  .infoCardValue  { font-size: 0.7rem !important; }
+  .infoCardHighlight { font-size: 0.82rem !important; }
 }

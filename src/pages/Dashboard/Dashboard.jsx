@@ -32,7 +32,6 @@ export default function Dashboard() {
       const od = await ownRes.json().catch(() => ({}));
       setStats(sd.stats || sd);
       setPending((pd.requests || pd.data || []).length);
-
       const now = new Date();
       const nowMins = now.getHours() * 60 + now.getMinutes();
       const upcoming = (od.appointments || [])
@@ -68,11 +67,13 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      {/* ── Seção de título — só no mobile ─────────────────── */}
+      {/* ── Hero mobile ──────────────────────────────────── */}
       <div className={s.mobileHero}>
         <div>
           <p className={s.mobileHeroTitle}>Painel do Administrador</p>
-          <p className={s.mobileHeroSub}>Bem-vindo de volta!{user?.name ? ` ${user.name}.` : ''} Aqui está o resumo de hoje.</p>
+          <p className={s.mobileHeroSub}>
+            Bem-vindo de volta{user?.name ? `, ${user.name}` : ''}! Aqui está o resumo de hoje.
+          </p>
         </div>
         <div className={s.mobileHeroLogo}>
           <img src="/icon.png" alt="Barbeiro ON" style={{ height: 44 }} />
@@ -80,15 +81,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Título desktop ──────────────────────────────────── */}
-      <h2 style={{ marginBottom: 20, fontSize: '1.35rem', fontWeight: 700 }} className={s.desktopTitle}>Dashboard</h2>
+      {/* ── Título desktop ──────────────────────────────── */}
+      <h2 className={s.desktopTitle} style={{ marginBottom: 20, fontSize: '1.35rem', fontWeight: 700 }}>Dashboard</h2>
 
-      {/* ── Ações ───────────────────────────────────────────── */}
+      {/* ── Ações ───────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-        <button
-          className={`btn btn-primary ${s.newApptBtn}`}
-          onClick={() => navigate(`/${tenantSlug}/novo-agendamento`)}
-        >
+        <button className={`btn btn-primary ${s.newApptBtn}`} onClick={() => navigate(`/${tenantSlug}/novo-agendamento`)}>
           <FiPlusCircle size={16} /> + Novo Agendamento
         </button>
         {pending > 0 && (
@@ -101,72 +99,65 @@ export default function Dashboard() {
         )}
       </div>
 
-      {loading ? (
-        <p style={{ color: 'var(--color-muted)' }}>Carregando...</p>
-      ) : (
+      {loading ? <p style={{ color: 'var(--color-muted)' }}>Carregando...</p> : (
         <>
-          {/* ── Stats ──────────────────────────────────────── */}
+          {/* ── Stats ─────────────────────────────────────── */}
           <div className={s.statsGrid}>
             {STATS.map(({ label, value, icon: Icon, color }) => (
               <div key={label} className={s.statCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                {/* Mobile layout */}
-                <div className={s.statCardTop}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0 }}>
-                    <Icon size={16} />
-                  </div>
+                <div className={s.statIcon} style={{ background: `${color}22`, color }}>
+                  <Icon size={17} />
+                </div>
+                <div className={s.statBody}>
+                  <span className={s.statValue}>{value}</span>
                   <span className={s.statLabel}>{label}</span>
                 </div>
-                <span className={s.statValue}>{value}</span>
               </div>
             ))}
           </div>
 
-          {/* ── Info cards ─────────────────────────────────── */}
+          {/* ── Info cards ──────────────────────────────── */}
           <div className={s.infoGrid}>
 
-            {/* Próximo agendamento */}
-            <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', cursor: 'pointer' }}
+            <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                  onClick={() => navigate(`/${tenantSlug}/servico-agendados`)}>
-              <span className={s.infoCardTitle}>Próximo agendamento</span>
-              <div style={{ color: '#2563eb' }}><FiClock size={22} /></div>
+              <div className={s.infoCardHeader}>
+                <div style={{ color: '#2563eb' }}><FiClock size={20} /></div>
+                <span className={s.infoCardTitle}>Próximo agendamento</span>
+              </div>
               {nextAppt ? (
-                <span className={s.infoCardValue}>
-                  {nextAppt.appointmentDate ? `Horário: ${new Date(nextAppt.appointmentDate + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}` : ''}{'\n'}
-                  Serviço: {nextAppt.service?.name || '—'}
-                </span>
-              ) : (
-                <span className={s.infoCardValue}>Nenhum agendamento hoje</span>
-              )}
+                <>
+                  <span className={s.infoCardHighlight}>{nextAppt.customer?.name || nextAppt.customerPhone || '—'}</span>
+                  <span className={s.infoCardValue}>{nextAppt.service?.name || '—'} · {String(nextAppt.appointmentTime || '').slice(0, 5)}</span>
+                </>
+              ) : <span className={s.infoCardValue}>Nenhum agendamento hoje</span>}
             </div>
 
-            {/* Serviço mais vendido */}
             <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-              <span className={s.infoCardTitle}>Serviço mais vendido</span>
-              <div style={{ color: '#f59e0b' }}><FiScissors size={22} /></div>
-              {topSvc ? (
-                <span className={s.infoCardValue}>{topSvc.name || topSvc.serviceName}</span>
-              ) : (
-                <span className={s.infoCardValue}>Sem dados</span>
-              )}
+              <div className={s.infoCardHeader}>
+                <div style={{ color: '#f59e0b' }}><FiAward size={20} /></div>
+                <span className={s.infoCardTitle}>Serviço mais vendido</span>
+              </div>
+              {topSvc
+                ? <><span className={s.infoCardHighlight}>{topSvc.name || topSvc.serviceName}</span><span className={s.infoCardValue}>{topSvc.count || topSvc.total || 0} atendimentos</span></>
+                : <span className={s.infoCardValue}>Sem dados</span>}
             </div>
 
-            {/* Aniversariantes */}
             <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', cursor: birthdays.length > 0 ? 'pointer' : 'default' }}
                  onClick={() => birthdays.length > 0 && setBdModal(true)}>
-              <span className={s.infoCardTitle}>Aniversariantes do Mês</span>
-              <div style={{ color: '#7c3aed' }}><FiGift size={22} /></div>
-              {birthdays.length > 0 ? (
-                <span className={s.infoCardValue}>{birthdays.length} cliente{birthdays.length > 1 ? 's' : ''}</span>
-              ) : (
-                <span className={s.infoCardValue}>Nenhum aniversariante este mês</span>
-              )}
+              <div className={s.infoCardHeader}>
+                <div style={{ color: '#7c3aed' }}><FiGift size={20} /></div>
+                <span className={s.infoCardTitle}>Aniversariantes do Mês</span>
+              </div>
+              {birthdays.length > 0
+                ? <span className={s.infoCardHighlight}>{birthdays.length} cliente{birthdays.length > 1 ? 's' : ''}</span>
+                : <span className={s.infoCardValue}>Nenhum aniversariante este mês</span>}
             </div>
 
           </div>
         </>
       )}
 
-      {/* ── Modal aniversariantes ───────────────────────────── */}
       {bdModal && (
         <div className="modal-overlay" onClick={() => setBdModal(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
