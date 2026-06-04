@@ -75,7 +75,7 @@ function SubItem({ to, icon, label, onClick }) {
   );
 }
 
-export default function Sidebar({ onWhatsApp, onSupport }) {
+export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExternalClose }) {
   const { user, logout } = useAuth();
   const [theme, toggleTheme] = useTheme();
   const location = useLocation();
@@ -83,6 +83,15 @@ export default function Sidebar({ onWhatsApp, onSupport }) {
   const params = useParams();
   const slug = params.slug || user?.tenantSlug || '';
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (externalOpen) setMobileOpen(true);
+  }, [externalOpen]);
+
+  const handleClose = () => {
+    setMobileOpen(false);
+    onExternalClose?.();
+  };
   const [tenantLogo, setTenantLogo] = useState('');
   const [tenantName, setTenantName] = useState('');
   const [pendingPlanCount, setPendingPlanCount] = useState(0);
@@ -146,7 +155,7 @@ export default function Sidebar({ onWhatsApp, onSupport }) {
         <FiMenu size={20} />
       </button>
 
-      <div className={`${s.overlay}${mobileOpen ? ` ${s.open}` : ''}`} onClick={() => setMobileOpen(false)} />
+      <div className={`${s.overlay}${mobileOpen ? ` ${s.open}` : ''}`} onClick={handleClose} />
 
       <nav className={`${s.sidebar}${mobileOpen ? ` ${s.open}` : ''}`}>
         <div className={s.brand}>
@@ -154,7 +163,7 @@ export default function Sidebar({ onWhatsApp, onSupport }) {
             ? <img src={tenantLogo} alt="" className={s.brandLogo} onError={e => { e.target.style.display = 'none'; }} />
             : <div className={s.brandLogo} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', fontSize: '1.1rem', fontWeight: 700 }}>B</div>
           }
-          <button className={s.closeBtn} onClick={() => setMobileOpen(false)} style={{ marginLeft: 'auto' }}><FiX size={18} /></button>
+          <button className={s.closeBtn} onClick={handleClose} style={{ marginLeft: 'auto' }}><FiX size={18} /></button>
           <span className={s.brandName}>{tenantName}</span>
         </div>
 

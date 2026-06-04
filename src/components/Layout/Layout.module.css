@@ -29,3 +29,17 @@
   .main { margin-left: 0; }
   .content { padding: 1.25rem 1rem; padding-top: calc(var(--header-h) + 0.5rem); }
 }
+
+/* Mobile — visual idêntico ao app nativo */
+@media (max-width: 768px) {
+  .main { margin-left: 0; }
+  .content {
+    padding: 1rem 0.75rem;
+    padding-top: 0.75rem;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+  .pageTitle {
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+  }
+}

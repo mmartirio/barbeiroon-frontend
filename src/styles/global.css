@@ -215,3 +215,41 @@ textarea.form-input { resize: vertical; min-height: 80px; }
   .modal-box { border-radius: var(--radius) var(--radius) 0 0; max-height: 95vh; }
   .modal-overlay { align-items: flex-end; padding: 0; }
 }
+
+/* ── Mobile — aparência idêntica ao app nativo (≤768px) ──── */
+@media (max-width: 768px) {
+  html, body { font-size: 16px; }
+
+  /* Cards: bordas menores, padding ajustado */
+  .card { border-radius: 14px; }
+  .card-body { padding: 1rem; }
+  .card-header { padding: 1rem 1rem 0; }
+
+  /* Botões com touch target mínimo de 44px */
+  .btn { min-height: 44px; padding: 0 1rem; font-size: 0.875rem; font-weight: 600; }
+  .btn-sm { min-height: 36px; font-size: 0.82rem; }
+  .btn-icon { min-height: 44px; min-width: 44px; }
+
+  /* Inputs maiores para toque */
+  .form-input { min-height: 44px; font-size: 1rem; padding: 0.65rem 0.875rem; border-radius: 10px; }
+  .form-label { font-size: 0.82rem; }
+
+  /* Tabelas com scroll suave */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Alerts full-width */
+  .alert { border-radius: 10px; font-size: 0.9rem; padding: 0.75rem 1rem; }
+
+  /* Modal bottom-sheet nativo */
+  .modal-box {
+    border-radius: 18px 18px 0 0;
+    max-height: 90vh;
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+  }
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-header { padding: 1.1rem 1.1rem 0; }
+  .modal-body   { padding: 0.9rem 1.1rem; }
+  .modal-footer { padding: 0.9rem 1.1rem; }
+}
