@@ -4,6 +4,33 @@
   .mobile-only-header { display: flex; }
 }
 
+/* ── Top bar com hamburger (só mobile) ───────────────── */
+.mobileTopBar {
+  display: none;
+}
+
+/* ── Hamburger button ────────────────────────────────── */
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  width: 36px;
+  height: 36px;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--color);
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
 /* ── Desktop: oculta seção de título mobile ─────────── */
 .mobileHero { display: none; }
 .desktopTitle { display: block; }
@@ -33,6 +60,19 @@
 
   /* Oculta título desktop no mobile */
   .desktopTitle { display: none; }
+
+  /* Top bar com hamburger */
+  .mobileTopBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .mobileTopBarTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color);
+  }
 
   /* Seção de título/boas-vindas */
   .mobileHero {

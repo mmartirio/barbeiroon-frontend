@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
+import { useSidebar } from '../../context/SidebarContext';
 import s from './Dashboard.module.css';
 import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle, FiClock, FiAward, FiGift } from 'react-icons/fi';
 
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { user } = useAuth();
+  const { openSidebar } = useSidebar();
   const tenantSlug = slug || user?.tenantSlug || '';
   const [stats,    setStats]    = useState(null);
   const [pending,  setPending]  = useState(0);
@@ -68,6 +70,14 @@ export default function Dashboard() {
 
   return (
     <Layout>
+      {/* ── Header hamburger — só no mobile ─────────────────── */}
+      <div className={s.mobileTopBar}>
+        <button className={s.hamburger} onClick={openSidebar} aria-label="Abrir menu">
+          <span /><span /><span />
+        </button>
+        <span className={s.mobileTopBarTitle}>Painel</span>
+      </div>
+
       {/* ── Seção de título — só no mobile ─────────────────── */}
       <div className={s.mobileHero}>
         <div>
