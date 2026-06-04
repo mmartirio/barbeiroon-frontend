@@ -3,11 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 import { useSidebar } from '../../context/SidebarContext';
-import s from './Dashboard.module.css';
-import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle } from 'react-icons/fi';
+import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle, FiClock, FiAward, FiGift } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
-const fmtP  = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
+const fmtP = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -62,26 +61,29 @@ export default function Dashboard() {
   const topSvc    = s.topServices?.[0];
 
   const STATS = [
-    { label: 'Total de Clientes',    value: s.totalClients       ?? '—', icon: <FiUsers size={20} />,       color: '#22c55e' },
-    { label: 'Agendamentos Hoje',    value: s.totalAppointments  ?? '—', icon: <FiCalendar size={20} />,    color: '#2563eb' },
-    { label: 'Faturamento Mensal',   value: fmtP(s.monthlyRevenue),      icon: <FiDollarSign size={20} />,  color: '#16a34a' },
-    { label: 'Serviços Realizados',  value: s.servicesPerformed  ?? '—', icon: <FiScissors size={20} />,    color: '#ee4c02' },
+    { label: 'Total de Clientes',   value: s.totalClients      ?? '—', icon: FiUsers,       color: '#2563eb' },
+    { label: 'Agendamentos Hoje',   value: s.totalAppointments ?? '—', icon: FiCalendar,    color: '#7c3aed' },
+    { label: 'Faturamento Mensal',  value: fmtP(s.monthlyRevenue),     icon: FiDollarSign,  color: '#16a34a' },
+    { label: 'Serviços Realizados', value: s.servicesPerformed ?? '—', icon: FiScissors,    color: '#f59e0b' },
   ];
 
   return (
     <Layout>
-      {/* Header mobile com botão de menu abaixo do título */}
-      <div className={s.mobileHeader}>
+      {/* Header mobile */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1rem', marginBottom: '1rem' }}
+           className="mobile-only-header">
         <div>
-          <h1 className={s.mobileTitle}>Painel do Barbeiro</h1>
-          {user?.name && <p className={s.mobileSubtitle}>Bem-vindo, {user.name}</p>}
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color)', marginBottom: '0.15rem' }}>Painel do Barbeiro</h1>
+          {user?.name && <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Bem-vindo, {user.name}</p>}
         </div>
-        <button className={s.menuBtn} onClick={openSidebar} aria-label="Abrir menu">
+        <button onClick={openSidebar} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--color)', fontSize: '0.85rem', fontWeight: 600, padding: '0.55rem 1rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
           ☰ Menu
         </button>
       </div>
 
-      {/* Top actions */}
+      <h2 style={{ marginBottom: 20, fontSize: '1.35rem', fontWeight: 700 }}>Dashboard</h2>
+
+      {/* Ações */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <button className="btn btn-primary btn-sm" onClick={() => navigate(`/${tenantSlug}/novo-agendamento`)}>
           <FiPlusCircle size={14} /> Novo Agendamento
@@ -97,71 +99,82 @@ export default function Dashboard() {
       </div>
 
       {loading ? (
-        <div className="empty-state"><p>Carregando...</p></div>
+        <p style={{ color: 'var(--color-muted)' }}>Carregando...</p>
       ) : (
         <>
-          {/* Stats grid */}
-          <div className={s.statsGrid}>
-            {STATS.map(st => (
-              <div key={st.label} className="card">
-                <div className={`card-body ${s.statCard}`}>
-                  <div className={s.statIcon} style={{ color: st.color }}>
-                    {st.icon}
-                  </div>
-                  <div>
-                    <p className={s.statLabel}>{st.label}</p>
-                    <p className={s.statValue}>{st.value}</p>
-                  </div>
+          {/* Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))', gap: 14, marginBottom: 28 }}>
+            {STATS.map(({ label, value, icon: Icon, color }) => (
+              <div key={label} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 38, height: 38, borderRadius: 8, background: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0 }}>
+                  <Icon size={17} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '1.45rem', fontWeight: 700, lineHeight: 1 }}>{value}</div>
+                  <div style={{ fontSize: '0.73rem', color: 'var(--color-muted)', marginTop: 3 }}>{label}</div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Compact info row */}
-          <div className={s.infoGrid}>
-            {/* Next appointment */}
-            <div className="card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/${tenantSlug}/servico-agendados`)}>
-              <div className="card-header"><p className="card-title">Próximo agendamento</p></div>
-              <div className="card-body">
-                {nextAppt ? (
-                  <>
-                    <p style={{ fontWeight: 600 }}>{nextAppt.customer?.name || nextAppt.customerPhone || '—'}</p>
-                    <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>
-                      {nextAppt.service?.name || '—'} · {String(nextAppt.appointmentTime || '').slice(0, 5)}
-                    </p>
-                  </>
-                ) : <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>Nenhum agendamento hoje</p>}
+          {/* Info cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+
+            {/* Próximo agendamento */}
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20, cursor: 'pointer' }}
+                 onClick={() => navigate(`/${tenantSlug}/servico-agendados`)}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#2563eb22', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
+                  <FiClock size={14} />
+                </div>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Próximo agendamento</span>
               </div>
+              {nextAppt ? (
+                <>
+                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{nextAppt.customer?.name || nextAppt.customerPhone || '—'}</div>
+                  <div style={{ color: 'var(--color-muted)', fontSize: '0.78rem', marginTop: 4 }}>
+                    {nextAppt.service?.name || '—'} · {String(nextAppt.appointmentTime || '').slice(0, 5)}
+                  </div>
+                </>
+              ) : <p style={{ color: 'var(--color-muted)', fontSize: '0.84rem' }}>Nenhum agendamento hoje</p>}
             </div>
 
-            {/* Top service */}
-            <div className="card">
-              <div className="card-header"><p className="card-title">Serviço mais vendido</p></div>
-              <div className="card-body">
-                {topSvc ? (
-                  <>
-                    <p style={{ fontWeight: 600 }}>{topSvc.name || topSvc.serviceName}</p>
-                    <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>{topSvc.count || topSvc.total || 0} atendimentos</p>
-                  </>
-                ) : <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>Sem dados</p>}
+            {/* Serviço mais vendido */}
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#f59e0b22', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b' }}>
+                  <FiAward size={14} />
+                </div>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Serviço mais vendido</span>
               </div>
+              {topSvc ? (
+                <>
+                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{topSvc.name || topSvc.serviceName}</div>
+                  <div style={{ color: 'var(--color-muted)', fontSize: '0.78rem', marginTop: 4 }}>{topSvc.count || topSvc.total || 0} atendimentos</div>
+                </>
+              ) : <p style={{ color: 'var(--color-muted)', fontSize: '0.84rem' }}>Sem dados</p>}
             </div>
 
-            {/* Birthdays */}
-            <div className="card" style={{ cursor: birthdays.length > 0 ? 'pointer' : 'default' }} onClick={() => birthdays.length > 0 && setBdModal(true)}>
-              <div className="card-header"><p className="card-title">Aniversariantes do Mês</p></div>
-              <div className="card-body">
-                {birthdays.length > 0 ? (
-                  <p style={{ fontWeight: 600, color: 'var(--accent)' }}>{birthdays.length} cliente{birthdays.length > 1 ? 's' : ''} — clique para ver</p>
-                ) : <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>Nenhum este mês</p>}
+            {/* Aniversariantes */}
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20, cursor: birthdays.length > 0 ? 'pointer' : 'default' }}
+                 onClick={() => birthdays.length > 0 && setBdModal(true)}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#ec489922', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ec4899' }}>
+                  <FiGift size={14} />
+                </div>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Aniversariantes do Mês</span>
               </div>
+              {birthdays.length > 0
+                ? <div style={{ fontWeight: 600, color: 'var(--accent)', fontSize: '0.95rem' }}>{birthdays.length} cliente{birthdays.length > 1 ? 's' : ''} — clique para ver</div>
+                : <p style={{ color: 'var(--color-muted)', fontSize: '0.84rem' }}>Nenhum este mês</p>
+              }
             </div>
+
           </div>
-
         </>
       )}
 
-      {/* Birthdays modal */}
+      {/* Modal aniversariantes */}
       {bdModal && (
         <div className="modal-overlay" onClick={() => setBdModal(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
@@ -177,11 +190,8 @@ export default function Dashboard() {
                     <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>{b.phone} · {b.birthDate ? new Date(b.birthDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : ''}</p>
                   </div>
                   {b.phone && (
-                    <a
-                      href={`https://wa.me/55${b.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Feliz aniversário, ${b.name}! 🎉`)}`}
-                      target="_blank" rel="noreferrer"
-                      className="btn btn-success btn-sm"
-                    >
+                    <a href={`https://wa.me/55${b.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Feliz aniversário, ${b.name}! 🎉`)}`}
+                       target="_blank" rel="noreferrer" className="btn btn-success btn-sm">
                       <FiMessageCircle size={13} /> WhatsApp
                     </a>
                   )}

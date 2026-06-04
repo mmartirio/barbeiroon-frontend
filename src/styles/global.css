@@ -257,3 +257,10 @@ textarea.form-input { resize: vertical; min-height: 80px; }
   .modal-body   { padding: 0.9rem 1.1rem; }
   .modal-footer { padding: 0.9rem 1.1rem; }
 }
+
+/* ── Mobile-only header (Dashboard barbeiro) ─────────────── */
+.mobile-only-header { display: none; }
+@media (max-width: 768px) {
+  .mobile-only-header { display: flex; }
+}
+
