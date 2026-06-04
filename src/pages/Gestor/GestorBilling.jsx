@@ -128,12 +128,13 @@ function PixConfigTab() {
 
 // ─── Tab: Cobranças PIX ───────────────────────────────────────────────────────
 
-const EMPTY_INVOICE = { tenantId: '', planType: 'monthly', amountCents: '', dueDate: '', description: '', notes: '' };
+const EMPTY_INVOICE = { tenantId: '', planId: '', amountCents: '', dueDate: '', description: '', notes: '' };
 
 function CobrancasTab() {
     const api = useApi();
     const [invoices, setInvoices]         = useState([]);
     const [tenants, setTenants]           = useState([]);
+    const [plans, setPlans]               = useState([]);
     const [loading, setLoading]           = useState(false);
     const [filterTenant, setFilterTenant] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
@@ -154,6 +155,11 @@ function CobrancasTab() {
         catch { /* silencioso */ }
     }, [api]);
 
+    const loadPlans = useCallback(async () => {
+        try { const d = await api('/plans'); setPlans((d.plans || []).filter(p => p.isActive)); }
+        catch { /* silencioso */ }
+    }, [api]);
+
     const loadInvoices = useCallback(async () => {
         setLoading(true); setError('');
         try {
@@ -166,7 +172,7 @@ function CobrancasTab() {
         finally { setLoading(false); }
     }, [api, filterTenant, filterStatus]);
 
-    useEffect(() => { checkPixConfig(); loadTenants(); }, [checkPixConfig, loadTenants]);
+    useEffect(() => { checkPixConfig(); loadTenants(); loadPlans(); }, [checkPixConfig, loadTenants, loadPlans]);
     useEffect(() => { loadInvoices(); }, [loadInvoices]);
 
     const openCreate = () => {
@@ -178,9 +184,17 @@ function CobrancasTab() {
     const handleCreate = async (e) => {
         e.preventDefault(); setSaving(true); setError('');
         try {
-            const amountCents = Math.round(Number(String(form.amountCents).replace(',', '.')) * 100);
-            if (!amountCents || amountCents < 100) throw new Error('Valor mínimo é R$ 1,00.');
-            await api('/pix/invoices', { method: 'POST', body: JSON.stringify({ tenantId: form.tenantId || undefined, planType: form.planType, amountCents, dueDate: form.dueDate, description: form.description || undefined, notes: form.notes || undefined }) });
+            const amountCents = form.amountCents
+                ? Math.round(Number(String(form.amountCents).replace(',', '.')) * 100)
+                : undefined;
+            await api('/pix/invoices', { method: 'POST', body: JSON.stringify({
+                tenantId: form.tenantId || undefined,
+                planId: form.planId || undefined,
+                amountCents,
+                dueDate: form.dueDate,
+                description: form.description || undefined,
+                notes: form.notes || undefined,
+            })});
             closeModal(); loadInvoices();
         } catch (e) { setError(e.message); }
         finally { setSaving(false); }
@@ -239,17 +253,18 @@ function CobrancasTab() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                                        <strong style={{ fontSize: '0.88rem' }}>{inv.customerName || inv.tenant?.name || `#${inv.id}`}</strong>
-                                        {inv.tenant?.name && inv.customerName !== inv.tenant?.name && (
-                                            <span style={{ fontSize: '0.72rem', padding: '1px 6px', borderRadius: 4, background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}>{inv.tenant.name}</span>
+                                        <strong style={{ fontSize: '0.88rem' }}>{inv.tenant?.name || inv.customerName || `#${inv.id}`}</strong>
+                                        {inv.planName && (
+                                            <span style={{ fontSize: '0.72rem', padding: '1px 6px', borderRadius: 4, background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}>{inv.planName}</span>
                                         )}
-                                        <span style={{ fontSize: '0.72rem', padding: '1px 6px', borderRadius: 4, background: 'rgba(34,197,94,0.12)', color: '#86efac' }}>{PLAN_LABEL[inv.planType] || inv.planType}</span>
                                         <Badge status={inv.status} />
                                     </div>
                                     <div style={{ fontSize: '0.78rem', color: 'var(--color-muted)', display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                                         <span><strong style={{ color: 'var(--color)' }}>{fmtMoney(inv.amountCents)}</strong></span>
                                         <span>Venc: {fmtDate(inv.dueDate)}</span>
-                                        {inv.description && <span>{inv.description}</span>}
+                                        {(inv.tenantPhone || inv.tenant?.ownerPhone || inv.tenant?.phone) && (
+                                            <span>📞 {inv.tenantPhone || inv.tenant?.ownerPhone || inv.tenant?.phone}</span>
+                                        )}
                                         {inv.paidAt && <span>Pago em: {new Date(inv.paidAt).toLocaleDateString('pt-BR')}</span>}
                                     </div>
                                 </div>
@@ -281,24 +296,26 @@ function CobrancasTab() {
                     <form onSubmit={handleCreate}>
                         {error && <div style={errStyle}>{error}</div>}
                         <div className="form-group">
-                            <label className="form-label">Empresa</label>
-                            <select className="form-input" value={form.tenantId} onChange={e => setForm(p => ({ ...p, tenantId: e.target.value }))}>
+                            <label className="form-label">Empresa *</label>
+                            <select className="form-input" value={form.tenantId} onChange={e => setForm(p => ({ ...p, tenantId: e.target.value }))} required>
                                 <option value="">Selecione a empresa...</option>
                                 {tenants.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                             </select>
                         </div>
-                        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                            {[{ v: 'monthly', l: 'Mensal' }, { v: 'annual', l: 'Anual' }].map(({ v, l }) => (
-                                <button key={v} type="button" onClick={() => setForm(p => ({ ...p, planType: v }))}
-                                    style={{ flex: 1, padding: '8px 0', border: '1px solid', borderRadius: 8, cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600, borderColor: form.planType === v ? '#3b82f6' : 'var(--border)', background: form.planType === v ? 'rgba(59,130,246,0.12)' : 'transparent', color: form.planType === v ? '#60a5fa' : 'var(--color-muted)' }}>
-                                    {l}
-                                </button>
-                            ))}
+                        <div className="form-group">
+                            <label className="form-label">Plano *</label>
+                            <select className="form-input" value={form.planId} onChange={e => {
+                                const plan = plans.find(p => String(p.id) === e.target.value);
+                                setForm(p => ({ ...p, planId: e.target.value, amountCents: plan ? String(plan.priceMonthly) : p.amountCents }));
+                            }} required>
+                                <option value="">Selecione o plano...</option>
+                                {plans.map(p => <option key={p.id} value={p.id}>{p.name} — {(p.priceMonthly || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/mês</option>)}
+                            </select>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
                             <div className="form-group">
-                                <label className="form-label">Valor (R$) *</label>
-                                <input className="form-input" value={form.amountCents} onChange={e => setForm(p => ({ ...p, amountCents: e.target.value }))} required placeholder="99,90" />
+                                <label className="form-label">Valor (R$) <span style={{ color: 'var(--color-muted)', fontWeight: 400 }}>(preenchido pelo plano)</span></label>
+                                <input className="form-input" value={form.amountCents} onChange={e => setForm(p => ({ ...p, amountCents: e.target.value }))} placeholder="99,90" />
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Vencimento *</label>
