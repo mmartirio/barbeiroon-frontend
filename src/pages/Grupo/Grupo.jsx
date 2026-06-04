@@ -21,12 +21,12 @@ const PERMISSOES = [
     { key: 'canDeleteCustomer',  label: 'Excluir' },
   ]},
   { categoria: 'Agendamento', perms: [
-    { key: 'canViewAppointments',    label: 'Visualizar' },
-    { key: 'canCreateAppointment',   label: 'Criar' },
-    { key: 'canEditAppointment',     label: 'Permitir editar agendados' },
-    { key: 'canCancelAppointment',   label: 'Permitir cancelar agendamentos' },
-    { key: 'canDeleteAppointment',   label: 'Excluir (remover permanentemente)' },
-    { key: 'maxAppointmentsPerDay',  label: 'Limite de agendamentos por dia por profissional', type: 'number', placeholder: 'Sem limite' },
+    { key: 'canViewAppointments',   label: 'Visualizar' },
+    { key: 'canCreateAppointment',  label: 'Criar' },
+    { key: 'canEditAppointment',    label: 'Permitir editar agendados' },
+    { key: 'canCancelAppointment',  label: 'Permitir cancelar agendamentos' },
+    { key: 'canDeleteAppointment',  label: 'Excluir (remover permanentemente)' },
+    { key: 'maxAppointmentsPerDay', label: 'Limite de agendamentos por dia por profissional', type: 'number', placeholder: 'Sem limite' },
   ]},
   { categoria: 'Conta', perms: [
     { key: 'canManageTenant', label: 'Gerenciar conta' },
@@ -37,6 +37,11 @@ const PERMISSOES = [
   { categoria: 'Serviços', perms: [
     { key: 'canViewServices',    label: 'Visualizar' },
     { key: 'canManageServices',  label: 'Gerenciar' },
+  ]},
+  { categoria: 'Planos de Serviço', perms: [
+    { key: 'canCreateServicePlan', label: 'Criar plano' },
+    { key: 'canEditServicePlan',   label: 'Editar plano' },
+    { key: 'canDeleteServicePlan', label: 'Excluir plano' },
   ]},
   { categoria: 'Profissionais', perms: [
     { key: 'canViewProfessionals',    label: 'Visualizar' },
