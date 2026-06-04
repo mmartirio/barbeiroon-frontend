@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
-import { useSidebar } from '../../context/SidebarContext';
 import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle, FiClock, FiAward, FiGift } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
@@ -12,8 +11,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { user } = useAuth();
-  const { openSidebar } = useSidebar();
-  const tenantSlug = slug || user?.tenantSlug || '';
+const tenantSlug = slug || user?.tenantSlug || '';
   const [stats,    setStats]    = useState(null);
   const [pending,  setPending]  = useState(0);
   const [nextAppt, setNextAppt] = useState(null);
@@ -69,17 +67,6 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      {/* Header mobile */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1rem', marginBottom: '1rem' }}
-           className="mobile-only-header">
-        <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color)', marginBottom: '0.15rem' }}>Painel do Barbeiro</h1>
-          {user?.name && <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Bem-vindo, {user.name}</p>}
-        </div>
-        <button onClick={openSidebar} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--color)', fontSize: '0.85rem', fontWeight: 600, padding: '0.55rem 1rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-          ☰ Menu
-        </button>
-      </div>
 
       <h2 style={{ marginBottom: 20, fontSize: '1.35rem', fontWeight: 700 }}>Dashboard</h2>
 
