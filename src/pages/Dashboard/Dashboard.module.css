@@ -1,0 +1,66 @@
+/* ── Stats grid ─────────────────────────────────────────── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.statIcon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.statLabel {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+
+.statValue {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* ── Mobile — grade 2 colunas estilo app nativo ─────────── */
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .statCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.9rem;
+  }
+
+  .statIcon {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+  }
+
+  .statLabel {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0;
+  }
+
+  .statValue {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+}

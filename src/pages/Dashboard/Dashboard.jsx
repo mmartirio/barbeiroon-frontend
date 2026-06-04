@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
+import s from './Dashboard.module.css';
 import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
@@ -87,16 +88,16 @@ export default function Dashboard() {
       ) : (
         <>
           {/* Stats grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className={s.statsGrid}>
             {STATS.map(st => (
               <div key={st.label} className="card">
-                <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: `${st.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: st.color, flexShrink: 0 }}>
+                <div className={`card-body ${s.statCard}`}>
+                  <div className={s.statIcon} style={{ background: `${st.color}22`, color: st.color }}>
                     {st.icon}
                   </div>
                   <div>
-                    <p style={{ color: 'var(--color-muted)', fontSize: '0.75rem', marginBottom: '0.2rem' }}>{st.label}</p>
-                    <p style={{ fontWeight: 700, fontSize: '1.2rem' }}>{st.value}</p>
+                    <p className={s.statLabel}>{st.label}</p>
+                    <p className={s.statValue}>{st.value}</p>
                   </div>
                 </div>
               </div>

@@ -183,11 +183,3 @@
   .overlay.open { display: block; }
 }
 
-/* mobile (≤768px): hamburger oculto — BottomNav é o gatilho */
-@media (max-width: 768px) {
-  .hamburger { display: none; }
-  .sidebar { transform: translateX(-100%); box-shadow: var(--shadow); }
-  .sidebar.open { transform: translateX(0); }
-  .closeBtn { display: flex; }
-  .overlay.open { display: block; }
-}

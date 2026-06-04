@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import s from './Layout.module.css';
 import Sidebar from '../Sidebar/Sidebar';
 import SuporteModal from '../Suporte/SuporteModal';
-import BottomNav from '../BottomNav/BottomNav';
 
 const tok = () => sessionStorage.getItem('token');
 
@@ -93,8 +92,6 @@ export default function Layout({ children, title }) {
           {children}
         </div>
       </main>
-
-      <BottomNav onOpenMenu={() => setSidebarOpen(true)} />
 
       {suporteOpen && <SuporteModal onClose={() => setSuporteOpen(false)} />}
 
