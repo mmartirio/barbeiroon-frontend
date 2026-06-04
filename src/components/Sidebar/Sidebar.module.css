@@ -174,17 +174,12 @@
 .themeBtn:hover { background: rgba(255,255,255,0.05); color: var(--color); }
 :global([data-theme="light"]) .themeBtn:hover { background: rgba(0,0,0,0.05); }
 
-/* tablet (1025px → 769px): hamburger + overlay */
-@media (max-width: 1024px) {
+/* mobile (≤768px): sidebar oculta, hamburger do Layout assume */
+@media (max-width: 768px) {
   .sidebar { transform: translateX(-100%); box-shadow: var(--shadow); }
   .sidebar.open { transform: translateX(0); }
-  .hamburger { display: flex; }
   .closeBtn { display: flex; }
   .overlay.open { display: block; }
-}
-
-/* mobile (≤768px): hamburger fixo oculto — botão de menu no Dashboard */
-@media (max-width: 768px) {
-  .hamburger { display: none; }
+  .hamburger { display: none; } /* hamburger está no Layout.jsx */
 }
 

@@ -25,9 +25,8 @@
   color: var(--color);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .main { margin-left: 0; }
-  .content { padding: 1.25rem 1rem; padding-top: calc(var(--header-h) + 0.5rem); }
 }
 
 /* ── Mobile top bar com hamburger ───────────────────── */
