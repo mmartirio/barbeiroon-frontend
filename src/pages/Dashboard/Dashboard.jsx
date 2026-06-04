@@ -66,7 +66,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <Layout title="Painel do Administrador">
+    <Layout title={`Painel do Barbeiro${user?.name ? ` — ${user.name}` : ''}`}>
       {/* Top actions */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <button className="btn btn-primary btn-sm" onClick={() => navigate(`/${tenantSlug}/novo-agendamento`)}>

@@ -297,8 +297,19 @@ export default function AgendamentoPublico() {
                 setAvailableTimes([]);
                 setOverflowTimes([]);
             } else {
-                setAvailableTimes(d.availableTimes || []);
-                setOverflowTimes(d.overflowTimes || []);
+                // Filtrar horários já passados quando a data selecionada é hoje
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0];
+                const isToday = date === todayStr;
+                const filterPast = (times) => isToday
+                    ? times.filter(t => {
+                        const [h, m] = t.split(':').map(Number);
+                        const slot = new Date(); slot.setHours(h, m, 0, 0);
+                        return slot > now;
+                    })
+                    : times;
+                setAvailableTimes(filterPast(d.availableTimes || []));
+                setOverflowTimes(filterPast(d.overflowTimes || []));
                 if ((d.availableTimes || []).length === 0 && (d.overflowTimes || []).length === 0) {
                     setTimesError('Nenhum horário disponível para esta data.');
                 }
