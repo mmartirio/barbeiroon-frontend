@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
+import { useSidebar } from '../../context/SidebarContext';
 import s from './Dashboard.module.css';
 import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle } from 'react-icons/fi';
 
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { user } = useAuth();
+  const { openSidebar } = useSidebar();
   const tenantSlug = slug || user?.tenantSlug || '';
   const [stats,    setStats]    = useState(null);
   const [pending,  setPending]  = useState(0);
@@ -67,7 +69,18 @@ export default function Dashboard() {
   ];
 
   return (
-    <Layout title={`Painel do Barbeiro${user?.name ? ` — ${user.name}` : ''}`}>
+    <Layout>
+      {/* Header mobile com botão de menu abaixo do título */}
+      <div className={s.mobileHeader}>
+        <div>
+          <h1 className={s.mobileTitle}>Painel do Barbeiro</h1>
+          {user?.name && <p className={s.mobileSubtitle}>Bem-vindo, {user.name}</p>}
+        </div>
+        <button className={s.menuBtn} onClick={openSidebar} aria-label="Abrir menu">
+          ☰ Menu
+        </button>
+      </div>
+
       {/* Top actions */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <button className="btn btn-primary btn-sm" onClick={() => navigate(`/${tenantSlug}/novo-agendamento`)}>
@@ -92,7 +105,7 @@ export default function Dashboard() {
             {STATS.map(st => (
               <div key={st.label} className="card">
                 <div className={`card-body ${s.statCard}`}>
-                  <div className={s.statIcon} style={{ background: `${st.color}22`, color: st.color }}>
+                  <div className={s.statIcon} style={{ color: st.color }}>
                     {st.icon}
                   </div>
                   <div>

@@ -183,3 +183,8 @@
   .overlay.open { display: block; }
 }
 
+/* mobile (≤768px): hamburger fixo oculto — botão de menu no Dashboard */
+@media (max-width: 768px) {
+  .hamburger { display: none; }
+}
+

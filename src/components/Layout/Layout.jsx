@@ -2,13 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import s from './Layout.module.css';
 import Sidebar from '../Sidebar/Sidebar';
 import SuporteModal from '../Suporte/SuporteModal';
+import { SidebarProvider, useSidebar } from '../../context/SidebarContext';
 
 const tok = () => sessionStorage.getItem('token');
 
-export default function Layout({ children, title }) {
+function LayoutInner({ children, title }) {
   const [suporteOpen,  setSuporteOpen]  = useState(false);
   const [whatsappOpen, setWhatsappOpen] = useState(false);
-  const [sidebarOpen,  setSidebarOpen]  = useState(false);
+  const { sidebarOpen, closeSidebar } = useSidebar();
   const [tab, setTab]         = useState('qr'); // 'qr' | 'code'
   const [qrState, setQrState] = useState('idle'); // idle | loading | qr | connected | error | pending
   const [qrCode,  setQrCode]  = useState('');
@@ -84,7 +85,7 @@ export default function Layout({ children, title }) {
         onWhatsApp={() => setWhatsappOpen(true)}
         onSupport={() => setSuporteOpen(true)}
         externalOpen={sidebarOpen}
-        onExternalClose={() => setSidebarOpen(false)}
+        onExternalClose={closeSidebar}
       />
       <main className={s.main}>
         <div className={s.content}>
@@ -240,5 +241,13 @@ export default function Layout({ children, title }) {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Layout(props) {
+  return (
+    <SidebarProvider>
+      <LayoutInner {...props} />
+    </SidebarProvider>
   );
 }

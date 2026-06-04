@@ -1,3 +1,36 @@
+/* ── Header mobile com botão de menu ────────────────────── */
+.mobileHeader {
+  display: none; /* só no mobile */
+}
+
+.mobileTitle    { font-size: 1.25rem; font-weight: 800; color: var(--color); margin-bottom: 0.15rem; }
+.mobileSubtitle { font-size: 0.85rem; color: var(--color-muted); }
+
+.menuBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--color);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .mobileHeader {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
 /* ── Stats grid ─────────────────────────────────────────── */
 .statsGrid {
   display: grid;
@@ -17,6 +50,8 @@
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  /* Sem background — cor via style inline (color) */
+  background: none;
 }
 
 .statLabel {
