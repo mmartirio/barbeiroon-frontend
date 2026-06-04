@@ -255,30 +255,23 @@ export default function Landing() {
           <div className="lp-app-cards">
             {/* Android */}
             <div className="lp-app-card">
-              <div className="lp-app-card-icon">🤖</div>
-              <h3>Android</h3>
-              <p>Baixe o APK e instale diretamente no seu celular Android.</p>
-              <a
-                href="https://barbeiroon.com/downloads/barbeiroon_1.0.0.apk"
-                className="lp-app-btn lp-app-btn-android"
-                download
-              >
-                ⬇ Baixar APK (Android)
+              <p className="lp-app-card-label">Android</p>
+              <p className="lp-app-card-desc">Baixe o APK e instale diretamente no seu celular.</p>
+              <a href="https://barbeiroon.com/downloads/barbeiroon_1.0.0.apk" className="lp-app-btn lp-app-btn-android" download>
+                Baixar APK
               </a>
               <span className="lp-app-version">v1.0.0 · 87 MB</span>
             </div>
 
             {/* iOS PWA */}
             <div className="lp-app-card">
-              <div className="lp-app-card-icon">🍎</div>
-              <h3>iPhone (iOS)</h3>
-              <p>Instale como app direto pelo Safari, sem precisar da App Store.</p>
+              <p className="lp-app-card-label">iPhone (iOS)</p>
+              <p className="lp-app-card-desc">Instale pelo Safari, sem App Store.</p>
               <div className="lp-pwa-steps">
                 <div className="lp-pwa-step"><span className="lp-pwa-num">1</span><span>Abra <strong>barbeiroon.com</strong> no <strong>Safari</strong></span></div>
-                <div className="lp-pwa-step"><span className="lp-pwa-num">2</span><span>Toque no ícone de compartilhar <strong>⬆</strong> (barra inferior)</span></div>
-                <div className="lp-pwa-step"><span className="lp-pwa-num">3</span><span>Role e toque em <strong>"Adicionar à Tela de Início"</strong></span></div>
-                <div className="lp-pwa-step"><span className="lp-pwa-num">4</span><span>Toque em <strong>"Adicionar"</strong> no canto superior direito</span></div>
-                <div className="lp-pwa-step"><span className="lp-pwa-num">5</span><span>O ícone do app aparece na sua tela inicial 🎉</span></div>
+                <div className="lp-pwa-step"><span className="lp-pwa-num">2</span><span>Toque no ícone <strong>Compartilhar ⬆</strong> (barra inferior)</span></div>
+                <div className="lp-pwa-step"><span className="lp-pwa-num">3</span><span>Toque em <strong>"Adicionar à Tela de Início"</strong></span></div>
+                <div className="lp-pwa-step"><span className="lp-pwa-num">4</span><span>Toque em <strong>"Adicionar"</strong></span></div>
               </div>
               <a href="https://barbeiroon.com/login" className="lp-app-btn lp-app-btn-ios" target="_blank" rel="noopener noreferrer">
                 Abrir no Safari

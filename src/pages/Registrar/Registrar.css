@@ -800,6 +800,7 @@
   display: flex; flex-direction: column; gap: 4px;
 }
 .reg-app-card strong { color: #e2e8f0; font-size: 0.92rem; }
+.reg-app-card-label { color: #e2e8f0; font-size: 0.9rem; font-weight: 700; }
 .reg-app-btn {
   display: flex; align-items: center; justify-content: center;
   padding: 9px 16px; border-radius: 8px;
