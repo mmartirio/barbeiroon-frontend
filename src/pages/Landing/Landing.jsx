@@ -27,7 +27,7 @@ const FEATURES = [
 ];
 
 
-const NAV_LINKS = ['Recursos', 'Planos', 'Funcionalidades', 'Como funciona', 'Depoimentos'];
+const NAV_LINKS = ['Recursos', 'Planos', 'Funcionalidades', 'Como funciona', 'Depoimentos', 'Downloads'];
 
 const CAL_DAYS = [18,19,20,21,22,23,24];
 const APPTS = [
@@ -246,7 +246,7 @@ export default function Landing() {
       </section>
 
       {/* ── App Mobile ── */}
-      <section className="lp-app-section" id="app">
+      <section className="lp-app-section" id="downloads">
         <div className="lp-app-inner">
           <div className="lp-section-eyebrow">Disponível em todas as plataformas</div>
           <h2 className="lp-section-title">Leve a barbearia no bolso</h2>
