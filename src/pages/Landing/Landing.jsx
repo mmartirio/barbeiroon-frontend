@@ -39,99 +39,24 @@ const APPTS = [
 
 function PhoneFront() {
   return (
-    <div className="phone-front">
-      <div className="phone-notch" />
-      <div className="phone-screen">
-        <div className="app-topbar">
-          <div className="app-topbar-logo">B</div>
-          <div className="app-topbar-text">
-            Olá, João!
-            <span>Aqui está o resumo do seu dia.</span>
-          </div>
-        </div>
-
-        <div className="app-stats-row">
-          <div className="app-stat-card">
-            <span className="app-stat-val">12</span>
-            <span className="app-stat-label">Agendamentos</span>
-          </div>
-          <div className="app-stat-card">
-            <span className="app-stat-val">86</span>
-            <span className="app-stat-label">Clientes</span>
-          </div>
-          <div className="app-stat-card">
-            <span className="app-stat-val" style={{ fontSize: 10 }}>R$1.250</span>
-            <span className="app-stat-label">Faturamento</span>
-          </div>
-        </div>
-
-        <div className="app-section-title">Próximos agendamentos</div>
-        {APPTS.map((a, i) => (
-          <div className="app-appt-item" key={i}>
-            <span className="app-appt-time">{a.time}</span>
-            <div className="app-appt-info">
-              <span className="app-appt-name">{a.name}</span>
-              <span className="app-appt-service">{a.service}</span>
-            </div>
-            <div className="app-appt-wa">W</div>
-          </div>
-        ))}
-
-        <div className="app-calendar">
-          <div className="app-calendar-header">
-            <span>Calendário</span>
-            <span>Maio 2025</span>
-          </div>
-          <div className="app-calendar-days">
-            {CAL_DAYS.map(d => (
-              <div key={d} className={`app-cal-day ${d === 21 ? 'today' : d === 19 || d === 23 ? 'has-appt' : ''}`}>
-                {d}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="app-tabbar">
-          {[['🏠','Início'],['📅','Agenda'],['➕',''],['👤','Clientes'],['···','Mais']].map(([icon, label], i) => (
-            <div key={i} className={`app-tab ${i === 0 ? 'active' : ''}`}>
-              <div className="app-tab-icon">{icon}</div>
-              <span>{label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="phone-front phone-screenshot">
+      <img
+        src="/screenshots/screen-dashboard.png"
+        alt="Painel do Barbeiro ON"
+        className="phone-screenshot-img"
+      />
     </div>
   );
 }
 
 function PhoneBack() {
   return (
-    <div className="phone-back">
-      <div className="phone-screen" style={{ padding: '20px 10px 10px' }}>
-        <div className="phone-back-screen">
-          <div className="pbs-title">Desempenho — Este mês</div>
-          <div className="pbs-big-num">R$ 12.540</div>
-          <div className="pbs-big-sub">+18% em relação ao mês anterior</div>
-          <div className="pbs-bars">
-            {[35, 50, 42, 65, 48, 72, 60, 88].map((h, i) => (
-              <div key={i} className="pbs-bar" style={{ height: `${h}%` }} />
-            ))}
-          </div>
-          <div className="pbs-legend">
-            {[['#60a5fa','Corte','65%'],['#4ade80','Barba','20%'],['#60a5fa','Combo','15%']].map(([color, label, pct]) => (
-              <div className="pbs-legend-item" key={label}>
-                <div className="pbs-legend-dot" style={{ background: color }} />
-                <span>{label}</span>
-                <span className="pbs-pct">{pct}</span>
-              </div>
-            ))}
-          </div>
-          <div className="pbs-attendance">
-            <div className="pbs-att-val">87%</div>
-            <span className="pbs-att-label">Taxa de comparecimento</span>
-          </div>
-        </div>
-      </div>
+    <div className="phone-back phone-screenshot">
+      <img
+        src="/screenshots/screen-relatorios.png"
+        alt="Relatórios Barbeiro ON"
+        className="phone-screenshot-img"
+      />
     </div>
   );
 }
