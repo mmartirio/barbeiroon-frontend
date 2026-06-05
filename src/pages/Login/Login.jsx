@@ -30,11 +30,8 @@ export default function Login() {
     const enabled   = BiometricService.isEnabled();
     setBioSupported(supported);
     setBioEnabled(enabled);
-
-    // Se já habilitada, tenta auto-login biométrico
-    if (supported && enabled) {
-      handleBiometricLogin();
-    }
+    // Biometria habilitada: exibe o botão na tela — sem auto-login.
+    // O usuário deve clicar para autenticar.
   }, []);
 
   // ─── Login biométrico (Credential Management API) ─────────────────────────

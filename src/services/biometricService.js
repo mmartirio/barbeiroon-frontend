@@ -5,9 +5,17 @@ const CRED_KEY  = 'barbeiroon_biometric_enabled';
 const TOKEN_KEY = 'barbeiroon_biometric_token';
 
 export const BiometricService = {
-  // Verifica se o navegador suporta autenticação com biometria (PasswordCredential + mediation)
+  // Verifica se o dispositivo é mobile
+  isMobile() {
+    return typeof navigator !== 'undefined' &&
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  },
+
+  // Verifica se o navegador suporta autenticação com biometria.
+  // Restrito a dispositivos móveis que usam biometria no sistema operacional.
   isSupported() {
     return typeof window !== 'undefined' &&
+      this.isMobile() &&
       'credentials' in navigator &&
       typeof window.PasswordCredential !== 'undefined' &&
       window.location.protocol === 'https:';
