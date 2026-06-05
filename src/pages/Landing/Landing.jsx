@@ -199,7 +199,7 @@ export default function Landing() {
             <div className="lp-app-card">
               <p className="lp-app-card-label">Android</p>
               <p className="lp-app-card-desc">Baixe o APK e instale diretamente no seu celular.</p>
-              <a href="https://barbeiroon.com/downloads/barbeiroon_1.0.0.apk" className="lp-app-btn lp-app-btn-android" download>
+              <a href="https://api-barbeiroon.com.br/downloads/barbeiroon_1.0.0.apk" className="lp-app-btn lp-app-btn-android" download>
                 Baixar APK
               </a>
               <span className="lp-app-version">v1.0.0 · 87 MB</span>
