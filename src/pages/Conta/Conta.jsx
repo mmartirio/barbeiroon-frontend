@@ -282,27 +282,21 @@ export default function Conta() {
                 {/* Dia de vencimento */}
                 {selectedPlan && parseFloat(selectedPlan.priceMonthly) > 0 && (
                   <div className="form-group" style={{ marginTop: '0.75rem' }}>
-                    <label className="form-label">Dia de vencimento *
-                      <span style={{ fontWeight: 400, color: 'var(--color-muted)', marginLeft: 6, fontSize: '0.75rem' }}>
-                        (1–28) — dia do mês em que a mensalidade vence
-                      </span>
-                    </label>
-                    <input
+                    <label className="form-label">Dia de vencimento</label>
+                    <select
                       className="form-input"
-                      type="number"
-                      min="1" max="28"
                       value={billingDay}
-                      onChange={e => {
-                        const v = e.target.value;
-                        if (v === '' || (Number(v) >= 1 && Number(v) <= 28)) setBillingDay(v);
-                      }}
-                      placeholder="Ex: 10"
-                      style={{ maxWidth: 120 }}
-                    />
+                      onChange={e => setBillingDay(e.target.value)}
+                      style={{ maxWidth: 160 }}
+                    >
+                      <option value="">— Selecione —</option>
+                      {[1, 5, 10, 15, 20].map(d => (
+                        <option key={d} value={d}>Dia {String(d).padStart(2, '0')}</option>
+                      ))}
+                    </select>
                     {billingDay && (
                       <p style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.3rem' }}>
-                        Próxima cobrança será gerada com vencimento no dia <strong>{billingDay}</strong>.
-                        {Number(billingDay) && ` Regras de prorateamento aplicadas automaticamente ao salvar.`}
+                        Próxima cobrança vencerá no dia <strong>{String(billingDay).padStart(2, '0')}</strong>. Prorateamento aplicado automaticamente.
                       </p>
                     )}
                   </div>
