@@ -8,11 +8,10 @@ const tok = () => sessionStorage.getItem('token');
 
 const ESTADOS_BR = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 
-const PLANOS = {
-  free:    { label: 'Gratuito', color: '#64748b', desc: 'Até 2 usuários' },
-  basic:   { label: 'Básico',   color: '#2563eb', desc: 'Até 5 usuários' },
-  premium: { label: 'Premium',  color: '#7c3aed', desc: 'Até 15 usuários' },
-};
+function fmtPrice(val) {
+  const n = parseFloat(val);
+  return isNaN(n) || n === 0 ? 'Gratuito' : n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) + '/mês';
+}
 
 const daysUntil = (dateStr) => {
   if (!dateStr) return null;
@@ -28,7 +27,8 @@ export default function Conta() {
     address: '', neighborhood: '', city: '', state: '', logo: '',
     pixKey: '', pixOwnerName: '', pixCity: '',
   });
-  const [planType,          setPlanType]          = useState('free');
+  const [planId,            setPlanId]            = useState(null);
+  const [plans,             setPlans]             = useState([]);
   const [scheduledDeleteAt, setScheduledDeleteAt] = useState(null);
   const [loading,           setLoading]           = useState(true);
   const [saving,            setSaving]            = useState(false);
@@ -44,8 +44,13 @@ export default function Conta() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res  = await fetch('/api/tenant/settings', { headers: { Authorization: `Bearer ${tok()}` } });
-      const data = await res.json().catch(() => ({}));
+      const [settingsRes, plansRes] = await Promise.all([
+        fetch('/api/tenant/settings', { headers: { Authorization: `Bearer ${tok()}` } }),
+        fetch('/api/tenant/plans',    { headers: { Authorization: `Bearer ${tok()}` } }),
+      ]);
+      const data      = await settingsRes.json().catch(() => ({}));
+      const plansData = await plansRes.json().catch(() => ({}));
+
       setForm({
         name:         data.name         || '',
         companyName:  data.companyName  || '',
@@ -60,7 +65,8 @@ export default function Conta() {
         pixOwnerName: data.pixOwnerName || '',
         pixCity:      data.pixCity      || '',
       });
-      setPlanType(data.planType || 'free');
+      setPlans(Array.isArray(plansData.plans) ? plansData.plans : []);
+      setPlanId(data.planId ?? null);
       setScheduledDeleteAt(data.scheduledDeleteAt || null);
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
@@ -85,7 +91,7 @@ export default function Conta() {
       const res  = await fetch('/api/tenant/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
-        body: JSON.stringify({ ...form, planType }),
+        body: JSON.stringify({ ...form, planId }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || 'Erro ao salvar');
@@ -94,7 +100,7 @@ export default function Conta() {
     finally { setSaving(false); }
   };
 
-  const plano = PLANOS[planType] || PLANOS.free;
+  const selectedPlan = plans.find(p => p.id === planId) || null;
 
   const handleRequestDelete = async () => {
     setDeleteLoading(true);
@@ -240,23 +246,39 @@ export default function Conta() {
         <div className="card">
           <div className="card-body">
             <h3 style={{ marginBottom: '1rem' }}>Plano Contratado</h3>
-            <div style={{ display: 'grid', gap: '0.75rem' }}>
-              <select
-                className="form-input"
-                value={planType}
-                onChange={e => setPlanType(e.target.value)}
-                style={{ width: '100%' }}
-              >
-                {Object.entries(PLANOS).map(([key, option]) => (
-                  <option key={key} value={key}>{option.label}</option>
-                ))}
-              </select>
-              <div style={{ border: `1.5px solid ${plano.color}`, borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: `${plano.color}18` }}>
-                <span style={{ fontWeight: 800, color: plano.color, fontSize: '1.1rem' }}>{plano.label}</span>
-                <span style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>{plano.desc}</span>
+            {plans.length === 0 ? (
+              <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Nenhum plano disponível.</p>
+            ) : (
+              <div style={{ display: 'grid', gap: '0.75rem' }}>
+                <select
+                  className="form-input"
+                  value={planId ?? ''}
+                  onChange={e => setPlanId(e.target.value ? Number(e.target.value) : null)}
+                  style={{ width: '100%' }}
+                >
+                  <option value="">— Selecione um plano —</option>
+                  {plans.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                {selectedPlan && (
+                  <div style={{ border: '1.5px solid var(--accent)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', background: 'rgba(124,58,237,0.07)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--accent)', fontSize: '1rem' }}>{selectedPlan.name}</span>
+                      <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{fmtPrice(selectedPlan.priceMonthly)}</span>
+                    </div>
+                    {selectedPlan.description && (
+                      <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', margin: 0 }}>{selectedPlan.description}</p>
+                    )}
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem', fontSize: '0.78rem', color: 'var(--color-muted)' }}>
+                      <span>Usuários: {selectedPlan.maxUsers ?? '∞'}</span>
+                      <span>Agendamentos/mês: {selectedPlan.maxAppointments ?? '∞'}</span>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-            <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', textAlign: 'center' }}>Administrador pode alterar o plano diretamente aqui.</p>
+            )}
+            <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', textAlign: 'center', marginTop: '0.5rem' }}>Administrador pode alterar o plano diretamente aqui.</p>
           </div>
         </div>
 
