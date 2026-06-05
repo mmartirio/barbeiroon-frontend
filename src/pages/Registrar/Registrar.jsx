@@ -386,7 +386,7 @@ export default function Registrar() {
                 <div className="reg-app-card">
                   <span className="reg-app-card-label">Android</span>
                   <p style={{ color: '#64748b', fontSize: '0.78rem', margin: 0 }}>Baixe e instale o APK diretamente</p>
-                  <a href="https://api-barbeiroon.com.br/downloads/barbeiroon_1.0.0.apk" className="reg-app-btn reg-app-btn-android" download>
+                  <a href="https://api-barbeiroon.com.br/downloads/barbeiroon_1.0.1.apk" className="reg-app-btn reg-app-btn-android" download>
                     Baixar APK
                   </a>
                 </div>
