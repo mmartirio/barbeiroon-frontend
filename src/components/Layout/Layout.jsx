@@ -60,7 +60,10 @@ function LayoutInner({ children, title }) {
       const d = await r.json().catch(() => ({}));
       if (!r.ok) { setCodeMsg(d.message || `Erro ${r.status}`); setCodeState('error'); return; }
       if (d.connected) { setCodeState('done'); setCodeMsg('connected'); return; }
-      if (d.pairingCode) { setPairingCode(d.pairingCode); setCodeState('done'); return; }
+      if (d.pairingCode) {
+        console.log(`[TIMING] código apareceu na tela em ${new Date().toISOString()} — usuário tem ~40s para digitar`);
+        setPairingCode(d.pairingCode); setCodeState('done'); return;
+      }
       setCodeMsg(d.message || 'Código não disponível. Tente novamente.'); setCodeState('error');
     } catch {
       setCodeMsg('Não foi possível conectar ao servidor.');
@@ -119,8 +122,9 @@ function LayoutInner({ children, title }) {
                   style={{
                     flex: 1, padding: '0.6rem', fontSize: '0.85rem', fontWeight: 500,
                     color: tab === key ? 'var(--accent)' : 'var(--color-muted)',
+                    borderTop: 'none', borderLeft: 'none', borderRight: 'none',
                     borderBottom: tab === key ? '2px solid var(--accent)' : '2px solid transparent',
-                    background: 'none', border: 'none', borderRadius: 0, cursor: 'pointer',
+                    background: 'none', borderRadius: 0, cursor: 'pointer',
                     marginBottom: -1,
                   }}
                 >
