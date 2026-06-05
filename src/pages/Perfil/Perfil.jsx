@@ -6,22 +6,25 @@ const tok = () => sessionStorage.getItem('token');
 
 export default function Perfil() {
   const { user } = useAuth();
-  const [name,    setName]    = useState('');
-  const [email,   setEmail]   = useState('');
-  const [curPass, setCurPass] = useState('');
-  const [newPass, setNewPass] = useState('');
-  const [conPass, setConPass] = useState('');
-  const [saving,  setSaving]  = useState(false);
-  const [error,   setError]   = useState('');
-  const [success, setSuccess] = useState('');
+  const [name,      setName]      = useState('');
+  const [email,     setEmail]     = useState('');
+  const [isBarber,  setIsBarber]  = useState(false);
+  const [curPass,   setCurPass]   = useState('');
+  const [newPass,   setNewPass]   = useState('');
+  const [conPass,   setConPass]   = useState('');
+  const [saving,    setSaving]    = useState(false);
+  const [error,     setError]     = useState('');
+  const [success,   setSuccess]   = useState('');
 
-  const userId = user?.id;
+  const userId  = user?.id;
+  const isAdmin = !!user?.permissions?.canEditUser;
   const avatarLetter = useMemo(() => String(name || '?').trim().charAt(0).toUpperCase(), [name]);
 
   useEffect(() => {
     if (user) {
       setName(user.name || '');
       setEmail(user.email || '');
+      setIsBarber(user.isBarber ?? false);
     }
   }, [user]);
 
@@ -40,7 +43,11 @@ export default function Perfil() {
       const updateRes = await fetch(`/api/user/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
-        body: JSON.stringify({ name: name.trim(), email: email.trim().toLowerCase() }),
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          ...(isAdmin ? { isBarber } : {}),
+        }),
       });
       const updateD = await updateRes.json().catch(() => ({}));
       if (!updateRes.ok) throw new Error(updateD.message || 'Erro ao atualizar perfil');
@@ -85,6 +92,24 @@ export default function Perfil() {
             <div className="form-group">
               <label className="form-label">E-mail</label>
               <input className="form-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="E-mail" />
+            </div>
+
+            <div className="form-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: isAdmin ? 'pointer' : 'not-allowed', opacity: isAdmin ? 1 : 0.5 }}>
+                <input
+                  type="checkbox"
+                  checked={isBarber}
+                  onChange={e => isAdmin && setIsBarber(e.target.checked)}
+                  disabled={!isAdmin}
+                  style={{ width: 16, height: 16, accentColor: 'var(--color-primary, #60a5fa)' }}
+                />
+                <span className="form-label" style={{ margin: 0 }}>É Barbeiro</span>
+              </label>
+              {!isAdmin && (
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.25rem' }}>
+                  Apenas administradores podem alterar esta configuração.
+                </p>
+              )}
             </div>
 
             <div style={{ paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
