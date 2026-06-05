@@ -281,24 +281,19 @@ export default function Conta() {
 
                 {/* Dia de vencimento */}
                 {selectedPlan && parseFloat(selectedPlan.priceMonthly) > 0 && (
-                  <div className="form-group" style={{ marginTop: '0.75rem' }}>
-                    <label className="form-label">Dia de vencimento</label>
+                  <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                    <label className="form-label" style={{ margin: 0, whiteSpace: 'nowrap', fontSize: '0.8rem' }}>Vencimento</label>
                     <select
                       className="form-input"
                       value={billingDay}
                       onChange={e => setBillingDay(e.target.value)}
-                      style={{ maxWidth: 160 }}
+                      style={{ width: 100, fontSize: '0.8rem', padding: '4px 8px', height: 32 }}
                     >
-                      <option value="">— Selecione —</option>
+                      <option value="">—</option>
                       {[1, 5, 10, 15, 20].map(d => (
                         <option key={d} value={d}>Dia {String(d).padStart(2, '0')}</option>
                       ))}
                     </select>
-                    {billingDay && (
-                      <p style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.3rem' }}>
-                        Próxima cobrança vencerá no dia <strong>{String(billingDay).padStart(2, '0')}</strong>. Prorateamento aplicado automaticamente.
-                      </p>
-                    )}
                   </div>
                 )}
               </div>
