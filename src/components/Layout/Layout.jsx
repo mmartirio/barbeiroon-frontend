@@ -106,7 +106,7 @@ function LayoutInner({ children, title }) {
       {suporteOpen && <SuporteModal onClose={() => setSuporteOpen(false)} />}
 
       {whatsappOpen && (
-        <div className="modal-overlay" onClick={closeModal}>
+        <div className="modal-overlay modal-overlay--whatsapp" onClick={closeModal}>
           <div className="modal-box" style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Conectar WhatsApp</h3>

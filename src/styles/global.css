@@ -218,6 +218,8 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 @media (max-width: 640px) {
   .modal-box { border-radius: var(--radius) var(--radius) 0 0; max-height: 95vh; }
   .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-overlay--whatsapp { align-items: center; padding: 1rem; }
+  .modal-overlay--whatsapp .modal-box { border-radius: 18px; max-height: 90vh; }
 }
 
 /* ── Mobile — aparência idêntica ao app nativo (≤768px) ──── */
@@ -256,6 +258,17 @@ textarea.form-input { resize: vertical; min-height: 80px; }
   .modal-header { padding: 1.1rem 1.1rem 0; }
   .modal-body   { padding: 0.9rem 1.1rem; }
   .modal-footer { padding: 0.9rem 1.1rem; }
+
+  /* Modal do WhatsApp: centralizado verticalmente no mobile */
+  .modal-overlay--whatsapp {
+    align-items: center;
+    padding: 1rem;
+  }
+  .modal-overlay--whatsapp .modal-box {
+    border-radius: 18px;
+    max-width: 420px;
+    margin: 0 auto;
+  }
 }
 
 /* ── Mobile-only header (Dashboard barbeiro) ─────────────── */
