@@ -289,7 +289,7 @@ export default function Conta() {
                       onChange={e => setBillingDay(e.target.value)}
                       style={{ width: 100, fontSize: '0.8rem', padding: '4px 8px', height: 32 }}
                     >
-                      <option value="">—</option>
+                      <option value="">Dia</option>
                       {[1, 5, 10, 15, 20].map(d => (
                         <option key={d} value={d}>Dia {String(d).padStart(2, '0')}</option>
                       ))}
