@@ -28,6 +28,7 @@ export default function Conta() {
     pixKey: '', pixOwnerName: '', pixCity: '',
   });
   const [planId,            setPlanId]            = useState(null);
+  const [billingDay,        setBillingDay]        = useState('');
   const [plans,             setPlans]             = useState([]);
   const [scheduledDeleteAt, setScheduledDeleteAt] = useState(null);
   const [loading,           setLoading]           = useState(true);
@@ -67,6 +68,7 @@ export default function Conta() {
       });
       setPlans(Array.isArray(plansData.plans) ? plansData.plans : []);
       setPlanId(data.planId ?? null);
+      setBillingDay(data.billingDay ? String(data.billingDay) : '');
       setScheduledDeleteAt(data.scheduledDeleteAt || null);
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
@@ -91,7 +93,7 @@ export default function Conta() {
       const res  = await fetch('/api/tenant/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
-        body: JSON.stringify({ ...form, planId }),
+        body: JSON.stringify({ ...form, planId, billingDay: billingDay ? Number(billingDay) : null }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || 'Erro ao salvar');
@@ -276,6 +278,35 @@ export default function Conta() {
                     </div>
                   </div>
                 )}
+
+                {/* Dia de vencimento */}
+                {selectedPlan && parseFloat(selectedPlan.priceMonthly) > 0 && (
+                  <div className="form-group" style={{ marginTop: '0.75rem' }}>
+                    <label className="form-label">Dia de vencimento *
+                      <span style={{ fontWeight: 400, color: 'var(--color-muted)', marginLeft: 6, fontSize: '0.75rem' }}>
+                        (1–28) — dia do mês em que a mensalidade vence
+                      </span>
+                    </label>
+                    <input
+                      className="form-input"
+                      type="number"
+                      min="1" max="28"
+                      value={billingDay}
+                      onChange={e => {
+                        const v = e.target.value;
+                        if (v === '' || (Number(v) >= 1 && Number(v) <= 28)) setBillingDay(v);
+                      }}
+                      placeholder="Ex: 10"
+                      style={{ maxWidth: 120 }}
+                    />
+                    {billingDay && (
+                      <p style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.3rem' }}>
+                        Próxima cobrança será gerada com vencimento no dia <strong>{billingDay}</strong>.
+                        {Number(billingDay) && ` Regras de prorateamento aplicadas automaticamente ao salvar.`}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
             <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', textAlign: 'center', marginTop: '0.5rem' }}>Administrador pode alterar o plano diretamente aqui.</p>
@@ -295,7 +326,7 @@ export default function Conta() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <div className="form-group">
-                <label className="form-label">Nome no PIX <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>(máx. 25 caracteres)</span></label>
+                <label className="form-label">Nome <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>(máx. 25 caracteres)</span></label>
                 <input className="form-input" value={form.pixOwnerName} maxLength={25} onChange={e => set('pixOwnerName', e.target.value)} placeholder="Ex: João Barbearia" />
               </div>
               <div className="form-group">
