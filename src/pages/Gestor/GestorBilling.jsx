@@ -130,11 +130,13 @@ function PixConfigTab() {
 
 const EMPTY_INVOICE = { tenantId: '', planId: '', amountCents: '', dueDate: '', description: '', notes: '' };
 
+// Plano é pago quando priceMonthly > 0
+const isPaid = (plan) => plan && Number(plan.priceMonthly) > 0;
+
 function CobrancasTab() {
     const api = useApi();
     const [invoices, setInvoices]         = useState([]);
     const [tenants, setTenants]           = useState([]);
-    const [plans, setPlans]               = useState([]);
     const [loading, setLoading]           = useState(false);
     const [filterTenant, setFilterTenant] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
@@ -145,18 +147,16 @@ function CobrancasTab() {
     const [copied, setCopied]             = useState(null);
     const [hasPixConfig, setHasPixConfig] = useState(null);
 
+    // Empresas com plano pago (únicas elegíveis para cobrança)
+    const billableTenants = tenants.filter(t => isPaid(t.plan));
+
     const checkPixConfig = useCallback(async () => {
         try { const d = await api('/pix/config'); setHasPixConfig(!!d); }
         catch { setHasPixConfig(false); }
     }, [api]);
 
     const loadTenants = useCallback(async () => {
-        try { const d = await api('/tenants?limit=200'); setTenants(d.tenants || []); }
-        catch { /* silencioso */ }
-    }, [api]);
-
-    const loadPlans = useCallback(async () => {
-        try { const d = await api('/plans'); setPlans((d.plans || []).filter(p => p.isActive)); }
+        try { const d = await api('/tenants?limit=500'); setTenants(d.tenants || []); }
         catch { /* silencioso */ }
     }, [api]);
 
@@ -172,8 +172,21 @@ function CobrancasTab() {
         finally { setLoading(false); }
     }, [api, filterTenant, filterStatus]);
 
-    useEffect(() => { checkPixConfig(); loadTenants(); loadPlans(); }, [checkPixConfig, loadTenants, loadPlans]);
+    useEffect(() => { checkPixConfig(); loadTenants(); }, [checkPixConfig, loadTenants]);
     useEffect(() => { loadInvoices(); }, [loadInvoices]);
+
+    // Quando empresa muda, auto-preenche plano e valor do plano contratado
+    const handleTenantChange = (tenantId) => {
+        const tenant = tenants.find(t => String(t.id) === tenantId);
+        const plan   = tenant?.plan;
+        setForm(p => ({
+            ...p,
+            tenantId,
+            planId:      plan ? String(plan.id) : '',
+            amountCents: plan ? String(plan.priceMonthly) : '',
+            description: plan ? `Plano ${plan.name} — ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}` : '',
+        }));
+    };
 
     const openCreate = () => {
         if (!hasPixConfig) { alert('Configure a chave PIX primeiro na aba "Chave PIX".'); return; }
@@ -188,12 +201,12 @@ function CobrancasTab() {
                 ? Math.round(Number(String(form.amountCents).replace(',', '.')) * 100)
                 : undefined;
             await api('/pix/invoices', { method: 'POST', body: JSON.stringify({
-                tenantId: form.tenantId || undefined,
-                planId: form.planId || undefined,
+                tenantId:    form.tenantId    || undefined,
+                planId:      form.planId      || undefined,
                 amountCents,
-                dueDate: form.dueDate,
+                dueDate:     form.dueDate,
                 description: form.description || undefined,
-                notes: form.notes || undefined,
+                notes:       form.notes       || undefined,
             })});
             closeModal(); loadInvoices();
         } catch (e) { setError(e.message); }
@@ -216,10 +229,20 @@ function CobrancasTab() {
         navigator.clipboard.writeText(text).then(() => { setCopied(id); setTimeout(() => setCopied(null), 2000); });
     };
 
+    // Empresa selecionada no modal
+    const selectedTenant = tenants.find(t => String(t.id) === form.tenantId);
+
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <span style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>Cobranças via Pix Copia e Cola</span>
+                <span style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>
+                    Cobranças via Pix Copia e Cola
+                    {billableTenants.length > 0 && (
+                        <span style={{ marginLeft: 10, fontSize: '0.75rem', padding: '2px 8px', borderRadius: 4, background: 'rgba(37,99,235,0.15)', color: '#60a5fa' }}>
+                            {billableTenants.length} empresa{billableTenants.length !== 1 ? 's' : ''} com plano pago
+                        </span>
+                    )}
+                </span>
                 <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn" onClick={loadInvoices} style={{ padding: '6px 10px' }}><FiRefreshCw size={13} /></button>
                     <button className="btn btn-primary" onClick={openCreate} style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FiPlus size={14} /> Nova Cobrança</button>
@@ -295,27 +318,42 @@ function CobrancasTab() {
                 <Modal title="Nova Cobrança PIX" onClose={closeModal} wide>
                     <form onSubmit={handleCreate}>
                         {error && <div style={errStyle}>{error}</div>}
+
+                        {/* Empresa — apenas as com plano pago */}
                         <div className="form-group">
                             <label className="form-label">Empresa *</label>
-                            <select className="form-input" value={form.tenantId} onChange={e => setForm(p => ({ ...p, tenantId: e.target.value }))} required>
+                            <select className="form-input" value={form.tenantId} onChange={e => handleTenantChange(e.target.value)} required>
                                 <option value="">Selecione a empresa...</option>
-                                {tenants.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                {billableTenants.map(t => (
+                                    <option key={t.id} value={t.id}>
+                                        {t.name} — {t.plan.name} ({Number(t.plan.priceMonthly).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/mês)
+                                    </option>
+                                ))}
                             </select>
+                            {tenants.length > 0 && tenants.length - billableTenants.length > 0 && (
+                                <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)', marginTop: 4, display: 'block' }}>
+                                    {tenants.length - billableTenants.length} empresa{tenants.length - billableTenants.length !== 1 ? 's' : ''} com plano gratuito não aparecem aqui.
+                                </span>
+                            )}
                         </div>
-                        <div className="form-group">
-                            <label className="form-label">Plano *</label>
-                            <select className="form-input" value={form.planId} onChange={e => {
-                                const plan = plans.find(p => String(p.id) === e.target.value);
-                                setForm(p => ({ ...p, planId: e.target.value, amountCents: plan ? String(plan.priceMonthly) : p.amountCents }));
-                            }} required>
-                                <option value="">Selecione o plano...</option>
-                                {plans.map(p => <option key={p.id} value={p.id}>{p.name} — {(p.priceMonthly || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/mês</option>)}
-                            </select>
-                        </div>
+
+                        {/* Plano — preenchido automaticamente, somente leitura */}
+                        {selectedTenant?.plan && (
+                            <div className="form-group">
+                                <label className="form-label">Plano contratado</label>
+                                <div style={{ padding: '10px 14px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, fontSize: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontWeight: 600, color: '#a5b4fc' }}>{selectedTenant.plan.name}</span>
+                                    <span style={{ color: 'var(--color-muted)', fontSize: '0.78rem' }}>
+                                        {Number(selectedTenant.plan.priceMonthly).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/mês
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
                             <div className="form-group">
-                                <label className="form-label">Valor (R$) <span style={{ color: 'var(--color-muted)', fontWeight: 400 }}>(preenchido pelo plano)</span></label>
-                                <input className="form-input" value={form.amountCents} onChange={e => setForm(p => ({ ...p, amountCents: e.target.value }))} placeholder="99,90" />
+                                <label className="form-label">Valor (R$) *</label>
+                                <input className="form-input" value={form.amountCents} onChange={e => setForm(p => ({ ...p, amountCents: e.target.value }))} placeholder="99,90" required />
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Vencimento *</label>
