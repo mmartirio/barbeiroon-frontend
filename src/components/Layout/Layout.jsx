@@ -3,6 +3,7 @@ import s from './Layout.module.css';
 import Sidebar from '../Sidebar/Sidebar';
 import SuporteModal from '../Suporte/SuporteModal';
 import { SidebarProvider, useSidebar } from '../../context/SidebarContext';
+import AnnouncementBanner from '../AnnouncementBanner/AnnouncementBanner';
 
 const tok = () => sessionStorage.getItem('token');
 
@@ -84,6 +85,7 @@ function LayoutInner({ children, title }) {
 
   return (
     <div className={s.shell}>
+      <AnnouncementBanner />
       <Sidebar
         onWhatsApp={() => setWhatsappOpen(true)}
         onSupport={() => setSuporteOpen(true)}
