@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
@@ -23,6 +23,7 @@ export default function NovoAgendamento() {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
+  const pendingTimeRef = useRef('');
   const tenantSlug = slug || user?.tenantSlug || '';
   const tenantId   = user?.tenantId || '';
 
@@ -55,7 +56,10 @@ export default function NovoAgendamento() {
     const dateParam = searchParams.get('date');
     const timeParam = searchParams.get('time');
     if (dateParam) setDate(dateParam);
-    if (timeParam) setTime(timeParam);
+    if (timeParam) {
+      setTime(timeParam);
+      pendingTimeRef.current = timeParam;
+    }
   }, [searchParams]);
 
   // Pre-fill professional after profs list loads
@@ -97,7 +101,17 @@ export default function NovoAgendamento() {
 
       const res = await fetch(`/api/public/appointment/available-times?${params}`);
       const d   = await res.json().catch(() => ({}));
-      setTimes(d.availableTimes || []);
+      const available = d.availableTimes || [];
+      setTimes(available);
+
+      // Restaura horário pré-selecionado via URL param
+      if (pendingTimeRef.current) {
+        const t = pendingTimeRef.current;
+        pendingTimeRef.current = '';
+        // adiciona à lista se não estiver disponível (pode ter sido ocupado entre telas)
+        if (!available.includes(t)) setTimes(prev => [t, ...prev]);
+        setTime(t);
+      }
     } catch { setTimes([]); }
     finally { setTimesLoading(false); }
   }, [prof, date, totalDuration, selectedSvcs, tenantId]);
@@ -260,14 +274,16 @@ export default function NovoAgendamento() {
               {timesLoading ? (
                 <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Carregando horários...</p>
               ) : times.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                <select
+                  className="form-input"
+                  value={time}
+                  onChange={e => setTime(e.target.value)}
+                >
+                  <option value="">— Selecione o horário —</option>
                   {times.map(t => (
-                    <button key={t} type="button"
-                      className={`btn btn-sm ${time === t ? 'btn-primary' : 'btn-ghost'}`}
-                      onClick={() => setTime(t)}
-                    >{t}</button>
+                    <option key={t} value={t}>{t}</option>
                   ))}
-                </div>
+                </select>
               ) : prof && date ? (
                 <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Nenhum horário disponível para esta data</p>
               ) : (
