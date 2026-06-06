@@ -14,8 +14,9 @@ import RankingTab    from './tabs/RankingTab';
 const PERIODOS = [
   { label: 'Hoje',      value: 'diario' },
   { label: 'Semana',    value: 'semanal' },
-  { label: 'Mês',       value: 'mensal' },
-  { label: 'Trimestre', value: 'trimestral' },
+  { label: 'Mês',          value: 'mensal' },
+  { label: 'Mês Anterior', value: 'mes_anterior' },
+  { label: 'Trimestre',    value: 'trimestral' },
   { label: 'Semestre',  value: 'semestral' },
   { label: 'Ano',       value: 'anual' },
 ];
