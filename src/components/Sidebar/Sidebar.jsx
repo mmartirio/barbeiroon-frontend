@@ -185,6 +185,7 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
 
         <ul className={s.nav}>
           {canDash && <NavItem to={`/${slug}/dashboard`} icon={<FiGrid size={15} />} label="Painel Principal" />}
+          {p('canViewCustomers') && <NavItem to={`/${slug}/tela-cliente`} icon={<FiLink size={15} />} label="Meu Link" />}
 
           {canClients && (
             <SubMenu icon={<FiUsers size={15} />} label="Clientes" menuKey="clients" open={openMenus.clients} onToggle={toggle}>
@@ -237,7 +238,6 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
             </span>
           } />}
           {p('canViewReports') && <NavItem to={`/${slug}/financeiro`} icon={<FiDollarSign size={15} />} label="Financeiro" />}
-          {p('canViewCustomers') && <NavItem to={`/${slug}/tela-cliente`} icon={<FiLink size={15} />} label="Meu Link" />}
 
           <li className={s.divider} />
 
