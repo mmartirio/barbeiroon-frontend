@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
 
-const KEY       = 'bb_ann_jun2026';
-const MAX_SHOWS = 3;
-const END_DATE  = new Date('2026-06-13T23:59:59');
+const KEY         = 'bb_ann_jun2026_v2';
+const SESSION_KEY = 'bb_ann_jun2026_v2_shown';
+const MAX_SHOWS   = 3;
+const END_DATE    = new Date('2026-06-13T23:59:59');
 
 export default function AnnouncementBanner() {
   const [visible, setVisible] = useState(false);
@@ -12,10 +13,14 @@ export default function AnnouncementBanner() {
     const now = new Date();
     if (now > END_DATE) return;
 
+    // Already shown in this login session
+    if (sessionStorage.getItem(SESSION_KEY)) return;
+
     const count = parseInt(localStorage.getItem(KEY) || '0', 10);
     if (count >= MAX_SHOWS) return;
 
     localStorage.setItem(KEY, String(count + 1));
+    sessionStorage.setItem(SESSION_KEY, '1');
     setVisible(true);
   }, []);
 
@@ -40,73 +45,45 @@ export default function AnnouncementBanner() {
           borderRadius: 20,
           overflow: 'hidden',
           boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
+          background: '#fff',
         }}
       >
-        {/* Fundo degradê */}
-        <div style={{
-          background: 'linear-gradient(135deg, #4c1d95 0%, #7c3aed 45%, #5b21b6 100%)',
-          padding: '2.5rem 2rem 2rem',
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          textAlign: 'center',
-          gap: '1rem',
-        }}>
-          {/* Botão fechar */}
+        {/* Botão fechar */}
+        <button
+          onClick={() => setVisible(false)}
+          style={{
+            position: 'absolute', top: 12, right: 12,
+            background: 'rgba(0,0,0,0.45)', border: 'none',
+            borderRadius: '50%', width: 32, height: 32,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', cursor: 'pointer', zIndex: 1,
+          }}
+        >
+          <FiX size={16} />
+        </button>
+
+        {/* Imagem do banner */}
+        <img
+          src="/banner-novidades.png"
+          alt="Estamos com novidades!"
+          style={{ width: '100%', display: 'block' }}
+        />
+
+        {/* Botão */}
+        <div style={{ padding: '1rem', textAlign: 'center', background: '#fff' }}>
           <button
             onClick={() => setVisible(false)}
             style={{
-              position: 'absolute', top: 14, right: 14,
-              background: 'rgba(255,255,255,0.15)', border: 'none',
-              borderRadius: '50%', width: 32, height: 32,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', cursor: 'pointer',
-            }}
-          >
-            <FiX size={16} />
-          </button>
-
-          {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <img src="/icon.png" alt="Barbeiroon" style={{ height: 52, borderRadius: 12 }} />
-            <span style={{ color: '#fff', fontWeight: 800, fontSize: '1.4rem', letterSpacing: '-0.02em' }}>
-              Barbeiro<span style={{ color: '#c4b5fd' }}>ON</span>
-            </span>
-          </div>
-
-          {/* Divisor decorativo */}
-          <div style={{ width: 48, height: 3, background: 'rgba(255,255,255,0.3)', borderRadius: 99 }} />
-
-          {/* Mensagem */}
-          <div>
-            <p style={{ color: '#fff', fontWeight: 800, fontSize: '1.5rem', margin: 0, lineHeight: 1.2 }}>
-              Estamos com novidades!
-            </p>
-            <p style={{ color: '#ddd6fe', fontSize: '1rem', marginTop: '0.6rem', lineHeight: 1.5 }}>
-              Consulte as novas funcionalidades do sistema
-            </p>
-          </div>
-
-          {/* Ícones decorativos */}
-          <div style={{ fontSize: '1.6rem', letterSpacing: '0.4rem' }}>✂️ 🎉 ✨</div>
-
-          {/* Botão */}
-          <button
-            onClick={() => setVisible(false)}
-            style={{
-              marginTop: '0.25rem',
-              background: '#fff', color: '#7c3aed',
+              background: '#16a34a', color: '#fff',
               border: 'none', borderRadius: 99,
-              padding: '0.65rem 2rem',
+              padding: '0.65rem 2.5rem',
               fontWeight: 700, fontSize: '0.95rem',
               cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
             }}
           >
             Entendido!
           </button>
-
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem', margin: 0 }}>
-            Esta mensagem aparece nas suas próximas visitas.
-          </p>
         </div>
       </div>
     </div>
