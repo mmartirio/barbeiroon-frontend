@@ -267,6 +267,15 @@
   opacity: 0.55;
 }
 
+.slotPast {
+  background: transparent;
+  color: var(--color-muted);
+  border-color: transparent;
+  cursor: default;
+  opacity: 0.3;
+  text-decoration: line-through;
+}
+
 .slotTime {
   font-weight: 700;
 }

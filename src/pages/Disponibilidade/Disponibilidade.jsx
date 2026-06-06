@@ -78,6 +78,19 @@ export default function Disponibilidade() {
     setBaseDate(toStr(d));
   };
 
+  const now = new Date();
+  const todayStr   = toStr(now);
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const isSlotPast = (dateStr, hora) => {
+    if (dateStr < todayStr) return true;
+    if (dateStr === todayStr) {
+      const [h, m] = hora.split(':').map(Number);
+      return h * 60 + m < nowMinutes;
+    }
+    return false;
+  };
+
   const handleSlotClick = (dateStr, hora) => {
     const params = new URLSearchParams({ date: dateStr, time: hora });
     if (effectiveProfId) params.set('professionalId', String(effectiveProfId));
@@ -189,29 +202,33 @@ export default function Disponibilidade() {
 
               {/* Slots */}
               <div className={s.slotsGrid}>
-                {dia.slots.map(slot =>
-                  slot.livre ? (
-                    <button
-                      key={slot.hora}
-                      className={`${s.slot} ${s.slotFree}`}
-                      onClick={() => handleSlotClick(dia.data, slot.hora)}
-                      title={`Agendar às ${slot.hora}`}
-                    >
-                      {slot.hora}
-                    </button>
-                  ) : (
+                {dia.slots.map(slot => {
+                  const past = isSlotPast(dia.data, slot.hora);
+                  if (slot.livre && !past) {
+                    return (
+                      <button
+                        key={slot.hora}
+                        className={`${s.slot} ${s.slotFree}`}
+                        onClick={() => handleSlotClick(dia.data, slot.hora)}
+                        title={`Agendar às ${slot.hora}`}
+                      >
+                        {slot.hora}
+                      </button>
+                    );
+                  }
+                  return (
                     <div
                       key={slot.hora}
-                      className={`${s.slot} ${s.slotBusy}`}
-                      title={slot.servico || 'Ocupado'}
+                      className={`${s.slot} ${past ? s.slotPast : s.slotBusy}`}
+                      title={past ? 'Horário passado' : (slot.servico || 'Ocupado')}
                     >
                       <span className={s.slotTime}>{slot.hora}</span>
-                      {slot.servico && (
+                      {!past && slot.servico && (
                         <span className={s.slotSvc}>{slot.servico}</span>
                       )}
                     </div>
-                  )
-                )}
+                  );
+                })}
               </div>
             </div>
           ))}

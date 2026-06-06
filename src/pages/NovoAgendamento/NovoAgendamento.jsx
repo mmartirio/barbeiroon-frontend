@@ -23,7 +23,9 @@ export default function NovoAgendamento() {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const pendingTimeRef = useRef('');
+  // Captura o horário da URL uma única vez no mount
+  const initialUrlTime      = useState(() => searchParams.get('time') || '')[0];
+  const urlTimeConsumedRef  = useRef(false);
   const tenantSlug = slug || user?.tenantSlug || '';
   const tenantId   = user?.tenantId || '';
 
@@ -51,15 +53,10 @@ export default function NovoAgendamento() {
   const totalDuration = selectedSvcs.reduce((acc, s) => acc + parseDuration(s.duration), 0);
   const totalPrice    = selectedSvcs.reduce((acc, s) => acc + Number(s.price || 0), 0);
 
-  // Pre-fill from URL params (coming from Disponibilidade page)
+  // Pre-fill date from URL param
   useEffect(() => {
     const dateParam = searchParams.get('date');
-    const timeParam = searchParams.get('time');
     if (dateParam) setDate(dateParam);
-    if (timeParam) {
-      setTime(timeParam);
-      pendingTimeRef.current = timeParam;
-    }
   }, [searchParams]);
 
   // Pre-fill professional after profs list loads
@@ -102,19 +99,20 @@ export default function NovoAgendamento() {
       const res = await fetch(`/api/public/appointment/available-times?${params}`);
       const d   = await res.json().catch(() => ({}));
       const available = d.availableTimes || [];
-      setTimes(available);
 
-      // Restaura horário pré-selecionado via URL param
-      if (pendingTimeRef.current) {
-        const t = pendingTimeRef.current;
-        pendingTimeRef.current = '';
-        // adiciona à lista se não estiver disponível (pode ter sido ocupado entre telas)
-        if (!available.includes(t)) setTimes(prev => [t, ...prev]);
-        setTime(t);
+      if (initialUrlTime && !urlTimeConsumedRef.current) {
+        urlTimeConsumedRef.current = true;
+        const allTimes = available.includes(initialUrlTime)
+          ? available
+          : [initialUrlTime, ...available];
+        setTimes(allTimes);
+        setTime(initialUrlTime);
+      } else {
+        setTimes(available);
       }
     } catch { setTimes([]); }
     finally { setTimesLoading(false); }
-  }, [prof, date, totalDuration, selectedSvcs, tenantId]);
+  }, [prof, date, totalDuration, selectedSvcs, tenantId, initialUrlTime]);
 
   useEffect(() => { loadTimes(); }, [loadTimes]);
 
@@ -274,16 +272,24 @@ export default function NovoAgendamento() {
               {timesLoading ? (
                 <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Carregando horários...</p>
               ) : times.length > 0 ? (
-                <select
-                  className="form-input"
-                  value={time}
-                  onChange={e => setTime(e.target.value)}
-                >
-                  <option value="">— Selecione o horário —</option>
-                  {times.map(t => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
+                <>
+                  <select
+                    className="form-input"
+                    value={time}
+                    onChange={e => setTime(e.target.value)}
+                    style={time ? { borderColor: 'var(--success)', outline: 'none', boxShadow: '0 0 0 2px rgba(34,197,94,0.2)' } : {}}
+                  >
+                    <option value="">— Selecione o horário —</option>
+                    {times.map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                  {time && (
+                    <p style={{ fontSize: '0.78rem', color: 'var(--success)', marginTop: '0.3rem' }}>
+                      ✓ Horário {time} selecionado
+                    </p>
+                  )}
+                </>
               ) : prof && date ? (
                 <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Nenhum horário disponível para esta data</p>
               ) : (
@@ -323,7 +329,10 @@ export default function NovoAgendamento() {
             )}
 
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
-              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => navigate(`/${tenantSlug}/servico-agendados`)}>Cancelar</button>
+              <button type="button" className="btn btn-ghost" style={{ flex: 1 }}
+                onClick={() => navigate(searchParams.get('date') ? `/${tenantSlug}/disponibilidade` : `/${tenantSlug}/servico-agendados`)}>
+                Cancelar
+              </button>
               <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading || !time || selectedSvcs.length === 0}>
                 {loading ? 'Agendando...' : 'Confirmar Agendamento'}
               </button>
