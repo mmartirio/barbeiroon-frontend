@@ -212,11 +212,6 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
 
           <NavItem to={`/${slug}/vendas`} icon={<FiShoppingCart size={15} />} label="Vendas" />
 
-          <SubMenu icon={<FiPackage size={15} />} label="Produtos" menuKey="produtos" open={openMenus.produtos} onToggle={toggle}>
-            <SubItem to={`/${slug}/produtos-cadastro`} icon={<FiPlusCircle size={14} />} label="Cadastrar" />
-            <SubItem to={`/${slug}/produtos-lista`}    icon={<FiList size={14} />}       label="Listar" />
-          </SubMenu>
-
           {p('canViewAgenda') && (
             <SubMenu icon={<FiCalendar size={15} />} label="Agenda" menuKey="agenda" open={openMenus.agenda} onToggle={toggle}>
               <SubItem to={`/${slug}/agenda`}           icon={<FiClock size={14} />}     label="Expediente" />
@@ -226,7 +221,11 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
             </SubMenu>
           )}
 
-          {p('canManageServices') && <NavItem to={`/${slug}/promocoes`}     icon={<FiTag size={15} />}      label="Promoções" />}
+          <SubMenu icon={<FiPackage size={15} />} label="Produtos" menuKey="produtos" open={openMenus.produtos} onToggle={toggle}>
+            <SubItem to={`/${slug}/produtos-cadastro`} icon={<FiPlusCircle size={14} />} label="Cadastrar" />
+            <SubItem to={`/${slug}/produtos-lista`}    icon={<FiList size={14} />}       label="Listar" />
+          </SubMenu>
+
           {p('canManageServices') && <NavItem to={`/${slug}/planos-servico`} icon={<FiPackage size={15} />}  label={
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <span>Planos</span>
@@ -237,6 +236,7 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
               )}
             </span>
           } />}
+          {p('canManageServices') && <NavItem to={`/${slug}/promocoes`} icon={<FiTag size={15} />} label="Promoções" />}
           {p('canViewReports') && <NavItem to={`/${slug}/financeiro`} icon={<FiDollarSign size={15} />} label="Financeiro" />}
 
           <li className={s.divider} />
