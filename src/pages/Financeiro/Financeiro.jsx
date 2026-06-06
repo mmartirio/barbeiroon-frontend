@@ -10,6 +10,7 @@ import ComissaoTab   from './tabs/ComissaoTab';
 import FluxoCaixaTab from './tabs/FluxoCaixaTab';
 import RelatoriosTab from './tabs/RelatoriosTab';
 import RankingTab    from './tabs/RankingTab';
+import ProdutosTab   from './tabs/ProdutosTab';
 
 const PERIODOS = [
   { label: 'Hoje',      value: 'diario' },
@@ -28,6 +29,7 @@ const ABAS = [
   { label: 'Comissão',       value: 'comissao' },
   { label: 'Fluxo de Caixa', value: 'fluxo' },
   { label: 'Ranking',        value: 'ranking' },
+  { label: 'Produtos',       value: 'produtos' },
   { label: 'Relatórios',     value: 'relatorios' },
 ];
 
@@ -56,6 +58,7 @@ export default function Financeiro() {
       case 'comissao':    return <ComissaoTab   {...tabProps} />;
       case 'fluxo':       return <FluxoCaixaTab {...tabProps} />;
       case 'ranking':     return <RankingTab    {...tabProps} />;
+      case 'produtos':    return <ProdutosTab   {...tabProps} />;
       case 'relatorios':  return <RelatoriosTab />;
       default:            return <ResumoTab     {...tabProps} />;
     }

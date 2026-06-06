@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 import s from './Dashboard.module.css';
-import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle, FiClock, FiAward, FiGift, FiCheckSquare } from 'react-icons/fi';
+import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle, FiClock, FiAward, FiGift, FiCheckSquare, FiShoppingBag } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
 const fmtP = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
@@ -17,24 +17,30 @@ export default function Dashboard() {
   const [pending,    setPending]    = useState(0);
   const [nextAppt,   setNextAppt]   = useState(null);
   const [freeSlots,  setFreeSlots]  = useState(null);
+  const [vendidos,   setVendidos]   = useState(null);
   const [loading,    setLoading]    = useState(true);
   const [bdModal,    setBdModal]    = useState(false);
   const [svcModal,   setSvcModal]   = useState(false);
+
+  const canSeePending = user != null && (!user?.isBarber || !!user?.permissions?.canManageTenant);
 
   const load = useCallback(async () => {
     try {
       const h = { Authorization: `Bearer ${tok()}`, 'Cache-Control': 'no-cache' };
       const today = new Date().toISOString().split('T')[0];
-      const [sRes, pRes, ownRes, slotRes] = await Promise.all([
+      const [sRes, pRes, ownRes, slotRes, prodRes] = await Promise.all([
         fetch('/api/dashboard/stats', { headers: h, cache: 'no-cache' }),
-        fetch('/api/appointment/requests/pending/own', { headers: h, cache: 'no-cache' }),
+        canSeePending ? fetch('/api/appointment/requests/pending/own', { headers: h, cache: 'no-cache' }) : Promise.resolve(null),
         fetch('/api/appointment/own', { headers: h, cache: 'no-cache' }),
         fetch(`/api/agenda/horarios-livres?periodo=diario&data=${today}`, { headers: h, cache: 'no-cache' }),
+        fetch('/api/produtos/vendas?periodo=mensal', { headers: h, cache: 'no-cache' }),
       ]);
-      const sd = await sRes.json().catch(() => ({}));
-      const pd = await pRes.json().catch(() => ({}));
-      const od = await ownRes.json().catch(() => ({}));
-      const sld = slotRes.ok ? await slotRes.json().catch(() => ({})) : {};
+      const sd   = await sRes.json().catch(() => ({}));
+      const pd   = pRes ? await pRes.json().catch(() => ({})) : {};
+      const od   = await ownRes.json().catch(() => ({}));
+      const sld  = slotRes.ok  ? await slotRes.json().catch(() => ({}))  : {};
+      const prod = prodRes.ok  ? await prodRes.json().catch(() => ({}))  : {};
+      setVendidos((prod.data || []).reduce((s, r) => s + Number(r.quantidade_vendida || 0), 0));
       setStats(sd.stats || sd);
       setPending((pd.requests || pd.data || []).length);
       const dias = sld.data || [];
@@ -53,7 +59,7 @@ export default function Dashboard() {
         .sort((a, b) => String(a.appointmentTime).localeCompare(String(b.appointmentTime)));
       setNextAppt(upcoming[0] || null);
     } finally { setLoading(false); }
-  }, []);
+  }, [canSeePending]);
 
   useEffect(() => {
     load();
@@ -184,6 +190,18 @@ export default function Dashboard() {
               {birthdays.length > 0
                 ? <span className={s.infoCardHighlight}>{birthdays.length} cliente{birthdays.length > 1 ? 's' : ''}</span>
                 : <span className={s.infoCardValue}>Nenhum aniversariante este mês</span>}
+            </div>
+
+            <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', cursor: 'default' }}>
+              <div className={s.infoCardHeader}>
+                <div style={{ color: '#7c3aed' }}><FiShoppingBag size={20} /></div>
+                <span className={s.infoCardTitle}>Produtos Vendidos</span>
+              </div>
+              {vendidos === null
+                ? <span className={s.infoCardValue}>Carregando...</span>
+                : vendidos > 0
+                  ? <><span className={s.infoCardHighlight}>{vendidos}</span><span className={s.infoCardValue}>unidades vendidas no mês</span></>
+                  : <span className={s.infoCardValue}>Nenhuma venda este mês</span>}
             </div>
 
           </div>

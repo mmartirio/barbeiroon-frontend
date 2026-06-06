@@ -86,7 +86,6 @@ export default function NovoAgendamento() {
   const loadTimes = useCallback(async () => {
     if (!prof || !date) return;
     setTimesLoading(true);
-    setTime('');
     try {
       const params = new URLSearchParams({
           professionalId: prof.id,
@@ -100,15 +99,22 @@ export default function NovoAgendamento() {
       const d   = await res.json().catch(() => ({}));
       const available = d.availableTimes || [];
 
-      if (initialUrlTime && !urlTimeConsumedRef.current) {
-        urlTimeConsumedRef.current = true;
+      if (initialUrlTime) {
+        // Sempre mantém o horário da URL na lista (veio de um slot livre em Disponibilidade)
         const allTimes = available.includes(initialUrlTime)
           ? available
           : [initialUrlTime, ...available];
         setTimes(allTimes);
-        setTime(initialUrlTime);
+        if (!urlTimeConsumedRef.current) {
+          urlTimeConsumedRef.current = true;
+          setTime(initialUrlTime);
+        } else {
+          // Após mudança de serviço: preserva seleção atual; se sumiu da lista, restaura horário da URL
+          setTime(prev => allTimes.includes(prev) ? prev : initialUrlTime);
+        }
       } else {
         setTimes(available);
+        setTime(prev => available.includes(prev) ? prev : '');
       }
     } catch { setTimes([]); }
     finally { setTimesLoading(false); }
@@ -128,12 +134,10 @@ export default function NovoAgendamento() {
       setSelectedSvcs(prev => [...prev, svc]);
     }
     setModal('');
-    setTime('');
   };
 
   const removeService = (id) => {
     setSelectedSvcs(prev => prev.filter(s => s.id !== id));
-    setTime('');
   };
 
   const discountAmount = () => {
@@ -316,7 +320,7 @@ export default function NovoAgendamento() {
                     </div>
                   ))}
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-muted)' }}>Profissional</span><span>{prof.name}</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-muted)' }}>Data/Hora</span><span>{date} às {time}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-muted)' }}>Data/Hora</span><span>{date.split('-').reverse().join('/')} às {time}</span></div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--color-muted)' }}>Duração total</span><span>{totalDuration} min</span></div>
                   {promo && discountAmount() > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--success)' }}>Desconto</span><span style={{ color: 'var(--success)' }}>-{fmtP(discountAmount())}</span></div>
