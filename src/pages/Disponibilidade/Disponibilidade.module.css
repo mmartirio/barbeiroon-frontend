@@ -93,8 +93,8 @@
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
   flex-shrink: 0;
   margin-left: 0.75rem;
 }
@@ -260,11 +260,10 @@
 }
 
 .slotBusy {
-  background: var(--bg-input);
-  color: var(--color-muted);
-  border-color: var(--border);
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.35);
   cursor: default;
-  opacity: 0.55;
 }
 
 .slotPast {
