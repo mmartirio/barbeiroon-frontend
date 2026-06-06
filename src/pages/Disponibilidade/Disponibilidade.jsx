@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 import s from './Disponibilidade.module.css';
@@ -19,11 +19,12 @@ const toStr = (d) =>
 export default function Disponibilidade() {
   const navigate    = useNavigate();
   const { slug }    = useParams();
+  const [searchParams] = useSearchParams();
   const { user }    = useAuth();
   const tenantSlug  = slug || user?.tenantSlug || '';
   const isOnlyBarber = user?.isBarber && !user?.permissions?.canManageTenant;
 
-  const [periodo,         setPeriodo]         = useState('semanal');
+  const [periodo,         setPeriodo]         = useState(() => searchParams.get('periodo') || 'semanal');
   const [baseDate,        setBaseDate]        = useState(toStr(new Date()));
   const [profId,          setProfId]          = useState('');
   const [profs,           setProfs]           = useState([]);

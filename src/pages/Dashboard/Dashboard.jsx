@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 import s from './Dashboard.module.css';
-import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle, FiClock, FiAward, FiGift } from 'react-icons/fi';
+import { FiUsers, FiCalendar, FiDollarSign, FiScissors, FiAlertCircle, FiPlusCircle, FiX, FiMessageCircle, FiClock, FiAward, FiGift, FiCheckSquare } from 'react-icons/fi';
 
 const tok = () => sessionStorage.getItem('token');
 const fmtP = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v || 0));
@@ -13,26 +13,34 @@ export default function Dashboard() {
   const { slug } = useParams();
   const { user } = useAuth();
   const tenantSlug = slug || user?.tenantSlug || '';
-  const [stats,    setStats]    = useState(null);
-  const [pending,  setPending]  = useState(0);
-  const [nextAppt, setNextAppt] = useState(null);
-  const [loading,  setLoading]  = useState(true);
-  const [bdModal,  setBdModal]  = useState(false);
-  const [svcModal, setSvcModal] = useState(false);
+  const [stats,      setStats]      = useState(null);
+  const [pending,    setPending]    = useState(0);
+  const [nextAppt,   setNextAppt]   = useState(null);
+  const [freeSlots,  setFreeSlots]  = useState(null);
+  const [loading,    setLoading]    = useState(true);
+  const [bdModal,    setBdModal]    = useState(false);
+  const [svcModal,   setSvcModal]   = useState(false);
 
   const load = useCallback(async () => {
     try {
       const h = { Authorization: `Bearer ${tok()}`, 'Cache-Control': 'no-cache' };
-      const [sRes, pRes, ownRes] = await Promise.all([
+      const today = new Date().toISOString().split('T')[0];
+      const [sRes, pRes, ownRes, slotRes] = await Promise.all([
         fetch('/api/dashboard/stats', { headers: h, cache: 'no-cache' }),
         fetch('/api/appointment/requests/pending/own', { headers: h, cache: 'no-cache' }),
         fetch('/api/appointment/own', { headers: h, cache: 'no-cache' }),
+        fetch(`/api/agenda/horarios-livres?periodo=diario&data=${today}`, { headers: h, cache: 'no-cache' }),
       ]);
       const sd = await sRes.json().catch(() => ({}));
       const pd = await pRes.json().catch(() => ({}));
       const od = await ownRes.json().catch(() => ({}));
+      const sld = slotRes.ok ? await slotRes.json().catch(() => ({})) : {};
       setStats(sd.stats || sd);
       setPending((pd.requests || pd.data || []).length);
+      const dias = sld.data || [];
+      const totalLivres = dias.reduce((acc, d) => acc + (d.slotsLivres || 0), 0);
+      const totalSlots  = dias.reduce((acc, d) => acc + (d.totalSlots  || 0), 0);
+      setFreeSlots({ livres: totalLivres, total: totalSlots });
       const now = new Date();
       const nowMins = now.getHours() * 60 + now.getMinutes();
       const upcoming = (od.appointments || [])
@@ -125,6 +133,22 @@ export default function Dashboard() {
 
           {/* ── Info cards ──────────────────────────────── */}
           <div className={s.infoGrid}>
+
+            <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', cursor: 'pointer' }}
+                 onClick={() => navigate(`/${tenantSlug}/disponibilidade?periodo=diario`)}>
+              <div className={s.infoCardHeader}>
+                <div style={{ color: '#16a34a' }}><FiCheckSquare size={20} /></div>
+                <span className={s.infoCardTitle}>Horários Livres Hoje</span>
+              </div>
+              {freeSlots !== null ? (
+                <>
+                  <span className={s.infoCardHighlight} style={{ color: freeSlots.livres > 0 ? '#4ade80' : 'var(--color-muted)' }}>
+                    {freeSlots.livres} livre{freeSlots.livres !== 1 ? 's' : ''}
+                  </span>
+                  <span className={s.infoCardValue}>de {freeSlots.total} horários</span>
+                </>
+              ) : <span className={s.infoCardValue}>Sem expediente hoje</span>}
+            </div>
 
             <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                  onClick={() => navigate(`/${tenantSlug}/servico-agendados`)}>
