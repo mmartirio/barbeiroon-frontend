@@ -46,9 +46,10 @@ const lineOpts = {
 };
 
 export default function ResumoTab({ periodo }) {
-  const [resumo,  setResumo]  = useState(null);
-  const [fluxo,   setFluxo]   = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [resumo,   setResumo]   = useState(null);
+  const [fluxo,    setFluxo]    = useState([]);
+  const [produtos, setProdutos] = useState(null);
+  const [loading,  setLoading]  = useState(true);
   const [apiError, setApiError] = useState(null);
 
   useEffect(() => {
@@ -59,7 +60,9 @@ export default function ResumoTab({ periodo }) {
         .then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d }))),
       fetch(`/api/financeiro/fluxo?periodo=${periodo}`,  { headers: { Authorization: `Bearer ${tok()}` } })
         .then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d }))).catch(() => ({ ok: true, data: {} })),
-    ]).then(([r, f]) => {
+      fetch(`/api/produtos/vendas?periodo=${periodo}`,   { headers: { Authorization: `Bearer ${tok()}` } })
+        .then(r => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([r, f, p]) => {
       if (!r.ok) {
         setApiError(`[${r.status}] ${r.data?.message || JSON.stringify(r.data)}`);
         setLoading(false);
@@ -67,6 +70,7 @@ export default function ResumoTab({ periodo }) {
       }
       setResumo(r.data);
       setFluxo(f.data?.data || []);
+      if (p) setProdutos(p);
       setLoading(false);
     }).catch(err => {
       setApiError(err.message);
@@ -186,6 +190,25 @@ export default function ResumoTab({ periodo }) {
           ))}
         </div>
       </div>
+
+      {/* KPIs Produtos */}
+      {produtos && (
+        <div>
+          <h4 style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Produtos</h4>
+          <div className={s.kpiGrid}>
+            {[
+              { label: 'Total em Produtos',  value: fmtR(produtos.totalVendas),                                                                   color: 'var(--success)' },
+              { label: 'Itens Vendidos',     value: fmtN((produtos.data || []).reduce((a, r) => a + Number(r.quantidade_vendida || 0), 0)),        color: '#7c3aed' },
+              { label: 'Transações',         value: fmtN((produtos.data || []).length),                                                           color: '#2563eb' },
+            ].map(k => (
+              <div key={k.label} className={s.kpiCard}>
+                <span className={s.kpiLabel}>{k.label}</span>
+                <span className={s.kpiValue} style={{ color: k.color }}>{k.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Linha — Evolução Receitas vs Despesas */}
       {fluxo.length > 0 && (
