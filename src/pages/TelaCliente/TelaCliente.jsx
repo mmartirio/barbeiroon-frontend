@@ -78,13 +78,13 @@ export default function TelaCliente() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
-  if (loading) return <Layout title="Tela do Cliente"><div className="empty-state"><p>Carregando...</p></div></Layout>;
+  if (loading) return <Layout title="Meu Link"><div className="empty-state"><p>Carregando...</p></div></Layout>;
 
   const logoSrc = logoPreview || toAbsUrl(tenantData.logo);
   const bgSrc   = bgPreview   || toAbsUrl(tenantData.backgroundImage);
 
   return (
-    <Layout title="Tela do Cliente">
+    <Layout title="Meu Link">
       <div style={{ maxWidth: 560, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Configure logo e plano de fundo da página de agendamento público.</p>
 
