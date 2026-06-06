@@ -30,6 +30,7 @@ const Registrar          = lazy(() => import('./pages/Registrar/Registrar'));
 const Landing            = lazy(() => import('./pages/Landing/Landing'));
 const PrimeiroAcesso     = lazy(() => import('./pages/PrimeiroAcesso/PrimeiroAcesso'));
 const AgendaRegras       = lazy(() => import('./pages/AgendaRegras/AgendaRegras'));
+const Disponibilidade    = lazy(() => import('./pages/Disponibilidade/Disponibilidade'));
 const PlanoServico       = lazy(() => import('./pages/PlanoServico/PlanoServico'));
 const ProdutosLista      = lazy(() => import('./pages/Produtos/ProdutosLista'));
 const ProdutosCadastro   = lazy(() => import('./pages/Produtos/ProdutosCadastro'));
@@ -97,6 +98,7 @@ function AppRoutes() {
           <Route path="/:slug/grupo"                  element={<PrivateRoute perm="canManageGroups"><Grupo /></PrivateRoute>} />
           <Route path="/:slug/agenda"                 element={<PrivateRoute perm="canViewAgenda"><Agenda /></PrivateRoute>} />
           <Route path="/:slug/agenda-regras"          element={<PrivateRoute perm="canViewAgenda"><AgendaRegras /></PrivateRoute>} />
+          <Route path="/:slug/disponibilidade"        element={<PrivateRoute perm="canCreateAppointment"><Disponibilidade /></PrivateRoute>} />
           <Route path="/:slug/promocoes"              element={<PrivateRoute perm="canManageServices"><Promocoes /></PrivateRoute>} />
           <Route path="/:slug/planos-servico"         element={<PrivateRoute perm="canManageServices"><PlanoServico /></PrivateRoute>} />
           <Route path="/:slug/relatorios"             element={<PrivateRoute perm="canViewReports"><Relatorios /></PrivateRoute>} />

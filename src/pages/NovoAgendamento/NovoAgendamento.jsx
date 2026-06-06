@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
 import SearchModal from '../../components/SearchModal/SearchModal';
@@ -21,6 +21,7 @@ const parseDuration = (v) => {
 export default function NovoAgendamento() {
   const navigate = useNavigate();
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const tenantSlug = slug || user?.tenantSlug || '';
   const tenantId   = user?.tenantId || '';
@@ -48,6 +49,23 @@ export default function NovoAgendamento() {
   // Computed totals
   const totalDuration = selectedSvcs.reduce((acc, s) => acc + parseDuration(s.duration), 0);
   const totalPrice    = selectedSvcs.reduce((acc, s) => acc + Number(s.price || 0), 0);
+
+  // Pre-fill from URL params (coming from Disponibilidade page)
+  useEffect(() => {
+    const dateParam = searchParams.get('date');
+    const timeParam = searchParams.get('time');
+    if (dateParam) setDate(dateParam);
+    if (timeParam) setTime(timeParam);
+  }, [searchParams]);
+
+  // Pre-fill professional after profs list loads
+  useEffect(() => {
+    const profIdParam = searchParams.get('professionalId');
+    if (profIdParam && profs.length > 0) {
+      const found = profs.find(p => String(p.id) === profIdParam);
+      if (found) setProf(found);
+    }
+  }, [profs, searchParams]);
 
   useEffect(() => {
     Promise.all([

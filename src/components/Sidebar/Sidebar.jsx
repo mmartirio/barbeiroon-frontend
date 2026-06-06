@@ -10,6 +10,7 @@ import {
   FiPlusCircle, FiAlertCircle, FiClock, FiHelpCircle,
   FiSun, FiMoon, FiSliders, FiPackage, FiDollarSign,
   FiTrendingUp, FiTrendingDown, FiAward, FiActivity, FiShoppingCart,
+  FiCheckSquare,
 } from 'react-icons/fi';
 
 function useTheme() {
@@ -220,6 +221,7 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
             <SubMenu icon={<FiCalendar size={15} />} label="Agenda" menuKey="agenda" open={openMenus.agenda} onToggle={toggle}>
               <SubItem to={`/${slug}/agenda`}           icon={<FiClock size={14} />}     label="Expediente" />
               {p('canViewAppointments') && <SubItem to={`/${slug}/servico-agendados`} icon={<FiCalendar size={14} />} label="Agendados" />}
+              {p('canCreateAppointment') && <SubItem to={`/${slug}/disponibilidade`}  icon={<FiCheckSquare size={14} />} label="Disponibilidade" />}
               <SubItem to={`/${slug}/agenda-regras`}    icon={<FiSliders size={14} />}   label="Regras" />
             </SubMenu>
           )}

@@ -87,7 +87,13 @@ export default function Dashboard() {
 
       {/* ── Ações ───────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-        <button className={`btn btn-primary ${s.newApptBtn}`} onClick={() => navigate(`/${tenantSlug}/novo-agendamento`)}>
+        <button
+          className={`btn btn-primary ${s.newApptBtn}`}
+          onClick={() => {
+            const onlyBarber = user?.isBarber && !user?.permissions?.canManageTenant;
+            navigate(`/${tenantSlug}/${onlyBarber ? 'disponibilidade' : 'novo-agendamento'}`);
+          }}
+        >
           + Novo Agendamento
         </button>
         {pending > 0 && (
