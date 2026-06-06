@@ -20,6 +20,7 @@ const Grupo              = lazy(() => import('./pages/Grupo/Grupo'));
 const Agenda             = lazy(() => import('./pages/Agenda/Agenda'));
 const Promocoes          = lazy(() => import('./pages/Promocoes/Promocoes'));
 const Relatorios         = lazy(() => import('./pages/Relatorios/Relatorios'));
+const Financeiro         = lazy(() => import('./pages/Financeiro/Financeiro'));
 const Perfil             = lazy(() => import('./pages/Perfil/Perfil'));
 const Conta              = lazy(() => import('./pages/Conta/Conta'));
 const TelaCliente        = lazy(() => import('./pages/TelaCliente/TelaCliente'));
@@ -30,6 +31,9 @@ const Landing            = lazy(() => import('./pages/Landing/Landing'));
 const PrimeiroAcesso     = lazy(() => import('./pages/PrimeiroAcesso/PrimeiroAcesso'));
 const AgendaRegras       = lazy(() => import('./pages/AgendaRegras/AgendaRegras'));
 const PlanoServico       = lazy(() => import('./pages/PlanoServico/PlanoServico'));
+const ProdutosLista      = lazy(() => import('./pages/Produtos/ProdutosLista'));
+const ProdutosCadastro   = lazy(() => import('./pages/Produtos/ProdutosCadastro'));
+const Vendas             = lazy(() => import('./pages/Vendas/Vendas'));
 
 const Fallback = () => <div className="app-loading">Carregando...</div>;
 
@@ -96,6 +100,11 @@ function AppRoutes() {
           <Route path="/:slug/promocoes"              element={<PrivateRoute perm="canManageServices"><Promocoes /></PrivateRoute>} />
           <Route path="/:slug/planos-servico"         element={<PrivateRoute perm="canManageServices"><PlanoServico /></PrivateRoute>} />
           <Route path="/:slug/relatorios"             element={<PrivateRoute perm="canViewReports"><Relatorios /></PrivateRoute>} />
+          <Route path="/:slug/financeiro"             element={<PrivateRoute perm="canViewReports"><Financeiro /></PrivateRoute>} />
+          <Route path="/:slug/vendas"                  element={<PrivateRoute><Vendas /></PrivateRoute>} />
+          <Route path="/:slug/produtos-lista"         element={<PrivateRoute><ProdutosLista /></PrivateRoute>} />
+          <Route path="/:slug/produtos-cadastro"      element={<PrivateRoute><ProdutosCadastro /></PrivateRoute>} />
+          <Route path="/:slug/produtos-cadastro/:id"  element={<PrivateRoute><ProdutosCadastro /></PrivateRoute>} />
           <Route path="/:slug/perfil"                 element={<PrivateRoute><Perfil /></PrivateRoute>} />
           <Route path="/:slug/conta"                  element={<PrivateRoute perm="canManageTenant"><Conta /></PrivateRoute>} />
           <Route path="/:slug/tela-cliente"           element={<PrivateRoute perm="canViewCustomers"><TelaCliente /></PrivateRoute>} />
@@ -116,6 +125,7 @@ function AppRoutes() {
           <Route path="/agenda"                 element={<LegacyRedirect path="agenda" />} />
           <Route path="/promocoes"              element={<LegacyRedirect path="promocoes" />} />
           <Route path="/relatorios"             element={<LegacyRedirect path="relatorios" />} />
+          <Route path="/financeiro"             element={<LegacyRedirect path="financeiro" />} />
           <Route path="/perfil"                 element={<LegacyRedirect path="perfil" />} />
           <Route path="/conta"                  element={<LegacyRedirect path="conta" />} />
           <Route path="/tela-cliente"           element={<LegacyRedirect path="tela-cliente" />} />

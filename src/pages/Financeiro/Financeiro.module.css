@@ -1,0 +1,237 @@
+.container { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+  margin-bottom: 1.25rem;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  margin-bottom: -1px;
+}
+
+.tab:hover { color: var(--color); }
+
+.tabActive {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.periodBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.periodBtn {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.periodBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+.periodBtnActive {
+  background: rgba(37,99,235,0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.kpiCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.kpiLabel {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.kpiValue {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color);
+}
+
+.tableWrap { overflow-x: auto; }
+
+.emptyState {
+  text-align: center;
+  padding: 2.5rem;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.barTrack {
+  flex: 1;
+  height: 10px;
+  background: var(--bg-input);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.4s ease;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.inputRow {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.inputGroup label {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.inputGroup input,
+.inputGroup select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  color: var(--color);
+  font-size: 0.875rem;
+  padding: 0.5rem 0.65rem;
+  min-width: 140px;
+}
+
+.inputGroup input:focus,
+.inputGroup select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.rankRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.rankPos {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.rankName {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.rankStat {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  text-align: right;
+  min-width: 80px;
+}
+
+.rankValue {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--success);
+  text-align: right;
+  min-width: 110px;
+}
+
+.fluxoChart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.fluxoRow {
+  display: grid;
+  grid-template-columns: 90px 1fr 1fr 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.82rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.fluxoHeader {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.pctInput {
+  width: 70px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  color: var(--color);
+  font-size: 0.875rem;
+  padding: 0.35rem 0.5rem;
+  text-align: center;
+}
+
+.pctInput:focus { outline: none; border-color: var(--accent); }

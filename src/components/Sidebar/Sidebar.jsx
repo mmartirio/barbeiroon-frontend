@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { NavLink, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import s from './Sidebar.module.css';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -8,7 +8,8 @@ import {
   FiSettings, FiLogOut, FiMenu, FiX,
   FiChevronDown, FiChevronRight, FiSmartphone, FiTag,
   FiPlusCircle, FiAlertCircle, FiClock, FiHelpCircle,
-  FiSun, FiMoon, FiSliders, FiPackage,
+  FiSun, FiMoon, FiSliders, FiPackage, FiDollarSign,
+  FiTrendingUp, FiTrendingDown, FiAward, FiActivity, FiShoppingCart,
 } from 'react-icons/fi';
 
 function useTheme() {
@@ -71,6 +72,20 @@ function SubItem({ to, icon, label, onClick }) {
       <NavLink to={to} className={({ isActive }) => `${s.navLink}${isActive ? ` ${s.active}` : ''}`} style={{ paddingLeft: '2.25rem', fontSize: '0.84rem' }}>
         {icon} {label}
       </NavLink>
+    </li>
+  );
+}
+
+function FinSubItem({ to, icon, label, tabValue }) {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const currentTab = params.get('tab') || 'resumo';
+  const isActive = location.pathname.includes('/financeiro') && currentTab === tabValue;
+  return (
+    <li>
+      <Link to={to} className={`${s.navLink}${isActive ? ` ${s.active}` : ''}`} style={{ paddingLeft: '2.25rem', fontSize: '0.84rem' }}>
+        {icon} {label}
+      </Link>
     </li>
   );
 }
@@ -194,6 +209,13 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
             </SubMenu>
           )}
 
+          <NavItem to={`/${slug}/vendas`} icon={<FiShoppingCart size={15} />} label="Vendas" />
+
+          <SubMenu icon={<FiPackage size={15} />} label="Produtos" menuKey="produtos" open={openMenus.produtos} onToggle={toggle}>
+            <SubItem to={`/${slug}/produtos-cadastro`} icon={<FiPlusCircle size={14} />} label="Cadastrar" />
+            <SubItem to={`/${slug}/produtos-lista`}    icon={<FiList size={14} />}       label="Listar" />
+          </SubMenu>
+
           {p('canViewAgenda') && (
             <SubMenu icon={<FiCalendar size={15} />} label="Agenda" menuKey="agenda" open={openMenus.agenda} onToggle={toggle}>
               <SubItem to={`/${slug}/agenda`}           icon={<FiClock size={14} />}     label="Expediente" />
@@ -213,7 +235,7 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
               )}
             </span>
           } />}
-          {p('canViewReports')    && <NavItem to={`/${slug}/relatorios`}    icon={<FiBarChart2 size={15} />} label="Relatórios" />}
+          {p('canViewReports') && <NavItem to={`/${slug}/financeiro`} icon={<FiDollarSign size={15} />} label="Financeiro" />}
 
           <li className={s.divider} />
 
