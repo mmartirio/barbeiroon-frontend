@@ -17,12 +17,16 @@ export default function PendingNotifier() {
 
   useEffect(() => {
     let mounted = true;
+    let id;
     const check = async () => {
       try {
         const res = await fetch('/api/appointment/requests/pending/own', {
           headers: { Authorization: `Bearer ${tok()}` },
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) clearInterval(id);
+          return;
+        }
         const d = await res.json().catch(() => ({}));
         const reqs = d.requests || d.data || [];
         if (!mounted) return;
@@ -35,7 +39,7 @@ export default function PendingNotifier() {
       } catch { /* silent */ }
     };
     check();
-    const id = setInterval(check, POLL_MS);
+    id = setInterval(check, POLL_MS);
     return () => { mounted = false; clearInterval(id); };
   }, []);
 
