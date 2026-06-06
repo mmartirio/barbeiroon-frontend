@@ -123,7 +123,7 @@ export default function TelaCliente() {
             <h3 style={{ marginBottom: '0.75rem' }}>Link de Agendamento</h3>
             {clientLink ? (
               <>
-                <div style={{ background: 'var(--bg-input)', borderRadius: 'var(--radius-xs)', padding: '0.6rem 0.75rem', fontSize: '0.85rem', color: '#d6e1ff', marginBottom: '0.75rem', wordBreak: 'break-all' }}>{clientLink}</div>
+                <div style={{ background: 'var(--bg-input)', borderRadius: 'var(--radius-xs)', padding: '0.6rem 0.75rem', fontSize: '0.85rem', color: 'var(--color-text)', marginBottom: '0.75rem', wordBreak: 'break-all' }}>{clientLink}</div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button className="btn btn-ghost btn-sm" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }} onClick={copyLink}>
                     <FiCopy size={13} /> {copied ? 'Copiado!' : 'Copiar link'}
