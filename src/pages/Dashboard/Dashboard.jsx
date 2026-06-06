@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout/Layout';
@@ -23,20 +23,23 @@ export default function Dashboard() {
   const [svcModal,   setSvcModal]   = useState(false);
 
   const canSeePending = user != null && (!user?.isBarber || !!user?.permissions?.canManageTenant);
+  const pendingBlocked = useRef(false);
 
   const load = useCallback(async () => {
     try {
       const h = { Authorization: `Bearer ${tok()}`, 'Cache-Control': 'no-cache' };
       const today = new Date().toISOString().split('T')[0];
+      const callPending = canSeePending && !pendingBlocked.current;
       const [sRes, pRes, ownRes, slotRes, prodRes] = await Promise.all([
         fetch('/api/dashboard/stats', { headers: h, cache: 'no-cache' }),
-        canSeePending ? fetch('/api/appointment/requests/pending/own', { headers: h, cache: 'no-cache' }) : Promise.resolve(null),
+        callPending ? fetch('/api/appointment/requests/pending/own', { headers: h, cache: 'no-cache' }) : Promise.resolve(null),
         fetch('/api/appointment/own', { headers: h, cache: 'no-cache' }),
         fetch(`/api/agenda/horarios-livres?periodo=diario&data=${today}`, { headers: h, cache: 'no-cache' }),
         fetch('/api/produtos/vendas?periodo=mensal', { headers: h, cache: 'no-cache' }),
       ]);
       const sd   = await sRes.json().catch(() => ({}));
-      const pd   = pRes ? await pRes.json().catch(() => ({})) : {};
+      if (pRes?.status === 403) pendingBlocked.current = true;
+      const pd   = (pRes?.ok) ? await pRes.json().catch(() => ({})) : {};
       const od   = await ownRes.json().catch(() => ({}));
       const sld  = slotRes.ok  ? await slotRes.json().catch(() => ({}))  : {};
       const prod = prodRes.ok  ? await prodRes.json().catch(() => ({}))  : {};
