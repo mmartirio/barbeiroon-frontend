@@ -23,13 +23,14 @@ export default function Disponibilidade() {
   const tenantSlug  = slug || user?.tenantSlug || '';
   const isOnlyBarber = user?.isBarber && !user?.permissions?.canManageTenant;
 
-  const [periodo,         setPeriodo]         = useState('diario');
+  const [periodo,         setPeriodo]         = useState('semanal');
   const [baseDate,        setBaseDate]        = useState(toStr(new Date()));
   const [profId,          setProfId]          = useState('');
   const [profs,           setProfs]           = useState([]);
   const [dias,            setDias]            = useState([]);
   const [effectiveProfId, setEffectiveProfId] = useState(null);
   const [loading,         setLoading]         = useState(false);
+  const [apiError,        setApiError]        = useState(false);
 
   useEffect(() => {
     if (!isOnlyBarber) {
@@ -45,16 +46,19 @@ export default function Disponibilidade() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setApiError(false);
     try {
       const params = new URLSearchParams({ periodo, data: baseDate });
       if (!isOnlyBarber && profId) params.set('professionalId', profId);
       const res  = await fetch(`/api/agenda/horarios-livres?${params}`, {
         headers: { Authorization: `Bearer ${tok()}` },
       });
+      if (!res.ok) { setApiError(true); setDias([]); return; }
       const json = await res.json().catch(() => ({}));
       setDias(json.data || []);
       setEffectiveProfId(json.professionalId || null);
     } catch {
+      setApiError(true);
       setDias([]);
     } finally {
       setLoading(false);
@@ -126,6 +130,12 @@ export default function Disponibilidade() {
       </div>
 
       {/* ── States ── */}
+      {apiError && (
+        <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
+          Erro ao carregar horários. Verifique se o servidor está atualizado.
+        </div>
+      )}
+
       {loading && (
         <div className={s.stateBox}>
           <div className={s.spinner} />
@@ -136,13 +146,12 @@ export default function Disponibilidade() {
       {!loading && dias.length === 0 && (
         <div className={s.stateBox}>
           <FiCalendar size={36} style={{ color: 'var(--color-muted)', marginBottom: 12 }} />
-          <p style={{ fontWeight: 600 }}>Nenhum expediente encontrado</p>
+          <p style={{ fontWeight: 600 }}>Sem expediente neste período</p>
           <p style={{ fontSize: '0.82rem', color: 'var(--color-muted)', marginTop: 4 }}>
-            Configure seu expediente em{' '}
-            <button
-              className={s.linkBtn}
-              onClick={() => navigate(`/${tenantSlug}/agenda`)}
-            >
+            Nenhum dia de trabalho configurado aqui. Tente{' '}
+            <button className={s.linkBtn} onClick={() => setPeriodo('semanal')}>ver a semana</button>
+            {' '}ou configure em{' '}
+            <button className={s.linkBtn} onClick={() => navigate(`/${tenantSlug}/agenda`)}>
               Agenda → Expediente
             </button>
           </p>
