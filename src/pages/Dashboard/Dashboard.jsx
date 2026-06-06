@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [nextAppt, setNextAppt] = useState(null);
   const [loading,  setLoading]  = useState(true);
   const [bdModal,  setBdModal]  = useState(false);
+  const [svcModal, setSvcModal] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -133,10 +134,11 @@ export default function Dashboard() {
               ) : <span className={s.infoCardValue}>Nenhum agendamento hoje</span>}
             </div>
 
-            <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+            <div className={s.infoCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', cursor: topSvc ? 'pointer' : 'default' }}
+                 onClick={() => topSvc && setSvcModal(true)}>
               <div className={s.infoCardHeader}>
                 <div style={{ color: '#f59e0b' }}><FiAward size={20} /></div>
-                <span className={s.infoCardTitle}>Serviço mais vendido</span>
+                <span className={s.infoCardTitle}>Serviços mais vendidos</span>
               </div>
               {topSvc
                 ? <><span className={s.infoCardHighlight}>{topSvc.name || topSvc.serviceName}</span><span className={s.infoCardValue}>{topSvc.count || topSvc.total || 0} atendimentos</span></>
@@ -156,6 +158,40 @@ export default function Dashboard() {
 
           </div>
         </>
+      )}
+
+      {svcModal && (
+        <div className="modal-overlay" onClick={() => setSvcModal(false)}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Serviços mais vendidos</h3>
+              <button className="modal-close" onClick={() => setSvcModal(false)}><FiX size={18} /></button>
+            </div>
+            <div className="modal-body">
+              {(st.topServices || []).map((svc, i) => {
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`;
+                const barPct = Math.round((svc.count / (st.topServices[0]?.count || 1)) * 100);
+                return (
+                  <div key={svc.name} style={{ padding: '0.65rem 0', borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: i < 3 ? '1.15rem' : '0.85rem', minWidth: 28, textAlign: 'center', fontWeight: 700, color: 'var(--color-muted)' }}>{medal}</span>
+                        <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{svc.name}</span>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontWeight: 700, color: 'var(--color)', fontSize: '0.9rem' }}>{svc.count} atend.</span>
+                        <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--color-muted)' }}>{svc.revenue}</span>
+                      </div>
+                    </div>
+                    <div style={{ background: 'var(--border)', borderRadius: 4, height: 5, overflow: 'hidden' }}>
+                      <div style={{ width: `${barPct}%`, height: '100%', background: i === 0 ? '#f59e0b' : i === 1 ? '#9ca3af' : i === 2 ? '#b45309' : '#7c3aed', borderRadius: 4, transition: 'width 0.4s' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
 
       {bdModal && (

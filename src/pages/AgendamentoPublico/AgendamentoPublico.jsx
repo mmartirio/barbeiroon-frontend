@@ -346,6 +346,15 @@ export default function AgendamentoPublico() {
         if (!appointmentData.professionalId) { alert('Selecione um profissional para continuar.'); return; }
         if (!appointmentData.date) { alert('Selecione uma data para continuar.'); return; }
         if (!appointmentData.time) { alert('Selecione um horário para continuar.'); return; }
+
+        // Impede agendamento em data/hora já passada (re-valida no momento do envio)
+        const selectedDateTime = new Date(`${appointmentData.date}T${appointmentData.time}:00`);
+        if (selectedDateTime <= new Date()) {
+            alert('Este horário já passou. Por favor, selecione uma data e horário futuros.');
+            setAppointmentData(prev => ({ ...prev, time: '' }));
+            return;
+        }
+
         setLoading(true);
         try {
             const r = await fetch('/api/public/appointment/create', {

@@ -91,11 +91,6 @@ export default defineConfig({
       '/api': {
         target: 'https://api-barbeiroon.com.br',
         changeOrigin: true,
-        configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq) => {
-            proxyReq.removeHeader('origin');
-          });
-        },
       },
       '/uploads': {
         target: 'https://api-barbeiroon.com.br',

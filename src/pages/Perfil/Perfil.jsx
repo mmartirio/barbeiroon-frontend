@@ -16,7 +16,7 @@ export default function Perfil() {
   const [error,     setError]     = useState('');
   const [success,   setSuccess]   = useState('');
 
-  const userId  = user?.id;
+  const userId  = user?.userId;
   const isAdmin = !!user?.permissions?.canEditUser;
   const avatarLetter = useMemo(() => String(name || '?').trim().charAt(0).toUpperCase(), [name]);
 
