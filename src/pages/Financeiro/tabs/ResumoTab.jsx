@@ -49,20 +49,38 @@ export default function ResumoTab({ periodo }) {
   const [resumo,  setResumo]  = useState(null);
   const [fluxo,   setFluxo]   = useState([]);
   const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
+    setApiError(null);
     Promise.all([
-      fetch(`/api/financeiro/resumo?periodo=${periodo}`, { headers: { Authorization: `Bearer ${tok()}` } }).then(r => r.json()).catch(() => ({})),
-      fetch(`/api/financeiro/fluxo?periodo=${periodo}`,  { headers: { Authorization: `Bearer ${tok()}` } }).then(r => r.json()).catch(() => ({})),
+      fetch(`/api/financeiro/resumo?periodo=${periodo}`, { headers: { Authorization: `Bearer ${tok()}` } })
+        .then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d }))),
+      fetch(`/api/financeiro/fluxo?periodo=${periodo}`,  { headers: { Authorization: `Bearer ${tok()}` } })
+        .then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d }))).catch(() => ({ ok: true, data: {} })),
     ]).then(([r, f]) => {
-      setResumo(r);
-      setFluxo(f.data || []);
+      if (!r.ok) {
+        setApiError(`[${r.status}] ${r.data?.message || JSON.stringify(r.data)}`);
+        setLoading(false);
+        return;
+      }
+      setResumo(r.data);
+      setFluxo(f.data?.data || []);
+      setLoading(false);
+    }).catch(err => {
+      setApiError(err.message);
       setLoading(false);
     });
   }, [periodo]);
 
   if (loading) return <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Carregando...</p>;
+  if (apiError) return (
+    <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid #dc2626', borderRadius: 6, padding: '1rem', color: '#dc2626', fontSize: '0.875rem' }}>
+      <strong>Erro ao carregar dados:</strong><br />
+      <code style={{ fontSize: '0.8rem', wordBreak: 'break-all' }}>{apiError}</code>
+    </div>
+  );
   if (!resumo) return null;
 
   const kpisFinanceiros = [
