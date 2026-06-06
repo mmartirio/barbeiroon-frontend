@@ -10,7 +10,7 @@ import {
   FiPlusCircle, FiAlertCircle, FiClock, FiHelpCircle,
   FiSun, FiMoon, FiSliders, FiPackage, FiDollarSign,
   FiTrendingUp, FiTrendingDown, FiAward, FiActivity, FiShoppingCart,
-  FiCheckSquare,
+  FiCheckSquare, FiLink,
 } from 'react-icons/fi';
 
 function useTheme() {
@@ -191,7 +191,6 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
               {p('canCreateCustomer') && <SubItem to={`/${slug}/cliente-cadastro`}   icon={<FiUserPlus size={14} />} label="Cadastro" />}
               {p('canViewCustomers')  && <SubItem to={`/${slug}/cliente-lista`}      icon={<FiList size={14} />}     label="Lista de Clientes" />}
               {p('canViewAppointments') && <SubItem to={`/${slug}/servico-agendados`} icon={<FiCalendar size={14} />} label="Clientes Agendados" />}
-              {p('canViewCustomers')  && <SubItem to={`/${slug}/tela-cliente`}       icon={<FiMonitor size={14} />}  label="Tela do Cliente" />}
             </SubMenu>
           )}
 
@@ -238,6 +237,7 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
             </span>
           } />}
           {p('canViewReports') && <NavItem to={`/${slug}/financeiro`} icon={<FiDollarSign size={15} />} label="Financeiro" />}
+          {p('canViewCustomers') && <NavItem to={`/${slug}/tela-cliente`} icon={<FiLink size={15} />} label="Meu Link" />}
 
           <li className={s.divider} />
 
