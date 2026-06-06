@@ -24,6 +24,7 @@ export default function Dashboard() {
 
   const canSeePending = user != null && (!user?.isBarber || !!user?.permissions?.canManageTenant);
   const pendingBlocked = useRef(false);
+  const vendasBlocked  = useRef(false);
 
   const load = useCallback(async () => {
     try {
@@ -35,15 +36,16 @@ export default function Dashboard() {
         callPending ? fetch('/api/appointment/requests/pending/own', { headers: h, cache: 'no-cache' }) : Promise.resolve(null),
         fetch('/api/appointment/own', { headers: h, cache: 'no-cache' }),
         fetch(`/api/agenda/horarios-livres?periodo=diario&data=${today}`, { headers: h, cache: 'no-cache' }),
-        fetch('/api/produtos/vendas?periodo=mensal', { headers: h, cache: 'no-cache' }),
+        vendasBlocked.current ? Promise.resolve(null) : fetch('/api/produtos/vendas?periodo=mensal', { headers: h, cache: 'no-cache' }),
       ]);
       const sd   = await sRes.json().catch(() => ({}));
       if (pRes?.status === 403) pendingBlocked.current = true;
       const pd   = (pRes?.ok) ? await pRes.json().catch(() => ({})) : {};
       const od   = await ownRes.json().catch(() => ({}));
       const sld  = slotRes.ok  ? await slotRes.json().catch(() => ({}))  : {};
-      const prod = prodRes.ok  ? await prodRes.json().catch(() => ({}))  : {};
-      setVendidos((prod.data || []).reduce((s, r) => s + Number(r.quantidade_vendida || 0), 0));
+      if (prodRes && !prodRes.ok) vendasBlocked.current = true;
+      const prod = prodRes?.ok ? await prodRes.json().catch(() => ({})) : {};
+      if (prodRes?.ok) setVendidos((prod.data || []).reduce((s, r) => s + Number(r.quantidade_vendida || 0), 0));
       setStats(sd.stats || sd);
       setPending((pd.requests || pd.data || []).length);
       const dias = sld.data || [];
