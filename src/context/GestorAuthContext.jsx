@@ -80,10 +80,11 @@ export function GestorAuthProvider({ children }) {
       return new Response(JSON.stringify({ message: 'Sessão expirada. Faça login novamente.' }), { status: 401 });
     }
 
+    const isFormData = opts.body instanceof FormData;
     const res = await fetch(url, {
       ...opts,
       headers: {
-        'Content-Type': 'application/json',
+        ...(!isFormData && { 'Content-Type': 'application/json' }),
         Authorization: `Bearer ${token}`,
         ...(opts.headers || {}),
       },
