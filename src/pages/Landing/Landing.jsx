@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   RiCalendarCheckLine,
@@ -14,7 +14,14 @@ import {
   RiStarFill,
   RiMenuLine,
   RiCloseLine,
+  RiCheckLine,
 } from 'react-icons/ri';
+
+function fmtPrice(val) {
+  const n = Number(val || 0);
+  const [int, dec] = n.toFixed(2).split('.');
+  return { int, dec, full: `${int},${dec}` };
+}
 import './Landing.css';
 
 const FEATURES = [
@@ -67,7 +74,24 @@ const scrollTo = (id) => {
 };
 
 export default function Landing() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen,     setMenuOpen]     = useState(false);
+  const [plans,        setPlans]        = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
+  const [priceView,    setPriceView]    = useState('monthly');
+
+  const [apkFile, setApkFile] = useState('app-release.apk');
+
+  useEffect(() => {
+    fetch('/api/public/plans')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(d => setPlans(Array.isArray(d?.plans) ? d.plans : []))
+      .catch(() => setPlans([]))
+      .finally(() => setLoadingPlans(false));
+    fetch('/api/public/installers')
+      .then(r => r.json())
+      .then(d => { if (d.files?.[0]) setApkFile(d.files[0]); })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="lp">
@@ -177,13 +201,67 @@ export default function Landing() {
           <div className="lp-section-eyebrow">Planos para sua barbearia</div>
           <h2 className="lp-section-title">Escolha o plano ideal para você</h2>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2.5rem' }}>
-            <Link to="/registrar">
-              <button className="btn-plan-cta">
-                Escolha seu plano <RiArrowRightLine />
-              </button>
-            </Link>
+          <div className="lp-billing-toggle">
+            <span className={priceView === 'monthly' ? 'active' : ''}>Mensal</span>
+            <button
+              className={`lp-toggle-pill ${priceView === 'annual' ? 'annual' : ''}`}
+              onClick={() => setPriceView(v => v === 'monthly' ? 'annual' : 'monthly')}
+              aria-label="Alternar período"
+            />
+            <span className={priceView === 'annual' ? 'active' : ''}>Anual</span>
           </div>
+
+          {loadingPlans && (
+            <div style={{ textAlign: 'center', color: '#64748b', padding: '3rem 0' }}>Carregando planos...</div>
+          )}
+
+          {!loadingPlans && plans.length > 0 && (
+            <div className="lp-plans-grid">
+              {plans.map((plan, idx) => {
+                const monthly = Number(plan.priceMonthly || 0);
+                const annual  = Number(plan.priceAnnual  || 0);
+                const price   = priceView === 'annual' && annual > 0 ? annual / 12 : monthly;
+                const { int, dec } = fmtPrice(price);
+                const features = Array.isArray(plan.features) ? plan.features : [];
+                const isFeatured = idx === Math.floor(plans.length / 2) || plan.isDefault;
+
+                return (
+                  <div key={plan.id} className={`plan-card-lp${isFeatured ? ' featured' : ''}`}>
+                    {isFeatured && <div className="plan-featured-badge">Mais popular</div>}
+                    <div className="plan-lp-header">
+                      <span className="plan-lp-name">{plan.name}</span>
+                      {plan.maxUsers && (
+                        <p className="plan-lp-desc">Até {plan.maxUsers} barbeiro{plan.maxUsers > 1 ? 's' : ''}</p>
+                      )}
+                    </div>
+                    <div className="plan-lp-price">
+                      <div className="plan-lp-price-row">
+                        <span className="plan-lp-currency">R$</span>
+                        <span className="plan-lp-amount">{int}<span style={{ fontSize: '1.4rem' }}>,{dec}</span></span>
+                        <span className="plan-lp-period">/mês</span>
+                      </div>
+                      {priceView === 'annual' && annual > 0 && (
+                        <div className="plan-lp-annual-note">R$ {fmtPrice(annual).full}/ano · 2 meses grátis</div>
+                      )}
+                    </div>
+                    {features.length > 0 && (
+                      <ul className="plan-lp-features">
+                        {features.slice(0, 6).map((f, i) => (
+                          <li key={i}>
+                            <span className="plan-check"><RiCheckLine size={10} /></span>
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <Link to={`/registrar?plano=${plan.id}&ciclo=${priceView}`}>
+                      <button className="plan-lp-btn">Começar agora</button>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -199,10 +277,9 @@ export default function Landing() {
             <div className="lp-app-card">
               <p className="lp-app-card-label">Android</p>
               <p className="lp-app-card-desc">Baixe o APK e instale diretamente no seu celular.</p>
-              <a href="https://api-barbeiroon.com.br/downloads/barbeiroon_1.0.1.apk" className="lp-app-btn lp-app-btn-android" download>
+              <a href={`https://api-barbeiroon.com.br/downloads/${apkFile}`} className="lp-app-btn lp-app-btn-android" download>
                 Baixar APK
               </a>
-              <span className="lp-app-version">v1.0.1</span>
             </div>
 
             {/* iOS PWA */}

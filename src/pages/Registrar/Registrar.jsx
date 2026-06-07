@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { RiCheckLine, RiArrowRightLine, RiShieldCheckLine, RiWhatsappLine } from 'react-icons/ri';
 import './Registrar.css';
 
@@ -82,6 +82,38 @@ function fmtPrice(val) {
   return { int, dec, full: `${int},${dec}` };
 }
 
+function fmtPhone(v) {
+  const d = v.replace(/\D/g, '').slice(0, 11);
+  if (d.length <= 10) return d.replace(/^(\d{0,2})(\d{0,4})(\d{0,4})$/, (_, a, b, c) => [a && `(${a}`, b && `) ${b}`, c && `-${c}`].filter(Boolean).join('').replace(/^\(/, '('));
+  return d.replace(/^(\d{2})(\d{5})(\d{0,4})$/, '($1) $2-$3');
+}
+
+function fmtCNPJ(v) {
+  const d = v.replace(/\D/g, '').slice(0, 14);
+  return d
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d)/, '$1-$2');
+}
+
+function fmtCEP(v) {
+  const d = v.replace(/\D/g, '').slice(0, 8);
+  return d.replace(/^(\d{5})(\d)/, '$1-$2');
+}
+
+function validCNPJ(cnpj) {
+  const d = cnpj.replace(/\D/g, '');
+  if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
+  const calc = (len) => {
+    let sum = 0, w = len - 7;
+    for (let i = 0; i < len; i++) { sum += parseInt(d[i]) * (w - i < 2 ? w - i + 9 : w - i); }
+    const r = sum % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  return parseInt(d[12]) === calc(12) && parseInt(d[13]) === calc(13);
+}
+
 function Footer() {
   return (
     <footer className="reg-footer">
@@ -141,16 +173,25 @@ function Steps({ current }) {
 }
 
 export default function Registrar() {
-  const [step, setStep] = useState(1);
-  const [plans, setPlans] = useState([]);
-  const [loadingPlans, setLoadingPlans] = useState(true);
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [priceView, setPriceView] = useState('monthly');
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [result, setResult] = useState(null);
+  const [searchParams]  = useSearchParams();
+  const paramPlanId     = searchParams.get('plano');
+  const paramCiclo      = searchParams.get('ciclo');
+
+  const [step,          setStep]         = useState(1);
+  const [plans,         setPlans]        = useState([]);
+  const [loadingPlans,  setLoadingPlans] = useState(true);
+  const [selectedPlan,  setSelectedPlan] = useState(null);
+  const [priceView,     setPriceView]    = useState('monthly');
+  const [form,          setForm]         = useState(() => ({
+    ...EMPTY_FORM,
+    billingCycle: paramCiclo === 'annual' ? 'annual' : 'monthly',
+  }));
+  const [errors,        setErrors]       = useState({});
+  const [submitting,    setSubmitting]   = useState(false);
+  const [submitError,   setSubmitError]  = useState('');
+  const [result,        setResult]       = useState(null);
+  const [apkFile,       setApkFile]      = useState('');
+  const [lookingCep,    setLookingCep]   = useState(false);
 
   useEffect(() => {
     fetch('/api/public/plans')
@@ -158,14 +199,46 @@ export default function Registrar() {
       .then(d => {
         const list = Array.isArray(d?.plans) && d.plans.length > 0 ? d.plans : FALLBACK_PLANS;
         setPlans(list);
-        setSelectedPlan(list[0]);
+        const pre = paramPlanId ? list.find(p => String(p.id) === String(paramPlanId)) : null;
+        setSelectedPlan(pre || list[0]);
+        if (paramCiclo === 'annual') setPriceView('annual');
+        // Se veio com plano via URL, pula direto para o formulário
+        if (paramPlanId) setStep(2);
       })
       .catch(() => {
         setPlans(FALLBACK_PLANS);
         setSelectedPlan(FALLBACK_PLANS[0]);
+        if (paramPlanId) setStep(2);
       })
       .finally(() => setLoadingPlans(false));
   }, []);
+
+  useEffect(() => {
+    fetch('/api/public/installers')
+      .then(r => r.json())
+      .then(d => { if (d.files?.[0]) setApkFile(d.files[0]); })
+      .catch(() => {});
+  }, []);
+
+  const lookupCEP = async (raw) => {
+    const cep = raw.replace(/\D/g, '');
+    if (cep.length !== 8) return;
+    setLookingCep(true);
+    try {
+      const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const d = await r.json();
+      if (!d.erro) {
+        setForm(f => ({
+          ...f,
+          address:      d.logradouro || f.address,
+          neighborhood: d.bairro     || f.neighborhood,
+          city:         d.localidade || f.city,
+          state:        d.uf         || f.state,
+        }));
+      }
+    } catch {}
+    finally { setLookingCep(false); }
+  };
 
   function set(field, val) {
     setForm(f => ({ ...f, [field]: val }));
@@ -178,6 +251,7 @@ export default function Registrar() {
     if (!form.name.trim())                                       e.name            = 'Nome fantasia é obrigatório';
     if (!form.email.trim() || !emailRe.test(form.email))        e.email           = 'Informe um e-mail válido';
     if (!form.phone.trim())                                      e.phone           = 'Telefone é obrigatório';
+    if (form.cnpj.replace(/\D/g,'').length > 0 && !validCNPJ(form.cnpj)) e.cnpj  = 'CNPJ inválido';
     if (!form.ownerName.trim())                                  e.ownerName       = 'Nome do responsável é obrigatório';
     if (!form.ownerEmail.trim() || !emailRe.test(form.ownerEmail)) e.ownerEmail   = 'Informe um e-mail válido';
     if (!form.ownerPassword || form.ownerPassword.length < 6)   e.ownerPassword   = 'Senha deve ter no mínimo 6 caracteres';
@@ -386,7 +460,7 @@ export default function Registrar() {
                 <div className="reg-app-card">
                   <span className="reg-app-card-label">Android</span>
                   <p style={{ color: '#64748b', fontSize: '0.78rem', margin: 0 }}>Baixe e instale o APK diretamente</p>
-                  <a href="https://api-barbeiroon.com.br/downloads/barbeiroon_1.0.1.apk" className="reg-app-btn reg-app-btn-android" download>
+                  <a href={`https://api-barbeiroon.com.br/downloads/${apkFile || 'app-release.apk'}`} className="reg-app-btn reg-app-btn-android" download>
                     Baixar APK
                   </a>
                 </div>
@@ -419,6 +493,80 @@ export default function Registrar() {
     );
   }
 
+  // ── Step 1: Plan selection (fallback se navegar direto sem params) ──
+  if (step === 1 && !loadingPlans) {
+    return (
+      <div className="reg-page reg-page--hero">
+        <Navbar />
+        <div className="reg-body">
+          <h2 className="reg-title">Escolha o plano ideal</h2>
+          <p className="reg-subtitle">Sem fidelidade. Cancele quando quiser.</p>
+
+          <div className="billing-toggle">
+            <span className={priceView === 'monthly' ? 'active-label' : ''}>Mensal</span>
+            <button
+              className={`toggle-pill ${priceView === 'annual' ? 'annual' : ''}`}
+              onClick={() => setPriceView(v => v === 'monthly' ? 'annual' : 'monthly')}
+              aria-label="Alternar período de cobrança"
+            />
+            <span className={priceView === 'annual' ? 'active-label' : ''}>Anual</span>
+          </div>
+
+          <div className="plans-grid">
+            {plans.map(plan => {
+              const monthly = Number(plan.priceMonthly || 0);
+              const annual  = Number(plan.priceAnnual  || 0);
+              const price   = priceView === 'annual' ? annual / 12 : monthly;
+              const { int, dec } = fmtPrice(price);
+              const isSel   = selectedPlan?.id === plan.id;
+              const features = Array.isArray(plan.features) && plan.features.length > 0 ? plan.features : [];
+              return (
+                <div key={plan.id} className={`plan-card ${isSel ? 'selected' : ''}`} onClick={() => setSelectedPlan(plan)}>
+                  <div className="plan-card-header">
+                    <span className="plan-card-name">{plan.name}</span>
+                    {plan.maxUsers && <span className="plan-users-badge">até {plan.maxUsers} barbeiro{plan.maxUsers > 1 ? 's' : ''}</span>}
+                  </div>
+                  <div>
+                    <div className="plan-price">
+                      <span className="plan-price-cur">R$</span>
+                      <span className="plan-price-val">{int}<span style={{ fontSize: '1.2rem' }}>,{dec}</span></span>
+                      <span className="plan-price-period">/mês</span>
+                    </div>
+                  </div>
+                  {features.length > 0 && (
+                    <ul className="plan-features">
+                      {features.slice(0, 6).map((f, i) => (
+                        <li key={i}><span className="plan-feat-check"><RiCheckLine size={9} /></span>{f}</li>
+                      ))}
+                    </ul>
+                  )}
+                  <button className="plan-select-btn" onClick={e => { e.stopPropagation(); setSelectedPlan(plan); }}>
+                    {isSel ? '✓ Selecionado' : 'Selecionar'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="reg-continue-area">
+            <button
+              className="reg-continue-btn"
+              disabled={!selectedPlan}
+              onClick={() => {
+                setForm(f => ({ ...f, billingCycle: priceView === 'annual' ? 'annual' : 'monthly' }));
+                setStep(2);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Continuar com {selectedPlan?.name || '—'} <RiArrowRightLine />
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   // ── Step 2: Registration form ─────────────────────────────────────
   const planPrice = selectedPlan
     ? (form.billingCycle === 'annual'
@@ -430,8 +578,6 @@ export default function Registrar() {
     <div className="reg-page">
       <Navbar />
       <div className="reg-body">
-        <Steps current={2} />
-
         <form onSubmit={handleSubmit} noValidate className="reg-form-wrapper">
 
           {selectedPlan && (
@@ -443,13 +589,9 @@ export default function Registrar() {
                   {form.billingCycle === 'annual' && ' — cobrança anual'}
                 </span>
               </div>
-              <button
-                type="button"
-                className="reg-plan-change"
-                onClick={() => { setStep(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              >
+              <Link to="/#planos" className="reg-plan-change">
                 Trocar plano
-              </button>
+              </Link>
             </div>
           )}
 
@@ -471,14 +613,25 @@ export default function Registrar() {
               </div>
               <div className="reg-field">
                 <label>Telefone / WhatsApp *</label>
-                <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
+                <input type="tel" value={form.phone}
+                  onChange={e => set('phone', fmtPhone(e.target.value))}
                   className={errors.phone ? 'has-error' : ''} placeholder="(11) 99999-9999" />
                 {errors.phone && <span className="field-error">{errors.phone}</span>}
               </div>
               <div className="reg-field">
                 <label>CNPJ (opcional)</label>
-                <input type="text" value={form.cnpj} onChange={e => set('cnpj', e.target.value)}
+                <input type="text" value={form.cnpj}
+                  onChange={e => set('cnpj', fmtCNPJ(e.target.value))}
+                  className={errors.cnpj ? 'has-error' : ''}
                   placeholder="00.000.000/0001-00" />
+                {errors.cnpj && <span className="field-error">{errors.cnpj}</span>}
+              </div>
+              <div className="reg-field">
+                <label>CEP{lookingCep ? ' (buscando...)' : ''}</label>
+                <input type="text" value={form.zipCode}
+                  onChange={e => set('zipCode', fmtCEP(e.target.value))}
+                  onBlur={e => lookupCEP(e.target.value)}
+                  placeholder="00000-000" />
               </div>
               <div className="reg-field full">
                 <label>Endereço (rua e número)</label>
@@ -502,11 +655,6 @@ export default function Registrar() {
                   {STATES_BR.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
-              <div className="reg-field">
-                <label>CEP</label>
-                <input type="text" value={form.zipCode} onChange={e => set('zipCode', e.target.value)}
-                  placeholder="00000-000" />
-              </div>
             </div>
           </div>
 
@@ -528,7 +676,8 @@ export default function Registrar() {
               </div>
               <div className="reg-field">
                 <label>Telefone do responsável</label>
-                <input type="tel" value={form.ownerPhone} onChange={e => set('ownerPhone', e.target.value)}
+                <input type="tel" value={form.ownerPhone}
+                  onChange={e => set('ownerPhone', fmtPhone(e.target.value))}
                   placeholder="(11) 99999-9999" />
               </div>
               <div className="reg-field">
@@ -608,10 +757,9 @@ export default function Registrar() {
             <button type="submit" className="reg-submit-btn" disabled={submitting}>
               {submitting ? 'Cadastrando...' : 'Criar Conta'}
             </button>
-            <button type="button" className="reg-back-link"
-              onClick={() => { setStep(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-              ← Voltar para os planos
-            </button>
+            <Link to="/#planos" className="reg-back-link">
+              ← Ver planos
+            </Link>
           </div>
         </form>
       </div>
