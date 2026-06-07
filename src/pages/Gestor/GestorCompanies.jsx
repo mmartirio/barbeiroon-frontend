@@ -7,7 +7,7 @@ const toSlug = (v) => (v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLower
 const errStyle = { background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171', padding: '10px 14px', borderRadius: 8, fontSize: '0.84rem', marginBottom: 14 };
 const TH ={ padding: '10px 14px', textAlign: 'left', fontWeight: 600, fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' };
 const TD = { padding: '10px 14px', verticalAlign: 'middle', fontSize: '0.84rem' };
-const EMPTY = { name: '', companyName: '', cnpj: '', slug: '', email: '', phone: '', address: '', neighborhood: '', city: '', state: '', zipCode: '', ownerName: '', ownerEmail: '', ownerPhone: '', planId: '', isActive: true };
+const EMPTY = { name: '', companyName: '', cnpj: '', slug: '', email: '', phone: '', address: '', neighborhood: '', city: '', state: '', zipCode: '', ownerName: '', ownerEmail: '', ownerPhone: '', planId: '', isActive: true, ownerIsBarber: true };
 
 function Modal({ title, onClose, children }) {
     return (
@@ -83,7 +83,7 @@ export default function GestorCompanies() {
         setEditId(null); setError(''); setSlugEdited(false); setModal('form');
     };
     const openEdit = (t) => {
-        setForm({ name: t.name || '', companyName: t.companyName || '', cnpj: t.cnpj || '', slug: t.slug || '', email: t.email || '', phone: t.phone || '', address: t.address || '', neighborhood: t.neighborhood || '', city: t.city || '', state: t.state || '', zipCode: t.zipCode || '', ownerName: t.ownerName || '', ownerEmail: t.ownerEmail || '', ownerPhone: t.ownerPhone || '', planId: t.planId ? String(t.planId) : '', isActive: t.isActive });
+        setForm({ name: t.name || '', companyName: t.companyName || '', cnpj: t.cnpj || '', slug: t.slug || '', email: t.email || '', phone: t.phone || '', address: t.address || '', neighborhood: t.neighborhood || '', city: t.city || '', state: t.state || '', zipCode: t.zipCode || '', ownerName: t.ownerName || '', ownerEmail: t.ownerEmail || '', ownerPhone: t.ownerPhone || '', planId: t.planId ? String(t.planId) : '', isActive: t.isActive, ownerIsBarber: t.ownerIsBarber ?? true });
         setEditId(t.id); setError(''); setSlugEdited(true); setModal('form');
     };
     const closeModal = () => { setModal(null); setError(''); };
@@ -217,6 +217,15 @@ export default function GestorCompanies() {
                             <Field label="Nome"><input className="form-input" {...inp('ownerName')} /></Field>
                             <Field label="Email"><input className="form-input" type="email" {...inp('ownerEmail')} /></Field>
                             <Field label="Telefone"><input className="form-input" {...inp('ownerPhone')} /></Field>
+                        </div>
+                        <div style={{ marginTop: 10, padding: '12px 14px', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8 }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
+                                <input type="checkbox" checked={form.ownerIsBarber} onChange={e => setForm(p => ({ ...p, ownerIsBarber: e.target.checked }))} />
+                                Proprietário é barbeiro / profissional
+                            </label>
+                            <p style={{ margin: '6px 0 0', fontSize: '0.78rem', color: 'var(--color-muted)' }}>
+                                Se marcado, o proprietário aparecerá na lista de profissionais disponíveis para agendamento pelos clientes.
+                            </p>
                         </div>
                         <p style={{ fontSize: '0.78rem', color: 'var(--color-muted)', margin: '14px 0 10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Plano</p>
                         <Field label="Plano vinculado">

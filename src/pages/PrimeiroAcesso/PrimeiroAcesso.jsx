@@ -10,6 +10,7 @@ export default function PrimeiroAcesso() {
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [confirm,  setConfirm]  = useState('');
+  const [isBarber, setIsBarber] = useState(true);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
   const [done,     setDone]     = useState(null); // email do novo admin após sucesso
@@ -61,6 +62,7 @@ export default function PrimeiroAcesso() {
           email: email.toLowerCase().trim(),
           password,
           groupId: adminGroup.id,
+          isBarber,
         }),
       });
       const d = await res.json().catch(() => ({}));
@@ -160,6 +162,16 @@ export default function PrimeiroAcesso() {
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
             />
+          </div>
+
+          <div style={{ marginTop: 4, marginBottom: 12, padding: '12px 14px', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
+              <input type="checkbox" checked={isBarber} onChange={e => setIsBarber(e.target.checked)} />
+              Sou barbeiro / profissional
+            </label>
+            <p style={{ margin: '6px 0 0', fontSize: '0.78rem', color: 'var(--color-muted)' }}>
+              Marque esta opção se você atende clientes. Você aparecerá na lista de profissionais disponíveis para agendamento.
+            </p>
           </div>
 
           <button

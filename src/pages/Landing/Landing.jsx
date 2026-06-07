@@ -81,16 +81,22 @@ export default function Landing() {
 
   const [apkFile, setApkFile] = useState('app-release.apk');
 
-  useEffect(() => {
+  const fetchPlans = () => {
     fetch('/api/public/plans')
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(d => setPlans(Array.isArray(d?.plans) ? d.plans : []))
       .catch(() => setPlans([]))
       .finally(() => setLoadingPlans(false));
+  };
+
+  useEffect(() => {
+    fetchPlans();
     fetch('/api/public/installers')
       .then(r => r.json())
       .then(d => { if (d.files?.[0]) setApkFile(d.files[0]); })
       .catch(() => {});
+    const interval = setInterval(fetchPlans, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
