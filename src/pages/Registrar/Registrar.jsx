@@ -71,6 +71,7 @@ const EMPTY_FORM = {
   address: '', neighborhood: '', city: '', state: '', zipCode: '',
   ownerName: '', ownerEmail: '', ownerPhone: '',
   ownerPassword: '', confirmPassword: '',
+  ownerIsBarber: true,
   billingCycle: 'monthly',
   billingDueDay: '5',
   contractAccepted: false,
@@ -286,6 +287,7 @@ export default function Registrar() {
         ownerEmail: form.ownerEmail.trim(),
         ownerPhone: form.ownerPhone.trim() || undefined,
         ownerPassword: form.ownerPassword,
+        ownerIsBarber: form.ownerIsBarber,
         planId: selectedPlan?.id || undefined,
         planType: 'basic',
         billingCycle: form.billingCycle,
@@ -693,6 +695,23 @@ export default function Registrar() {
                   className={errors.confirmPassword ? 'has-error' : ''} placeholder="Repita a senha"
                   autoComplete="new-password" />
                 {errors.confirmPassword && <span className="field-error">{errors.confirmPassword}</span>}
+              </div>
+
+              <div className="reg-field full">
+                <div className="reg-barber-field">
+                  <label className="reg-barber-toggle">
+                    <input
+                      type="checkbox"
+                      checked={form.ownerIsBarber}
+                      onChange={e => set('ownerIsBarber', e.target.checked)}
+                    />
+                    <span className="reg-barber-label">Sou barbeiro / profissional</span>
+                  </label>
+                  <p className="reg-barber-hint">
+                    Marque esta opção se você será um dos profissionais disponíveis para agendamento pelos clientes.
+                    Se desmarcado, seu usuário ficará como gestor somente administrativo.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
