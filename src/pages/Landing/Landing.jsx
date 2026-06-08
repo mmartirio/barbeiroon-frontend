@@ -167,9 +167,9 @@ export default function Landing() {
             </p>
 
             <div className="lp-hero-btns">
-              <Link to="/registrar" className="btn-hero-primary">
+              <a href="#planos" className="btn-hero-primary">
                 Começar agora <RiArrowRightLine />
-              </Link>
+              </a>
               <button className="btn-hero-outline">
                 <div className="btn-play-circle">
                   <RiPlayCircleLine size={12} />
