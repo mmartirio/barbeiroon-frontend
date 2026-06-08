@@ -187,6 +187,16 @@ export default function ComissaoTab({ isBarber, permissions = {} }) {
   // Subtab
   const [subTab, setSubTab] = useState('servicos'); // 'servicos' | 'produtos' | 'resultados'
 
+  // Aplicar para todos — serviços
+  const [loteTypeSvc,  setLoteTypeSvc]  = useState('fixed');
+  const [loteValSvc,   setLoteValSvc]   = useState('');
+  const [savingLoteSvc, setSavingLoteSvc] = useState(false);
+
+  // Aplicar para todos — produtos
+  const [loteTypeProd,  setLoteTypeProd]  = useState('fixed');
+  const [loteValProd,   setLoteValProd]   = useState('');
+  const [savingLoteProd, setSavingLoteProd] = useState(false);
+
   const buscarServicos = useCallback(async () => {
     if (!canManage) return;
     setLoadingSvc(true);
@@ -220,6 +230,44 @@ export default function ComissaoTab({ isBarber, permissions = {} }) {
   useEffect(() => { buscarServicos();   }, [buscarServicos]);
   useEffect(() => { buscarProdutos();   }, [buscarProdutos]);
   useEffect(() => { buscarResultados(); }, [buscarResultados]);
+
+  const aplicarLoteSvc = async () => {
+    const num = parseFloat(loteValSvc);
+    if (isNaN(num) || num < 0) return alert('Informe um valor válido.');
+    if (loteTypeSvc === 'percentage' && num > 100) return alert('Percentual deve ser entre 0 e 100.');
+    setSavingLoteSvc(true);
+    try {
+      await Promise.all(servicos.map(s =>
+        fetch(`/api/financeiro/comissao/servicos/${s.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
+          body: JSON.stringify({ type: loteTypeSvc, value: num }),
+        })
+      ));
+      setLoteValSvc('');
+      await Promise.all([buscarServicos(), buscarResultados()]);
+    } catch { alert('Erro ao aplicar.'); }
+    finally { setSavingLoteSvc(false); }
+  };
+
+  const aplicarLoteProd = async () => {
+    const num = parseFloat(loteValProd);
+    if (isNaN(num) || num < 0) return alert('Informe um valor válido.');
+    if (loteTypeProd === 'percentage' && num > 100) return alert('Percentual deve ser entre 0 e 100.');
+    setSavingLoteProd(true);
+    try {
+      await Promise.all(produtos.map(p =>
+        fetch(`/api/financeiro/comissao/produtos/${p.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
+          body: JSON.stringify({ type: loteTypeProd, value: num }),
+        })
+      ));
+      setLoteValProd('');
+      await Promise.all([buscarProdutos(), buscarResultados()]);
+    } catch { alert('Erro ao aplicar.'); }
+    finally { setSavingLoteProd(false); }
+  };
 
   // Handlers genéricos para serviços
   const salvarSvc = async (id, type, value) => {
@@ -333,10 +381,38 @@ export default function ComissaoTab({ isBarber, permissions = {} }) {
 
       {/* ── Configuração por Serviço ──────────────────────────────────────── */}
       {subTab === 'servicos' && canManage && (
-        <div>
-          <p style={{ fontSize: '0.72rem', color: 'var(--color-muted)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <p style={{ fontSize: '0.72rem', color: 'var(--color-muted)', lineHeight: 1.5 }}>
             Defina a comissão de cada serviço. O valor configurado é pago ao barbeiro que realizou o serviço.
           </p>
+          {/* Aplicar para todos os serviços */}
+          <div className="card" style={{ padding: '0.85rem' }}>
+            <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.6rem' }}>
+              Aplicar para Todos os Serviços
+            </p>
+            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <div className={s.inputGroup} style={{ minWidth: 160 }}>
+                <label>Tipo</label>
+                <select value={loteTypeSvc} onChange={e => { setLoteTypeSvc(e.target.value); setLoteValSvc(''); }}>
+                  <option value="fixed">Valor Fixo (R$)</option>
+                  <option value="percentage">Percentagem (%)</option>
+                </select>
+              </div>
+              <div className={s.inputGroup}>
+                <label>{loteTypeSvc === 'fixed' ? 'Valor por Serviço' : 'Percentual'}</label>
+                <ValorInput type={loteTypeSvc} value={loteValSvc} onChange={setLoteValSvc} />
+              </div>
+              <button
+                className="btn btn-primary"
+                onClick={aplicarLoteSvc}
+                disabled={savingLoteSvc || !loteValSvc || servicos.length === 0}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <FiCheck size={13} />
+                {savingLoteSvc ? 'Aplicando...' : `Aplicar para Todos (${servicos.length})`}
+              </button>
+            </div>
+          </div>
           <ConfigTable
             items={servicos}
             baseLabel={item => `Preço: ${fmtR(item.preco)}`}
@@ -351,10 +427,38 @@ export default function ComissaoTab({ isBarber, permissions = {} }) {
 
       {/* ── Configuração por Produto ──────────────────────────────────────── */}
       {subTab === 'produtos' && canManage && (
-        <div>
-          <p style={{ fontSize: '0.72rem', color: 'var(--color-muted)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <p style={{ fontSize: '0.72rem', color: 'var(--color-muted)', lineHeight: 1.5 }}>
             Defina a comissão de cada produto. O valor é pago ao barbeiro que realizou a venda.
           </p>
+          {/* Aplicar para todos os produtos */}
+          <div className="card" style={{ padding: '0.85rem' }}>
+            <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.6rem' }}>
+              Aplicar para Todos os Produtos
+            </p>
+            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <div className={s.inputGroup} style={{ minWidth: 160 }}>
+                <label>Tipo</label>
+                <select value={loteTypeProd} onChange={e => { setLoteTypeProd(e.target.value); setLoteValProd(''); }}>
+                  <option value="fixed">Valor Fixo (R$)</option>
+                  <option value="percentage">Percentagem (%)</option>
+                </select>
+              </div>
+              <div className={s.inputGroup}>
+                <label>{loteTypeProd === 'fixed' ? 'Valor por Produto Vendido' : 'Percentual'}</label>
+                <ValorInput type={loteTypeProd} value={loteValProd} onChange={setLoteValProd} />
+              </div>
+              <button
+                className="btn btn-primary"
+                onClick={aplicarLoteProd}
+                disabled={savingLoteProd || !loteValProd || produtos.length === 0}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <FiCheck size={13} />
+                {savingLoteProd ? 'Aplicando...' : `Aplicar para Todos (${produtos.length})`}
+              </button>
+            </div>
+          </div>
           <ConfigTable
             items={produtos}
             baseLabel={item => `Preço de venda: ${fmtR(item.precoVenda)}`}
