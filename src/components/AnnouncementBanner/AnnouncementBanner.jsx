@@ -1,34 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
 
-const KEY         = 'bb_ann_jun2026_v2';
-const SESSION_KEY = 'bb_ann_jun2026_v2_shown';
-const MAX_SHOWS   = 3;
-const END_DATE    = new Date('2026-06-13T23:59:59');
+const SESSION_KEY = 'ann_shown_ids';
+const tok = () => sessionStorage.getItem('token');
 
 export default function AnnouncementBanner() {
-  const [visible, setVisible] = useState(false);
+  const [banner, setBanner] = useState(null);
 
   useEffect(() => {
-    const now = new Date();
-    if (now > END_DATE) return;
+    const t = tok();
+    if (!t) return;
 
-    // Already shown in this login session
-    if (sessionStorage.getItem(SESSION_KEY)) return;
+    // IDs já exibidos nessa sessão (evita re-exibir na mesma sessão)
+    let shownIds = [];
+    try { shownIds = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '[]'); } catch { shownIds = []; }
 
-    const count = parseInt(localStorage.getItem(KEY) || '0', 10);
-    if (count >= MAX_SHOWS) return;
+    fetch('/api/avisos/active', { headers: { Authorization: `Bearer ${t}` } })
+      .then(r => r.ok ? r.json() : [])
+      .then(rows => {
+        const next = (rows || []).find(r => !shownIds.includes(r.id));
+        if (!next) return;
 
-    localStorage.setItem(KEY, String(count + 1));
-    sessionStorage.setItem(SESSION_KEY, '1');
-    setVisible(true);
+        // Registra visualização no servidor
+        fetch(`/api/avisos/${next.id}/view`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${t}` },
+        }).catch(() => {});
+
+        // Marca como exibido na sessão
+        shownIds.push(next.id);
+        try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(shownIds)); } catch { }
+
+        setBanner(next);
+      })
+      .catch(() => {});
   }, []);
 
-  if (!visible) return null;
+  if (!banner) return null;
+
+  const hasText = banner.title || banner.subtitle || banner.body;
 
   return (
     <div
-      onClick={() => setVisible(false)}
+      onClick={() => setBanner(null)}
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
         background: 'rgba(0,0,0,0.65)',
@@ -48,9 +62,8 @@ export default function AnnouncementBanner() {
           background: '#fff',
         }}
       >
-        {/* Botão fechar */}
         <button
-          onClick={() => setVisible(false)}
+          onClick={() => setBanner(null)}
           style={{
             position: 'absolute', top: 12, right: 12,
             background: 'rgba(0,0,0,0.45)', border: 'none',
@@ -62,17 +75,27 @@ export default function AnnouncementBanner() {
           <FiX size={16} />
         </button>
 
-        {/* Imagem do banner */}
-        <img
-          src="/banner-novidades.png"
-          alt="Estamos com novidades!"
-          style={{ width: '100%', display: 'block' }}
-        />
+        {banner.imageUrl && (
+          <img src={banner.imageUrl} alt="" style={{ width: '100%', display: 'block' }} />
+        )}
 
-        {/* Botão */}
-        <div style={{ padding: '1rem', textAlign: 'center', background: '#fff' }}>
+        {hasText && (
+          <div style={{ padding: '1rem 1.25rem' }}>
+            {banner.title && (
+              <p style={{ fontWeight: 800, fontSize: '1.05rem', color: '#111', margin: '0 0 0.25rem' }}>{banner.title}</p>
+            )}
+            {banner.subtitle && (
+              <p style={{ fontWeight: 600, fontSize: '0.9rem', color: '#444', margin: '0 0 0.5rem' }}>{banner.subtitle}</p>
+            )}
+            {banner.body && (
+              <p style={{ fontSize: '0.85rem', color: '#555', margin: 0, lineHeight: 1.5 }}>{banner.body}</p>
+            )}
+          </div>
+        )}
+
+        <div style={{ padding: '1rem', textAlign: 'center', background: '#fff', borderTop: hasText ? '1px solid #eee' : 'none' }}>
           <button
-            onClick={() => setVisible(false)}
+            onClick={() => setBanner(null)}
             style={{
               background: '#16a34a', color: '#fff',
               border: 'none', borderRadius: 99,
