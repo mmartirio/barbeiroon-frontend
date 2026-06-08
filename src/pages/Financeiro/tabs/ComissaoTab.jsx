@@ -106,7 +106,7 @@ function ItemRow({ item, baseLabel, onSave, onDelete, saving }) {
       <td>
         <div style={{ display: 'flex', gap: '0.3rem', justifyContent: 'flex-end' }}>
           <button
-            className="btn btn-ghost"
+            className={`btn ${value && !saving ? 'btn-primary' : 'btn-ghost'}`}
             style={{ padding: '0.25rem 0.55rem', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
             onClick={() => onSave(item.id, type, value)}
             disabled={saving || !value}
