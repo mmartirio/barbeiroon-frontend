@@ -95,7 +95,7 @@ export default function RankingTab({ periodo }) {
       ) : (
         <>
           {/* Gráficos */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '1rem' }}>
+          <div className={s.chartGridRanking}>
             <div className="card">
               <div className="card-body">
                 <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem' }}>Ranking por {sortBy === 'faturamento' ? 'Faturamento' : sortBy === 'atendimentos' ? 'Atendimentos' : 'Ticket Médio'}</h4>

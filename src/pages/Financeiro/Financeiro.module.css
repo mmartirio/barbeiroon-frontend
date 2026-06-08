@@ -247,3 +247,15 @@
     grid-template-columns: 1fr;
   }
 }
+
+.chartGridRanking {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .chartGridRanking {
+    grid-template-columns: 1fr;
+  }
+}
