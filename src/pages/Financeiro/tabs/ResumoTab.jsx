@@ -90,6 +90,7 @@ export default function ResumoTab({ periodo }) {
   const kpisFinanceiros = [
     { label: 'Faturamento Bruto',   value: fmtR(resumo.faturamentoBruto),  color: 'var(--success)' },
     { label: 'Total Despesas',      value: fmtR(resumo.totalDespesas),      color: '#dc2626' },
+    { label: 'Total Comissões',     value: fmtR(resumo.totalComissoes),     color: '#7c3aed' },
     { label: 'Lucro Líquido',       value: fmtR(resumo.lucroLiquido),       color: resumo.lucroLiquido >= 0 ? 'var(--success)' : '#dc2626' },
     { label: 'Receita Potencial',   value: fmtR(resumo.receitaPotencial),   color: '#f59e0b' },
     { label: 'Ticket Médio',        value: fmtR(resumo.ticketMedio),        color: '#f59e0b' },
