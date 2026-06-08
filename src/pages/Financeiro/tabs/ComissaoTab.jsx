@@ -6,7 +6,7 @@ import {
   ArcElement, Title, Tooltip, Legend,
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
-import { FiEdit2, FiTrash2, FiUsers } from 'react-icons/fi';
+import { FiCheck, FiTrash2 } from 'react-icons/fi';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -16,13 +16,9 @@ const fmtPct = v => {
   const n = parseFloat(v || 0);
   return n % 1 === 0 ? `${Math.round(n)}%` : `${n.toFixed(1)}%`;
 };
-const fmtConfig = (type, pct, val) => {
-  if (!type) return null;
-  return type === 'fixed' ? fmtR(val) : fmtPct(pct);
-};
 
 const MEDALS = ['🥇', '🥈', '🥉'];
-const COLORS  = ['#f59e0b','#9ca3af','#b45309','#2563eb','#7c3aed','#16a34a','#0891b2','#db2777'];
+const COLORS  = ['#f59e0b', '#9ca3af', '#b45309', '#2563eb', '#7c3aed', '#16a34a', '#0891b2', '#db2777'];
 
 const chartBarOpts = {
   indexAxis: 'y',
@@ -41,94 +37,37 @@ const chartDonutOpts = {
   },
 };
 
-// ─── Modal criar/editar ───────────────────────────────────────────────────────
-function ComissaoModal({ barber, onSave, onClose, saving }) {
-  const initial    = barber?.commissionType || 'percentage';
-  const initialVal = initial === 'fixed'
-    ? (barber?.commissionValue    != null ? String(barber.commissionValue)    : '')
-    : (barber?.commissionPercentage != null ? String(barber.commissionPercentage) : '');
-
-  const [type,  setType]  = useState(initial);
-  const [value, setValue] = useState(initialVal);
-  const [err,   setErr]   = useState('');
-
-  const handleSave = () => {
-    const num = parseFloat(value);
-    if (value === '' || isNaN(num) || num < 0) return setErr('Informe um valor válido.');
-    if (type === 'percentage' && num > 100)    return setErr('Percentual deve ser entre 0 e 100.');
-    setErr('');
-    onSave({ type, value: num });
-  };
-
+// ─── Input de valor formatado por tipo ───────────────────────────────────────
+function ValorInput({ type, value, onChange }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div className="card" style={{ padding: '1.5rem', minWidth: 340, maxWidth: 420, width: '90%' }}>
-        <h3 style={{ marginBottom: '1.25rem', fontSize: '0.95rem', fontWeight: 700 }}>
-          {barber ? `Comissão — ${barber.nome}` : 'Definir Comissão para Todos'}
-        </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div className={s.inputGroup}>
-            <label>Tipo de Comissão</label>
-            <div style={{ display: 'flex', gap: '1.25rem', marginTop: '0.25rem' }}>
-              {[
-                { v: 'percentage', label: 'Percentagem (%)' },
-                { v: 'fixed',      label: 'Valor Fixo (R$)' },
-              ].map(opt => (
-                <label key={opt.v} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.875rem' }}>
-                  <input
-                    type="radio"
-                    value={opt.v}
-                    checked={type === opt.v}
-                    onChange={() => { setType(opt.v); setValue(''); setErr(''); }}
-                  />
-                  {opt.label}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className={s.inputGroup}>
-            <label>{type === 'fixed' ? 'Valor Fixo por Atendimento' : 'Percentual'}</label>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              {type === 'fixed' && (
-                <span style={{ position: 'absolute', left: '0.65rem', color: 'var(--color-muted)', fontSize: '0.875rem', pointerEvents: 'none' }}>R$</span>
-              )}
-              <input
-                type="number"
-                min="0"
-                max={type === 'percentage' ? 100 : undefined}
-                step={type === 'percentage' ? 1 : 0.01}
-                value={value}
-                onChange={e => { setValue(e.target.value); setErr(''); }}
-                placeholder={type === 'fixed' ? '0,00' : '0'}
-                style={{
-                  width: '100%',
-                  paddingLeft:  type === 'fixed'      ? '2.4rem' : '0.65rem',
-                  paddingRight: type === 'percentage' ? '2rem'   : '0.65rem',
-                }}
-                autoFocus
-                onKeyDown={e => e.key === 'Enter' && handleSave()}
-              />
-              {type === 'percentage' && (
-                <span style={{ position: 'absolute', right: '0.65rem', color: 'var(--color-muted)', fontSize: '0.875rem', pointerEvents: 'none' }}>%</span>
-              )}
-            </div>
-            {err && <span style={{ fontSize: '0.75rem', color: '#dc2626' }}>{err}</span>}
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', paddingTop: '0.25rem' }}>
-            <button className="btn btn-ghost" onClick={onClose} disabled={saving}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-              {saving ? 'Salvando...' : 'Salvar'}
-            </button>
-          </div>
-        </div>
-      </div>
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', minWidth: 110 }}>
+      {type === 'fixed' && (
+        <span style={{ position: 'absolute', left: '0.55rem', fontSize: '0.8rem', color: 'var(--color-muted)', pointerEvents: 'none' }}>R$</span>
+      )}
+      <input
+        type="number"
+        min="0"
+        max={type === 'percentage' ? 100 : undefined}
+        step={type === 'percentage' ? 1 : 0.01}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={type === 'fixed' ? '0,00' : '0'}
+        className={s.pctInput}
+        style={{
+          width: '100%',
+          paddingLeft:  type === 'fixed'      ? '2rem'   : '0.5rem',
+          paddingRight: type === 'percentage' ? '1.75rem' : '0.5rem',
+          textAlign: 'left',
+        }}
+      />
+      {type === 'percentage' && (
+        <span style={{ position: 'absolute', right: '0.55rem', fontSize: '0.8rem', color: 'var(--color-muted)', pointerEvents: 'none' }}>%</span>
+      )}
     </div>
   );
 }
 
-// ─── Card de comissão do barbeiro (vista própria) ─────────────────────────────
+// ─── Card da comissão do próprio barbeiro ────────────────────────────────────
 function MyComissaoCard({ result }) {
   if (!result) return null;
   const isFixed    = result.commissionType === 'fixed';
@@ -159,11 +98,10 @@ function MyComissaoCard({ result }) {
           )}
         </div>
       </div>
-
       <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
         {[
-          { label: 'Atendimentos',  value: result.qtdAtendimentos,          color: 'var(--color)' },
-          { label: 'Faturamento',   value: fmtR(result.faturamento),        color: 'var(--success)' },
+          { label: 'Atendimentos',     value: result.qtdAtendimentos,                          color: 'var(--color)' },
+          { label: 'Faturamento',      value: fmtR(result.faturamento),                        color: 'var(--success)' },
           { label: 'Ganho no Período', value: result.comissao > 0 ? fmtR(result.comissao) : '—', color: '#7c3aed' },
         ].map(k => (
           <div key={k.label} style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
@@ -182,9 +120,15 @@ export default function ComissaoTab({ periodo, isBarber }) {
   const [results,       setResults]       = useState([]);
   const [loadingConfig, setLoadingConfig] = useState(!isBarber);
   const [loadingResult, setLoadingResult] = useState(true);
+  // Estado local de cada linha: { [id]: { type, value } }
+  const [rows,          setRows]          = useState({});
+  const [saving,        setSaving]        = useState({});
+  // Filtro
   const [filterBarber,  setFilterBarber]  = useState('todos');
-  const [modal,         setModal]         = useState(null);
-  const [saving,        setSaving]        = useState(false);
+  // Formulário "Aplicar para Todos"
+  const [loteType,  setLoteType]  = useState('percentage');
+  const [loteValue, setLoteValue] = useState('');
+  const [savingLote, setSavingLote] = useState(false);
 
   // Busca configurações (só gestores)
   const buscarBarbers = useCallback(async () => {
@@ -193,7 +137,19 @@ export default function ComissaoTab({ periodo, isBarber }) {
     try {
       const r = await fetch('/api/financeiro/comissao/barbeiros', { headers: { Authorization: `Bearer ${tok()}` } });
       const d = await r.json();
-      setBarbers(d.data || []);
+      const list = d.data || [];
+      setBarbers(list);
+      // Inicializa estado das linhas
+      const init = {};
+      list.forEach(b => {
+        init[b.id] = {
+          type:  b.commissionType || 'percentage',
+          value: b.commissionType === 'fixed'
+            ? (b.commissionValue != null ? String(b.commissionValue) : '')
+            : (b.commissionPercentage != null ? String(b.commissionPercentage) : ''),
+        };
+      });
+      setRows(init);
     } finally {
       setLoadingConfig(false);
     }
@@ -214,58 +170,63 @@ export default function ComissaoTab({ periodo, isBarber }) {
   useEffect(() => { buscarBarbers(); }, [buscarBarbers]);
   useEffect(() => { buscarResults(); }, [buscarResults]);
 
-  // Salvar individual
-  const salvar = async (barberId, { type, value }) => {
-    setSaving(true);
+  // Atualiza campo de uma linha
+  const setRow = (id, field, val) =>
+    setRows(prev => ({ ...prev, [id]: { ...prev[id], [field]: val } }));
+
+  // Salvar uma linha
+  const salvar = async (id) => {
+    const row = rows[id] || {};
+    const num = parseFloat(row.value);
+    if (row.value === '' || isNaN(num) || num < 0) return alert('Informe um valor válido.');
+    if (row.type === 'percentage' && num > 100) return alert('Percentual deve ser entre 0 e 100.');
+
+    setSaving(sv => ({ ...sv, [id]: true }));
     try {
-      const res = await fetch(`/api/financeiro/comissao/${barberId}`, {
+      const res = await fetch(`/api/financeiro/comissao/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
-        body: JSON.stringify({ type, value }),
+        body: JSON.stringify({ type: row.type, value: num }),
       });
       if (!res.ok) throw new Error();
       await Promise.all([buscarBarbers(), buscarResults()]);
-      setModal(null);
     } catch { alert('Erro ao salvar comissão.'); }
-    finally { setSaving(false); }
+    finally { setSaving(sv => ({ ...sv, [id]: false })); }
   };
 
-  // Salvar em lote
-  const salvarLote = async ({ type, value }) => {
-    setSaving(true);
-    try {
-      await Promise.all(barbers.map(b =>
-        fetch(`/api/financeiro/comissao/${b.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
-          body: JSON.stringify({ type, value }),
-        })
-      ));
-      await Promise.all([buscarBarbers(), buscarResults()]);
-      setModal(null);
-    } catch { alert('Erro ao salvar comissões.'); }
-    finally { setSaving(false); }
-  };
-
-  // Excluir
-  const excluir = async (barberId, nome) => {
+  // Excluir comissão de uma linha
+  const excluir = async (id, nome) => {
     if (!window.confirm(`Remover comissão de "${nome}"?`)) return;
+    setSaving(sv => ({ ...sv, [id]: true }));
     try {
-      await fetch(`/api/financeiro/comissao/${barberId}`, {
+      await fetch(`/api/financeiro/comissao/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${tok()}` },
       });
       await Promise.all([buscarBarbers(), buscarResults()]);
     } catch { alert('Erro ao remover comissão.'); }
+    finally { setSaving(sv => ({ ...sv, [id]: false })); }
   };
 
-  // Abrir modal: se um barbeiro específico estiver selecionado, edita ele diretamente
-  const abrirModal = () => {
-    if (filterBarber !== 'todos') {
-      const b = barbers.find(x => x.id === Number(filterBarber));
-      if (b) return setModal({ barber: b });
-    }
-    setModal('lote');
+  // Aplicar tipo+valor para todos (ou filtrado)
+  const aplicarLote = async () => {
+    const num = parseFloat(loteValue);
+    if (loteValue === '' || isNaN(num) || num < 0) return alert('Informe um valor válido.');
+    if (loteType === 'percentage' && num > 100) return alert('Percentual deve ser entre 0 e 100.');
+    setSavingLote(true);
+    const targets = filteredBarbers;
+    try {
+      await Promise.all(targets.map(b =>
+        fetch(`/api/financeiro/comissao/${b.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok()}` },
+          body: JSON.stringify({ type: loteType, value: num }),
+        })
+      ));
+      setLoteValue('');
+      await Promise.all([buscarBarbers(), buscarResults()]);
+    } catch { alert('Erro ao salvar comissões.'); }
+    finally { setSavingLote(false); }
   };
 
   // Dados filtrados
@@ -283,153 +244,202 @@ export default function ComissaoTab({ periodo, isBarber }) {
   // Gráficos
   const fatBar = {
     labels: filteredResults.map(b => b.nome),
-    datasets: [{
-      data: filteredResults.map(b => b.faturamento),
-      backgroundColor: COLORS,
-      borderRadius: 4,
-    }],
+    datasets: [{ data: filteredResults.map(b => b.faturamento), backgroundColor: COLORS, borderRadius: 4 }],
   };
   const donutData = filteredResults.filter(b => b.comissao > 0);
   const comissaoDoughnut = {
     labels: donutData.map(b => b.nome),
-    datasets: [{
-      data: donutData.map(b => b.comissao),
-      backgroundColor: COLORS,
-      borderWidth: 0,
-    }],
+    datasets: [{ data: donutData.map(b => b.comissao), backgroundColor: COLORS, borderWidth: 0 }],
   };
 
-  // Vista barbeiro — própria linha de resultado
   const myResult = isBarber ? results[0] || null : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      {/* ── Vista do barbeiro ──────────────────────────────────────────── */}
+      {/* ── Vista do barbeiro ─────────────────────────────────────────── */}
       {isBarber && (
         loadingResult
           ? <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Carregando...</p>
           : <MyComissaoCard result={myResult} />
       )}
 
-      {/* ── Filtro + ação em lote (só gestores) ───────────────────────── */}
+      {/* ── Seção CRUD (só gestores) ───────────────────────────────────── */}
       {!isBarber && (
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <div className={s.inputGroup}>
-            <label>Filtrar barbeiro</label>
-            <select value={filterBarber} onChange={e => setFilterBarber(e.target.value)}>
-              <option value="todos">Todos</option>
-              {barbers.map(b => <option key={b.id} value={b.id}>{b.nome}</option>)}
-            </select>
-          </div>
-          <button
-            className="btn btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-            onClick={abrirModal}
-          >
-            <FiUsers size={14} />
-            {filterBarber === 'todos' ? 'Definir para Todos' : 'Definir Comissão'}
-          </button>
-        </div>
-      )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-      {/* ── Tabela CRUD de configurações (só gestores) ────────────────── */}
-      {!isBarber && (
-        <div>
-          <h3 style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-            Configurações de Comissão
-          </h3>
-          {loadingConfig ? (
-            <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Carregando...</p>
-          ) : (
-            <div className={s.tableWrap}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Profissional</th>
-                    <th style={{ textAlign: 'center' }}>Tipo</th>
-                    <th style={{ textAlign: 'right'  }}>Comissão</th>
-                    <th style={{ width: 80 }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredBarbers.length === 0 && (
-                    <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--color-muted)', padding: '1.5rem' }}>Nenhum barbeiro encontrado.</td></tr>
-                  )}
-                  {filteredBarbers.map(b => {
-                    const hasComissao = !!b.commissionType;
-                    const cfgDisplay  = fmtConfig(b.commissionType, b.commissionPercentage, b.commissionValue);
-                    return (
-                      <tr key={b.id}>
-                        <td style={{ fontWeight: 600 }}>{b.nome}</td>
-                        <td style={{ textAlign: 'center' }}>
-                          {hasComissao ? (
-                            <span className={s.badge} style={{
-                              background: b.commissionType === 'fixed' ? 'rgba(37,99,235,0.15)' : 'rgba(124,58,237,0.15)',
-                              color:      b.commissionType === 'fixed' ? 'var(--accent)'        : '#7c3aed',
-                            }}>
-                              {b.commissionType === 'fixed' ? 'Valor Fixo' : 'Percentagem'}
-                            </span>
-                          ) : (
-                            <span style={{ color: 'var(--color-muted)', fontSize: '0.82rem' }}>—</span>
-                          )}
-                        </td>
-                        <td style={{ textAlign: 'right', fontWeight: 700 }}>
-                          {cfgDisplay ?? <span style={{ color: 'var(--color-muted)', fontWeight: 400 }}>Não definida</span>}
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'flex-end' }}>
-                            <button
-                              className="btn btn-ghost"
-                              style={{ padding: '0.25rem 0.5rem' }}
-                              title="Editar"
-                              onClick={() => setModal({ barber: b })}
+          {/* Cabeçalho + filtro */}
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div className={s.inputGroup}>
+              <label>Filtrar barbeiro</label>
+              <select value={filterBarber} onChange={e => setFilterBarber(e.target.value)}>
+                <option value="todos">Todos</option>
+                {barbers.map(b => <option key={b.id} value={b.id}>{b.nome}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Formulário "Aplicar para Todos / Filtrado" */}
+          <div className="card" style={{ padding: '1rem' }}>
+            <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
+              {filterBarber === 'todos' ? 'Aplicar para Todos os Barbeiros' : `Aplicar para: ${barbers.find(b => b.id === Number(filterBarber))?.nome}`}
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <div className={s.inputGroup}>
+                <label>Tipo</label>
+                <select value={loteType} onChange={e => { setLoteType(e.target.value); setLoteValue(''); }}>
+                  <option value="percentage">Percentagem (%)</option>
+                  <option value="fixed">Valor Fixo (R$)</option>
+                </select>
+              </div>
+              <div className={s.inputGroup}>
+                <label>{loteType === 'fixed' ? 'Valor por Atendimento' : 'Percentual'}</label>
+                <ValorInput type={loteType} value={loteValue} onChange={setLoteValue} />
+              </div>
+              <button
+                className="btn btn-primary"
+                onClick={aplicarLote}
+                disabled={savingLote || !loteValue}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <FiCheck size={14} />
+                {savingLote ? 'Aplicando...' : filterBarber === 'todos' ? 'Aplicar para Todos' : 'Aplicar'}
+              </button>
+            </div>
+          </div>
+
+          {/* Tabela CRUD inline */}
+          <div>
+            <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
+              Comissão por Profissional
+            </p>
+
+            {loadingConfig ? (
+              <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Carregando...</p>
+            ) : filteredBarbers.length === 0 ? (
+              <p className={s.emptyState}>Nenhum barbeiro encontrado.</p>
+            ) : (
+              <div className={s.tableWrap}>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Profissional</th>
+                      <th style={{ textAlign: 'center', width: 160 }}>Tipo de Comissão</th>
+                      <th style={{ textAlign: 'center', width: 140 }}>Valor</th>
+                      <th style={{ textAlign: 'center', width: 90 }}>Situação</th>
+                      <th style={{ width: 90 }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBarbers.map(b => {
+                      const row         = rows[b.id] || { type: 'percentage', value: '' };
+                      const hasComissao = !!b.commissionType;
+                      const isSaving    = saving[b.id];
+                      return (
+                        <tr key={b.id}>
+                          <td style={{ fontWeight: 600 }}>{b.nome}</td>
+
+                          {/* Tipo */}
+                          <td style={{ textAlign: 'center' }}>
+                            <select
+                              value={row.type}
+                              onChange={e => setRow(b.id, 'type', e.target.value)}
+                              style={{
+                                background: 'var(--bg-input)',
+                                border: '1px solid var(--border)',
+                                borderRadius: 'var(--radius-xs)',
+                                color: 'var(--color)',
+                                fontSize: '0.82rem',
+                                padding: '0.35rem 0.5rem',
+                                width: '100%',
+                              }}
                             >
-                              <FiEdit2 size={13} />
-                            </button>
-                            {hasComissao && (
+                              <option value="percentage">Percentagem (%)</option>
+                              <option value="fixed">Valor Fixo (R$)</option>
+                            </select>
+                          </td>
+
+                          {/* Valor */}
+                          <td style={{ textAlign: 'center' }}>
+                            <ValorInput
+                              type={row.type}
+                              value={row.value}
+                              onChange={val => setRow(b.id, 'value', val)}
+                            />
+                          </td>
+
+                          {/* Situação */}
+                          <td style={{ textAlign: 'center' }}>
+                            {hasComissao ? (
+                              <span className={s.badge} style={{
+                                background: b.commissionType === 'fixed' ? 'rgba(37,99,235,0.15)' : 'rgba(124,58,237,0.15)',
+                                color:      b.commissionType === 'fixed' ? 'var(--accent)'        : '#7c3aed',
+                              }}>
+                                {b.commissionType === 'fixed'
+                                  ? fmtR(b.commissionValue)
+                                  : fmtPct(b.commissionPercentage)}
+                              </span>
+                            ) : (
+                              <span style={{ color: 'var(--color-muted)', fontSize: '0.78rem' }}>Não definida</span>
+                            )}
+                          </td>
+
+                          {/* Ações */}
+                          <td>
+                            <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'flex-end' }}>
                               <button
                                 className="btn btn-ghost"
-                                style={{ padding: '0.25rem 0.5rem', color: '#dc2626' }}
-                                title="Remover"
-                                onClick={() => excluir(b.id, b.nome)}
+                                style={{ padding: '0.25rem 0.6rem', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                onClick={() => salvar(b.id)}
+                                disabled={isSaving || !row.value}
+                                title="Salvar"
                               >
-                                <FiTrash2 size={13} />
+                                <FiCheck size={13} />
+                                {isSaving ? '...' : 'Salvar'}
                               </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+                              {hasComissao && (
+                                <button
+                                  className="btn btn-ghost"
+                                  style={{ padding: '0.25rem 0.5rem', color: '#dc2626' }}
+                                  onClick={() => excluir(b.id, b.nome)}
+                                  disabled={isSaving}
+                                  title="Remover comissão"
+                                >
+                                  <FiTrash2 size={13} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* ── KPIs do período ─────────────────────────────────────────────── */}
-      {!isBarber && (
-        <div className={s.kpiGrid}>
-          <div className={s.kpiCard}>
-            <span className={s.kpiLabel}>Faturamento Total</span>
-            <span className={s.kpiValue} style={{ color: 'var(--success)' }}>{fmtR(totalFaturamento)}</span>
-          </div>
-          <div className={s.kpiCard}>
-            <span className={s.kpiLabel}>Total Comissões</span>
-            <span className={s.kpiValue} style={{ color: '#7c3aed' }}>{fmtR(totalComissao)}</span>
-          </div>
-          {totalFaturamento > 0 && (
-            <div className={s.kpiCard}>
-              <span className={s.kpiLabel}>% sobre Faturamento</span>
-              <span className={s.kpiValue} style={{ color: '#f59e0b' }}>
-                {((totalComissao / totalFaturamento) * 100).toFixed(1)}%
-              </span>
-            </div>
-          )}
+      <div className={s.kpiGrid}>
+        <div className={s.kpiCard}>
+          <span className={s.kpiLabel}>Faturamento Total</span>
+          <span className={s.kpiValue} style={{ color: 'var(--success)' }}>{fmtR(totalFaturamento)}</span>
         </div>
-      )}
+        <div className={s.kpiCard}>
+          <span className={s.kpiLabel}>Total Comissões</span>
+          <span className={s.kpiValue} style={{ color: '#7c3aed' }}>{fmtR(totalComissao)}</span>
+        </div>
+        {totalFaturamento > 0 && !isBarber && (
+          <div className={s.kpiCard}>
+            <span className={s.kpiLabel}>% sobre Faturamento</span>
+            <span className={s.kpiValue} style={{ color: '#f59e0b' }}>
+              {((totalComissao / totalFaturamento) * 100).toFixed(1)}%
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* ── Gráficos ────────────────────────────────────────────────────── */}
       {!isBarber && filteredResults.length > 1 && (
@@ -453,12 +463,9 @@ export default function ComissaoTab({ periodo, isBarber }) {
 
       {/* ── Tabela de resultados do período ─────────────────────────────── */}
       <div>
-        {!isBarber && (
-          <h3 style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
-            Resultados do Período
-          </h3>
-        )}
-
+        <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem' }}>
+          Resultados do Período
+        </p>
         {loadingResult ? (
           <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Carregando...</p>
         ) : filteredResults.length === 0 ? (
@@ -478,7 +485,7 @@ export default function ComissaoTab({ periodo, isBarber }) {
               </thead>
               <tbody>
                 {filteredResults.map((b, i) => {
-                  const isFixed    = b.commissionType === 'fixed';
+                  const isFixed     = b.commissionType === 'fixed';
                   const hasComissao = isFixed ? b.commissionValue > 0 : b.percentual > 0;
                   return (
                     <tr key={b.id}>
@@ -490,14 +497,9 @@ export default function ComissaoTab({ periodo, isBarber }) {
                       <td style={{ textAlign: 'right', color: 'var(--success)', fontWeight: 700 }}>{fmtR(b.faturamento)}</td>
                       <td style={{ textAlign: 'center' }}>
                         {hasComissao ? (
-                          isFixed ? (
-                            <span>
-                              {fmtR(b.commissionValue)}
-                              <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', marginLeft: '0.25rem' }}>/atend.</span>
-                            </span>
-                          ) : (
-                            <span style={{ fontWeight: 700 }}>{fmtPct(b.percentual)}</span>
-                          )
+                          isFixed
+                            ? <span>{fmtR(b.commissionValue)}<span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', marginLeft: '0.25rem' }}>/atend.</span></span>
+                            : <span style={{ fontWeight: 700 }}>{fmtPct(b.percentual)}</span>
                         ) : (
                           <span style={{ color: 'var(--color-muted)' }}>—</span>
                         )}
@@ -514,17 +516,6 @@ export default function ComissaoTab({ periodo, isBarber }) {
         )}
       </div>
 
-      {/* ── Modal ────────────────────────────────────────────────────────── */}
-      {modal !== null && (
-        <ComissaoModal
-          barber={modal === 'lote' ? null : modal.barber}
-          onSave={modal === 'lote'
-            ? salvarLote
-            : ({ type, value }) => salvar(modal.barber.id, { type, value })}
-          onClose={() => setModal(null)}
-          saving={saving}
-        />
-      )}
     </div>
   );
 }
