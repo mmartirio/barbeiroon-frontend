@@ -51,6 +51,7 @@ export default function Promocoes() {
   const [showTipoP,  setShowTipoP]    = useState(false);
   const [showTipo,   setShowTipo]     = useState(false);
   const [showRep,    setShowRep]      = useState(false);
+  const [tab,        setTab]          = useState('form');
 
   const setF = (k, v) => setForm(p => ({ ...p, [k]: v }));
   const toggleCrit = (v) => setF('criterios', form.criterios.includes(v) ? form.criterios.filter(c => c !== v) : [...form.criterios, v]);
@@ -136,6 +137,7 @@ export default function Promocoes() {
   const startEdit = (item) => {
     const { clienteId, clean } = parseTarget(Array.isArray(item.criteria) ? item.criteria : []);
     setEditingId(item.id);
+    setTab('form');
     setForm({
       nome:           item.name || '',
       preco:          item.price !== null ? String(Number(item.price).toFixed(2)).replace('.', ',') : '',
@@ -207,12 +209,33 @@ export default function Promocoes() {
     </div>
   ) : null;
 
+  const tabStyle = (key) => ({
+    padding: '0.5rem 1.25rem',
+    fontWeight: tab === key ? 700 : 400,
+    color: tab === key ? 'var(--accent)' : 'var(--color-muted)',
+    borderBottom: tab === key ? '2px solid var(--accent)' : '2px solid transparent',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    transition: 'color 0.15s',
+  });
+
   return (
     <Layout title="Promoções">
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+      <div style={{ maxWidth: 620, margin: '0 auto' }}>
 
-        {/* Form */}
-        <div className="card">
+        {/* Tabs */}
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: '1.25rem' }}>
+          <button style={tabStyle('form')} onClick={() => setTab('form')}>
+            {editingId ? 'Editar Promoção' : 'Nova Promoção'}
+          </button>
+          <button style={tabStyle('list')} onClick={() => setTab('list')}>
+            Promoções Cadastradas {promotions.length > 0 && `(${promotions.length})`}
+          </button>
+        </div>
+
+        <div className="card" style={{ display: tab === 'form' ? 'block' : 'none' }}>
           <div className="card-body">
             <h3 style={{ marginBottom: '1rem' }}>{editingId ? 'Editar Promoção' : 'Nova Promoção'}</h3>
             {error   && <div className="alert alert-error"   style={{ marginBottom:'0.75rem' }}>{error}</div>}
@@ -366,8 +389,7 @@ export default function Promocoes() {
           </div>
         </div>
 
-        {/* List */}
-        <div className="card">
+        <div className="card" style={{ display: tab === 'list' ? 'block' : 'none' }}>
           <div className="card-body">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
               <h3>Promoções Cadastradas</h3>
