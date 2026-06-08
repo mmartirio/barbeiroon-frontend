@@ -130,6 +130,15 @@ function PixConfigTab() {
 
 const EMPTY_INVOICE = { tenantId: '', planId: '', amountCents: '', dueDate: '', description: '', notes: '' };
 
+function calcNextDueDate(billingDay) {
+    if (!billingDay) return '';
+    const today = new Date();
+    const day = Math.min(Math.max(1, Number(billingDay)), 28);
+    const candidate = new Date(today.getFullYear(), today.getMonth(), day);
+    if (candidate <= today) candidate.setMonth(candidate.getMonth() + 1);
+    return candidate.toISOString().split('T')[0];
+}
+
 // Plano é pago quando priceMonthly > 0
 const isPaid = (plan) => plan && Number(plan.priceMonthly) > 0;
 
@@ -175,7 +184,7 @@ function CobrancasTab() {
     useEffect(() => { checkPixConfig(); loadTenants(); }, [checkPixConfig, loadTenants]);
     useEffect(() => { loadInvoices(); }, [loadInvoices]);
 
-    // Quando empresa muda, auto-preenche plano e valor do plano contratado
+    // Quando empresa muda, auto-preenche plano, valor e data de vencimento
     const handleTenantChange = (tenantId) => {
         const tenant = tenants.find(t => String(t.id) === tenantId);
         const plan   = tenant?.plan;
@@ -185,6 +194,7 @@ function CobrancasTab() {
             planId:      plan ? String(plan.id) : '',
             amountCents: plan ? String(plan.priceMonthly) : '',
             description: plan ? `Plano ${plan.name} — ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}` : '',
+            dueDate:     calcNextDueDate(tenant?.billingDay),
         }));
     };
 
@@ -356,7 +366,14 @@ function CobrancasTab() {
                                 <input className="form-input" value={form.amountCents} onChange={e => setForm(p => ({ ...p, amountCents: e.target.value }))} placeholder="99,90" required />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Vencimento *</label>
+                                <label className="form-label">
+                                    Vencimento *
+                                    {selectedTenant?.billingDay && (
+                                        <span style={{ fontSize: '0.7rem', color: '#60a5fa', marginLeft: 6, fontWeight: 400 }}>
+                                            (dia {selectedTenant.billingDay} contratado)
+                                        </span>
+                                    )}
+                                </label>
                                 <input className="form-input" type="date" value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} required />
                             </div>
                             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
