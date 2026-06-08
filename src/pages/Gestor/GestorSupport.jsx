@@ -177,12 +177,12 @@ export default function GestorSupport() {
             <tbody>
               {tickets.map(t => (
                 <tr key={t.id}>
-                  <td style={{ fontWeight: 600 }}>#{t.id}</td>
-                  <td style={{ fontSize: '0.85rem' }}>{t.tenantId}</td>
-                  <td style={{ fontSize: '0.85rem' }}>{CATEGORY_LABEL[t.category] || t.category}</td>
-                  <td><span className={`badge ${STATUS_CLASS[t.status] || 'badge-gray'}`}>{STATUS_LABEL[t.status] || t.status}</span></td>
-                  <td style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>{fmtDate(t.created_at)}</td>
-                  <td>
+                  <td data-label="#" style={{ fontWeight: 600 }}>#{t.id}</td>
+                  <td data-label="Tenant" style={{ fontSize: '0.85rem' }}>{t.tenantId}</td>
+                  <td data-label="Categoria" style={{ fontSize: '0.85rem' }}>{CATEGORY_LABEL[t.category] || t.category}</td>
+                  <td data-label="Status"><span className={`badge ${STATUS_CLASS[t.status] || 'badge-gray'}`}>{STATUS_LABEL[t.status] || t.status}</span></td>
+                  <td data-label="Criado em" style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>{fmtDate(t.created_at)}</td>
+                  <td data-label="">
                     <button className="btn btn-primary btn-sm" onClick={() => openTicket(t)}>Ver</button>
                   </td>
                 </tr>

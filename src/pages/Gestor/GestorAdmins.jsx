@@ -122,22 +122,22 @@ export default function Admins() {
             <tbody>
               {filtered.map(admin => (
                 <tr key={admin.id}>
-                  <td style={{ fontWeight: 500 }}>{admin.name}</td>
-                  <td style={{ color: 'var(--color-muted)' }}>{admin.email}</td>
-                  <td>
+                  <td data-label="Nome" style={{ fontWeight: 500 }}>{admin.name}</td>
+                  <td data-label="E-mail" style={{ color: 'var(--color-muted)' }}>{admin.email}</td>
+                  <td data-label="Status">
                     <span className={`badge ${admin.isActive ? 'badge-green' : 'badge-gray'}`}>
                       {admin.isActive ? 'Ativo' : 'Inativo'}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Tipo">
                     {admin.isBootstrap
                       ? <span className="badge badge-amber">Bootstrap</span>
                       : <span className="badge badge-blue">Admin</span>}
                   </td>
-                  <td style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>
+                  <td data-label="Criado em" style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>
                     {new Date(admin.createdAt).toLocaleDateString('pt-BR')}
                   </td>
-                  <td>
+                  <td data-label="">
                     <div style={{ display: 'flex', gap: '0.375rem', justifyContent: 'flex-end' }}>
                       <button className="btn btn-ghost btn-icon btn-xs" title="Editar" onClick={() => openEdit(admin)}>
                         <RiEditLine size={14} />

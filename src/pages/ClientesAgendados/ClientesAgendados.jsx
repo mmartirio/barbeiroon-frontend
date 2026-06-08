@@ -265,14 +265,14 @@ export default function ClientesAgendados() {
             <tbody>
               {filtered.map(a => (
                 <tr key={a.id}>
-                  <td style={{ fontWeight: 600 }}>{a.customerName}</td>
-                  <td style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>{fmtPhone(a.customerPhone)}</td>
-                  <td>{a.serviceName}</td>
-                  <td style={{ color: 'var(--color-muted)' }}>{a.professionalName}</td>
-                  <td style={{ fontSize: '0.85rem' }}>{fmtDate(a.appointmentDate)}</td>
-                  <td style={{ fontSize: '0.85rem' }}>{a.appointmentTime?.slice(0,5) || '—'}</td>
-                  <td><span className={`badge ${STATUS_BADGE[a.status] || 'badge-gray'}`}>{STATUS_LABEL[a.status] || a.status}</span></td>
-                  <td>
+                  <td data-label="Cliente" style={{ fontWeight: 600 }}>{a.customerName}</td>
+                  <td data-label="Telefone" style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>{fmtPhone(a.customerPhone)}</td>
+                  <td data-label="Serviço">{a.serviceName}</td>
+                  <td data-label="Profissional" style={{ color: 'var(--color-muted)' }}>{a.professionalName}</td>
+                  <td data-label="Data" style={{ fontSize: '0.85rem' }}>{fmtDate(a.appointmentDate)}</td>
+                  <td data-label="Hora" style={{ fontSize: '0.85rem' }}>{a.appointmentTime?.slice(0,5) || '—'}</td>
+                  <td data-label="Status"><span className={`badge ${STATUS_BADGE[a.status] || 'badge-gray'}`}>{STATUS_LABEL[a.status] || a.status}</span></td>
+                  <td data-label="">
                     <div style={{ display: 'flex', gap: '0.4rem' }}>
                       {(a.status === 'scheduled' || a.status === 'pending') && (
                         <>

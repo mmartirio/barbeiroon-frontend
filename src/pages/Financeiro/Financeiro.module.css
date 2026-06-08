@@ -288,6 +288,11 @@
   gap: 1rem;
 }
 
+.chartBox {
+  position: relative;
+  height: 240px;
+}
+
 @media (max-width: 640px) {
   .chartGrid {
     grid-template-columns: 1fr;

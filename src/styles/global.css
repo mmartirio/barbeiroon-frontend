@@ -277,3 +277,38 @@ textarea.form-input { resize: vertical; min-height: 80px; }
   .mobile-only-header { display: flex; }
 }
 
+/* ── Tabelas responsivas (≤640px) — empilha células como cards ── */
+@media (max-width: 640px) {
+  .table-wrap { overflow-x: visible; border: none; }
+  .data-table thead { display: none; }
+  .data-table tbody tr {
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+  .data-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    text-align: left !important;
+  }
+  .data-table tbody tr td:last-child { border-bottom: none; }
+  .data-table tbody td::before {
+    content: attr(data-label);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    margin-right: 0.75rem;
+  }
+  .data-table tbody td[data-label=""]::before { display: none; }
+  .data-table tbody td[data-label=""] { justify-content: flex-end; }
+}
+

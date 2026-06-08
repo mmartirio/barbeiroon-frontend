@@ -18,6 +18,7 @@ const MEDAL_COLORS = ['#f59e0b','#9ca3af','#b45309','#2563eb','#7c3aed','#16a34a
 
 const doughnutOpts = {
   responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: { position: 'right', labels: { color: '#9ca3af', font: { size: 10 }, boxWidth: 12 } },
     tooltip: { callbacks: { label: ctx => `${ctx.label}: ${fmtR(ctx.parsed)}` } },
@@ -54,6 +55,7 @@ export default function RankingTab({ periodo }) {
 
   const barOpts = {
     responsive: true,
+    maintainAspectRatio: false,
     indexAxis: 'y',
     plugins: {
       legend: { display: false },
@@ -99,13 +101,13 @@ export default function RankingTab({ periodo }) {
             <div className="card">
               <div className="card-body">
                 <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem' }}>Ranking por {sortBy === 'faturamento' ? 'Faturamento' : sortBy === 'atendimentos' ? 'Atendimentos' : 'Ticket Médio'}</h4>
-                <Bar data={barData} options={barOpts} />
+                <div className={s.chartBox}><Bar data={barData} options={barOpts} /></div>
               </div>
             </div>
             <div className="card">
               <div className="card-body">
                 <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem' }}>Participação no Faturamento</h4>
-                <Doughnut data={doughnutData} options={doughnutOpts} />
+                <div className={s.chartBox}><Doughnut data={doughnutData} options={doughnutOpts} /></div>
               </div>
             </div>
           </div>

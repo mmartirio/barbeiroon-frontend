@@ -144,16 +144,16 @@ export default function UsuarioLista() {
             <tbody>
               {filtered.map(u => (
                 <tr key={u.id}>
-                  <td>
+                  <td data-label="Usuário">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                       <Avatar u={u} />
                       <span style={{ fontWeight: 600 }}>{u.name}</span>
                     </div>
                   </td>
-                  <td style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>{u.email}</td>
-                  <td>{groupName(u.groupId)}</td>
-                  <td><span className={`badge ${u.isBarber ? 'badge-blue' : 'badge-gray'}`}>{u.isBarber ? 'Sim' : 'Não'}</span></td>
-                  <td>
+                  <td data-label="E-mail" style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>{u.email}</td>
+                  <td data-label="Grupo">{groupName(u.groupId)}</td>
+                  <td data-label="Barbeiro"><span className={`badge ${u.isBarber ? 'badge-blue' : 'badge-gray'}`}>{u.isBarber ? 'Sim' : 'Não'}</span></td>
+                  <td data-label="">
                     <div style={{ display: 'flex', gap: '0.4rem' }}>
                       <button className="btn btn-ghost btn-sm btn-icon" onClick={() => startEdit(u)}><FiEdit2 size={14} /></button>
                       <button className="btn btn-danger btn-sm btn-icon" onClick={() => setConfirm(u)}><FiTrash2 size={14} /></button>

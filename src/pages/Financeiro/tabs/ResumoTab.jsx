@@ -18,6 +18,7 @@ const COLORS = ['#2563eb','#7c3aed','#16a34a','#f59e0b','#dc2626','#0891b2','#db
 
 const doughnutOpts = {
   responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: { position: 'right', labels: { color: '#9ca3af', font: { size: 10 }, boxWidth: 12 } },
     tooltip: { callbacks: { label: ctx => `${ctx.label}: ${fmtR(ctx.parsed)}` } },
@@ -26,6 +27,7 @@ const doughnutOpts = {
 
 const barOpts = (fmt) => ({
   responsive: true,
+  maintainAspectRatio: false,
   plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmt(ctx.parsed.y) } } },
   scales: {
     x: { ticks: { color: '#6b7280', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
@@ -35,6 +37,7 @@ const barOpts = (fmt) => ({
 
 const lineOpts = {
   responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: { position: 'top', labels: { color: '#9ca3af', font: { size: 11 } } },
     tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtR(ctx.parsed.y)}` } },
@@ -216,7 +219,7 @@ export default function ResumoTab({ periodo }) {
         <div className="card">
           <div className="card-body">
             <h4 style={{ marginBottom: '1rem', fontSize: '0.9rem' }}>Evolução — Receitas vs Despesas</h4>
-            <Line data={lineData} options={lineOpts} />
+            <div className={s.chartBox}><Line data={lineData} options={lineOpts} /></div>
           </div>
         </div>
       )}
@@ -227,14 +230,14 @@ export default function ResumoTab({ periodo }) {
           <div className="card">
             <div className="card-body">
               <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem' }}>Agendamentos por Status</h4>
-              <Doughnut data={statusDoughnut} options={doughnutOpts} />
+              <div className={s.chartBox}><Doughnut data={statusDoughnut} options={doughnutOpts} /></div>
             </div>
           </div>
           {(resumo.porServico || []).length > 0 && (
             <div className="card">
               <div className="card-body">
                 <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem' }}>Top Serviços</h4>
-                <Bar data={svcBar} options={{ ...barOpts(fmtR), indexAxis: 'y' }} />
+                <div className={s.chartBox}><Bar data={svcBar} options={{ ...barOpts(fmtR), indexAxis: 'y' }} /></div>
               </div>
             </div>
           )}
@@ -246,7 +249,7 @@ export default function ResumoTab({ periodo }) {
         <div className="card">
           <div className="card-body">
             <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem' }}>Faturamento por Barbeiro</h4>
-            <Bar data={barbBar} options={barOpts(fmtR)} />
+            <div className={s.chartBox}><Bar data={barbBar} options={barOpts(fmtR)} /></div>
           </div>
         </div>
       )}

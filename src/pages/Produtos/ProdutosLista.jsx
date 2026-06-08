@@ -126,16 +126,16 @@ export default function ProdutosLista() {
             <tbody>
               {produtos.map(p => (
                 <tr key={p.id} style={{ opacity: p.vencido ? 0.6 : 1 }}>
-                  <td style={{ fontWeight: 600 }}>
+                  <td data-label="Nome" style={{ fontWeight: 600 }}>
                     {p.nome}
                     {p.peso && (
                       <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginLeft: '0.4rem' }}>{p.peso}</span>
                     )}
                   </td>
-                  <td style={{ fontSize: '0.82rem', color: 'var(--color-muted)', fontFamily: 'monospace' }}>
+                  <td data-label="Cód. Barras" style={{ fontSize: '0.82rem', color: 'var(--color-muted)', fontFamily: 'monospace' }}>
                     {p.codigoBarras || '—'}
                   </td>
-                  <td style={{ textAlign: 'center' }}>
+                  <td data-label="Estoque" style={{ textAlign: 'center' }}>
                     <span style={{
                       fontWeight: 700,
                       color: p.quantidade === 0 ? '#dc2626' : p.quantidade <= 3 ? '#f59e0b' : 'var(--success)',
@@ -143,8 +143,8 @@ export default function ProdutosLista() {
                       {p.quantidade}
                     </span>
                   </td>
-                  <td style={{ fontSize: '0.85rem' }}>{p.fabricante || '—'}</td>
-                  <td style={{ fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
+                  <td data-label="Fabricante" style={{ fontSize: '0.85rem' }}>{p.fabricante || '—'}</td>
+                  <td data-label="Validade" style={{ fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
                     {p.dataValidade ? (
                       <span style={{
                         color: p.vencido ? '#dc2626' : p.venceEmBreve ? '#f59e0b' : 'var(--color)',
@@ -156,9 +156,9 @@ export default function ProdutosLista() {
                       </span>
                     ) : '—'}
                   </td>
-                  <td style={{ textAlign: 'right', fontSize: '0.85rem' }}>{fmtR(p.preco)}</td>
-                  <td style={{ textAlign: 'right', color: 'var(--success)', fontWeight: 700 }}>{fmtR(p.precoVenda)}</td>
-                  <td style={{ whiteSpace: 'nowrap' }}>
+                  <td data-label="Custo" style={{ textAlign: 'right', fontSize: '0.85rem' }}>{fmtR(p.preco)}</td>
+                  <td data-label="Venda" style={{ textAlign: 'right', color: 'var(--success)', fontWeight: 700 }}>{fmtR(p.precoVenda)}</td>
+                  <td data-label="" style={{ whiteSpace: 'nowrap' }}>
                     <button
                       className="btn btn-ghost"
                       onClick={() => navigate(`/${slug}/produtos-cadastro/${p.id}`)}

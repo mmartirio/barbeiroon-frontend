@@ -127,12 +127,12 @@ export default function ServicoLista() {
             <tbody>
               {filtered.map(sv => (
                 <tr key={sv.id}>
-                  <td style={{ fontWeight: 600 }}>{sv.name}</td>
-                  <td style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>{sv.tipo || sv.description || '—'}</td>
-                  <td style={{ color: '#fbbf24', fontWeight: 600 }}>{fmtP(sv.price)}</td>
-                  <td style={{ fontSize: '0.85rem' }}>{displayDuration(sv)}</td>
-                  <td><span className={`badge ${sv.ativo !== false ? 'badge-green' : 'badge-red'}`}>{sv.ativo !== false ? 'Ativo' : 'Inativo'}</span></td>
-                  <td>
+                  <td data-label="Nome" style={{ fontWeight: 600 }}>{sv.name}</td>
+                  <td data-label="Tipo" style={{ color: 'var(--color-muted)', fontSize: '0.85rem' }}>{sv.tipo || sv.description || '—'}</td>
+                  <td data-label="Valor" style={{ color: '#fbbf24', fontWeight: 600 }}>{fmtP(sv.price)}</td>
+                  <td data-label="Duração" style={{ fontSize: '0.85rem' }}>{displayDuration(sv)}</td>
+                  <td data-label="Status"><span className={`badge ${sv.ativo !== false ? 'badge-green' : 'badge-red'}`}>{sv.ativo !== false ? 'Ativo' : 'Inativo'}</span></td>
+                  <td data-label="">
                     <div style={{ display: 'flex', gap: '0.4rem' }}>
                       <button className="btn btn-ghost btn-sm btn-icon" onClick={() => startEdit(sv)}><FiEdit2 size={14} /></button>
                       <button className="btn btn-danger btn-sm btn-icon" onClick={() => setConfirm(sv)}><FiTrash2 size={14} /></button>

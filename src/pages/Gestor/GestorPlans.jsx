@@ -200,7 +200,7 @@ export default function GestorPlans() {
             <tbody>
               {plans.map(plan => (
                 <tr key={plan.id}>
-                  <td>
+                  <td data-label="Nome">
                     <span style={{ fontWeight: 500 }}>{plan.name}</span>
                     {plan.isDefault && (
                       <span className="badge badge-amber" style={{ marginLeft: '0.5rem' }}>
@@ -208,25 +208,25 @@ export default function GestorPlans() {
                       </span>
                     )}
                   </td>
-                  <td>{fmt(plan.priceMonthly)}</td>
-                  <td>{fmt(plan.priceAnnual)}</td>
-                  <td style={{ color: 'var(--color-muted)' }}>
+                  <td data-label="Mensal">{fmt(plan.priceMonthly)}</td>
+                  <td data-label="Anual">{fmt(plan.priceAnnual)}</td>
+                  <td data-label="Usuários" style={{ color: 'var(--color-muted)' }}>
                     {plan.maxUsers ?? '∞'}
                   </td>
-                  <td style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>
+                  <td data-label="Recursos" style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>
                     {Array.isArray(plan.features) ? plan.features.length : 0} selecionados
                   </td>
-                  <td>
+                  <td data-label="Status">
                     <span className={`badge ${plan.isActive ? 'badge-green' : 'badge-gray'}`}>
                       {plan.isActive ? 'Ativo' : 'Inativo'}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Visib.">
                     <span className={`badge ${plan.isPublic !== false ? 'badge-blue' : 'badge-gray'}`}>
                       {plan.isPublic !== false ? 'Público' : 'Privado'}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="">
                     <div style={{ display: 'flex', gap: '0.375rem', justifyContent: 'flex-end' }}>
                       <button className="btn btn-ghost btn-icon btn-xs" title="Editar" onClick={() => openEdit(plan)}>
                         <RiEditLine size={14} />

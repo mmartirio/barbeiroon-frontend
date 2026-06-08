@@ -116,10 +116,10 @@ export default function ClienteLista() {
             <tbody>
               {filtered.map(c => (
                 <tr key={c.id}>
-                  <td style={{ fontWeight: 600 }}>{c.name}</td>
-                  <td>{fmtPhone(c.phone)}</td>
-                  <td style={{ color: 'var(--color-muted)' }}>{toDisplay(c.birthDate) || '—'}</td>
-                  <td>
+                  <td data-label="Nome" style={{ fontWeight: 600 }}>{c.name}</td>
+                  <td data-label="Telefone">{fmtPhone(c.phone)}</td>
+                  <td data-label="Aniversário" style={{ color: 'var(--color-muted)' }}>{toDisplay(c.birthDate) || '—'}</td>
+                  <td data-label="">
                     <div style={{ display: 'flex', gap: '0.4rem' }}>
                       <button className="btn btn-ghost btn-sm btn-icon" onClick={() => startEdit(c)}><FiEdit2 size={14} /></button>
                       <button className="btn btn-danger btn-sm btn-icon" onClick={() => setConfirm(c)}><FiTrash2 size={14} /></button>

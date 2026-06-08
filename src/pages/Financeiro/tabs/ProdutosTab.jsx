@@ -96,13 +96,13 @@ export default function ProdutosTab({ periodo }) {
             <tbody>
               {rows.map(row => (
                 <tr key={row.id}>
-                  <td style={{ whiteSpace: 'nowrap', color: 'var(--color-muted)', fontSize: '0.82rem' }}>{fmtD(row.data)}</td>
-                  <td style={{ fontWeight: 600 }}>{row.nomeProduto || '—'}</td>
-                  <td style={{ textAlign: 'center' }}>{row.quantidade_vendida}</td>
-                  <td style={{ textAlign: 'right', color: 'var(--color-muted)', fontSize: '0.85rem' }}>{fmtR(row.valor_unitario)}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--success)' }}>{fmtR(row.valor_total)}</td>
-                  <td style={{ fontSize: '0.82rem' }}>{FORMA_LABEL[row.forma_pagamento] || row.forma_pagamento || '—'}</td>
-                  <td style={{ fontSize: '0.82rem', color: 'var(--color-muted)' }}>{row.vendedor || '—'}</td>
+                  <td data-label="Data" style={{ whiteSpace: 'nowrap', color: 'var(--color-muted)', fontSize: '0.82rem' }}>{fmtD(row.data)}</td>
+                  <td data-label="Produto" style={{ fontWeight: 600 }}>{row.nomeProduto || '—'}</td>
+                  <td data-label="Qtd" style={{ textAlign: 'center' }}>{row.quantidade_vendida}</td>
+                  <td data-label="Unit." style={{ textAlign: 'right', color: 'var(--color-muted)', fontSize: '0.85rem' }}>{fmtR(row.valor_unitario)}</td>
+                  <td data-label="Total" style={{ textAlign: 'right', fontWeight: 700, color: 'var(--success)' }}>{fmtR(row.valor_total)}</td>
+                  <td data-label="Pagamento" style={{ fontSize: '0.82rem' }}>{FORMA_LABEL[row.forma_pagamento] || row.forma_pagamento || '—'}</td>
+                  <td data-label="Vendedor" style={{ fontSize: '0.82rem', color: 'var(--color-muted)' }}>{row.vendedor || '—'}</td>
                 </tr>
               ))}
             </tbody>

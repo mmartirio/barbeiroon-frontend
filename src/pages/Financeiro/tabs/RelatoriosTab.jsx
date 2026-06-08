@@ -390,13 +390,13 @@ export default function RelatoriosTab() {
                       const sc = STATUS_COLORS[item.status] || '#8b8b93';
                       return (
                         <tr key={item.id ?? i}>
-                          <td style={{ fontSize:'0.85rem' }}>{fmtDate(item.data)}</td>
-                          <td style={{ fontSize:'0.85rem' }}>{fmtTime(item.horario)}</td>
-                          <td style={{ fontWeight:600 }}>{item.cliente?.nome||'—'}</td>
-                          <td>{item.profissional?.nome||'—'}</td>
-                          <td style={{ fontSize:'0.85rem' }}>{item.servico?.nome||'—'}</td>
-                          <td style={{ color:'var(--success)', fontWeight:700 }}>{fmtP(item.valor)}</td>
-                          <td><span style={{ background:`${sc}22`, color:sc, border:`1px solid ${sc}`, borderRadius:999, padding:'0.15rem 0.5rem', fontSize:'0.7rem', fontWeight:800, textTransform:'uppercase' }}>{STATUS_LABELS[item.status]||item.status||'—'}</span></td>
+                          <td data-label="Data" style={{ fontSize:'0.85rem' }}>{fmtDate(item.data)}</td>
+                          <td data-label="Hora" style={{ fontSize:'0.85rem' }}>{fmtTime(item.horario)}</td>
+                          <td data-label="Cliente" style={{ fontWeight:600 }}>{item.cliente?.nome||'—'}</td>
+                          <td data-label="Profissional">{item.profissional?.nome||'—'}</td>
+                          <td data-label="Serviço" style={{ fontSize:'0.85rem' }}>{item.servico?.nome||'—'}</td>
+                          <td data-label="Valor" style={{ color:'var(--success)', fontWeight:700 }}>{fmtP(item.valor)}</td>
+                          <td data-label="Status"><span style={{ background:`${sc}22`, color:sc, border:`1px solid ${sc}`, borderRadius:999, padding:'0.15rem 0.5rem', fontSize:'0.7rem', fontWeight:800, textTransform:'uppercase' }}>{STATUS_LABELS[item.status]||item.status||'—'}</span></td>
                         </tr>
                       );
                     })}
