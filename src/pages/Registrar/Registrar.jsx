@@ -9,7 +9,7 @@ const STATES_BR = [
   'RO','RR','RS','SC','SE','SP','TO',
 ];
 
-const DUE_DAYS = Array.from({ length: 28 }, (_, i) => i + 1);
+const DUE_DAYS = [1, 5, 10, 15, 20];
 
 const CONTRACT = `TERMO DE ADESÃO AO SERVIÇO — BARBEIRO ON
 
