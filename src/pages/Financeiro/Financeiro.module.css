@@ -235,3 +235,15 @@
 }
 
 .pctInput:focus { outline: none; border-color: var(--accent); }
+
+.chartGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .chartGrid {
+    grid-template-columns: 1fr;
+  }
+}

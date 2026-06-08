@@ -223,7 +223,7 @@ export default function ResumoTab({ periodo }) {
 
       {/* Anel — Status dos agendamentos + Barras top serviços */}
       {resumo.qtdTotal > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className={s.chartGrid}>
           <div className="card">
             <div className="card-body">
               <h4 style={{ marginBottom: '0.75rem', fontSize: '0.875rem' }}>Agendamentos por Status</h4>
