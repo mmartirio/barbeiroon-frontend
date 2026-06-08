@@ -191,7 +191,6 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
             <SubMenu icon={<FiUsers size={15} />} label="Clientes" menuKey="clients" open={openMenus.clients} onToggle={toggle}>
               {p('canCreateCustomer') && <SubItem to={`/${slug}/cliente-cadastro`}   icon={<FiUserPlus size={14} />} label="Cadastro" />}
               {p('canViewCustomers')  && <SubItem to={`/${slug}/cliente-lista`}      icon={<FiList size={14} />}     label="Lista de Clientes" />}
-              {p('canViewAppointments') && <SubItem to={`/${slug}/servico-agendados`} icon={<FiCalendar size={14} />} label="Clientes Agendados" />}
             </SubMenu>
           )}
 
