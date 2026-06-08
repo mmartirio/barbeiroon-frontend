@@ -112,7 +112,7 @@ export default function RankingTab({ periodo }) {
 
           {/* Tabela */}
           <div className={s.tableWrap}>
-            <table className="data-table">
+            <table className={`data-table ${s.rankTable}`}>
               <thead>
                 <tr>
                   <th>#</th>
@@ -126,10 +126,10 @@ export default function RankingTab({ periodo }) {
                 {sorted.map((b, i) => (
                   <tr key={b.id}>
                     <td style={{ textAlign: 'center', fontSize: '1rem' }}>{MEDALS[i] || i + 1}</td>
-                    <td style={{ fontWeight: 600 }}>{b.nome}</td>
-                    <td style={{ textAlign: 'center' }}>{fmtN(b.atendimentos)}</td>
-                    <td style={{ textAlign: 'right', color: '#f59e0b', fontWeight: 700 }}>{fmtR(b.ticketMedio)}</td>
-                    <td style={{ textAlign: 'right', color: 'var(--success)', fontWeight: 700 }}>{fmtR(b.faturamento)}</td>
+                    <td data-label="Profissional" style={{ fontWeight: 600 }}>{b.nome}</td>
+                    <td data-label="Atendimentos" style={{ textAlign: 'center' }}>{fmtN(b.atendimentos)}</td>
+                    <td data-label="Ticket Médio" style={{ textAlign: 'right', color: '#f59e0b', fontWeight: 700 }}>{fmtR(b.ticketMedio)}</td>
+                    <td data-label="Faturamento" style={{ textAlign: 'right', color: 'var(--success)', fontWeight: 700 }}>{fmtR(b.faturamento)}</td>
                   </tr>
                 ))}
               </tbody>
