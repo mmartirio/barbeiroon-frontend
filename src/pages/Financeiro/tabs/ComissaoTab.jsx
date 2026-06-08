@@ -115,10 +115,13 @@ function MyComissaoCard({ result }) {
 }
 
 // ─── Tab principal ────────────────────────────────────────────────────────────
-export default function ComissaoTab({ periodo, isBarber }) {
+export default function ComissaoTab({ periodo, isBarber, permissions = {} }) {
+  // Pode gerenciar comissões: gestor (!isBarber) OU barbeiro com canManageTenant
+  const canManage = !isBarber || !!permissions?.canManageTenant;
+
   const [barbers,       setBarbers]       = useState([]);
   const [results,       setResults]       = useState([]);
-  const [loadingConfig, setLoadingConfig] = useState(!isBarber);
+  const [loadingConfig, setLoadingConfig] = useState(canManage);
   const [loadingResult, setLoadingResult] = useState(true);
   // Estado local de cada linha: { [id]: { type, value } }
   const [rows,          setRows]          = useState({});
@@ -130,9 +133,9 @@ export default function ComissaoTab({ periodo, isBarber }) {
   const [loteValue, setLoteValue] = useState('');
   const [savingLote, setSavingLote] = useState(false);
 
-  // Busca configurações (só gestores)
+  // Busca configurações (só quem pode gerenciar)
   const buscarBarbers = useCallback(async () => {
-    if (isBarber) return;
+    if (!canManage) return;
     setLoadingConfig(true);
     try {
       const r = await fetch('/api/financeiro/comissao/barbeiros', { headers: { Authorization: `Bearer ${tok()}` } });
@@ -153,7 +156,7 @@ export default function ComissaoTab({ periodo, isBarber }) {
     } finally {
       setLoadingConfig(false);
     }
-  }, [isBarber]);
+  }, [canManage]);
 
   // Busca resultados do período
   const buscarResults = useCallback(async () => {
@@ -252,20 +255,20 @@ export default function ComissaoTab({ periodo, isBarber }) {
     datasets: [{ data: donutData.map(b => b.comissao), backgroundColor: COLORS, borderWidth: 0 }],
   };
 
-  const myResult = isBarber ? results[0] || null : null;
+  const myResult = (isBarber && !canManage) ? results[0] || null : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-      {/* ── Vista do barbeiro ─────────────────────────────────────────── */}
-      {isBarber && (
+      {/* ── Vista do barbeiro (barber sem permissão de gestor) ──────────── */}
+      {isBarber && !canManage && (
         loadingResult
           ? <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Carregando...</p>
           : <MyComissaoCard result={myResult} />
       )}
 
-      {/* ── Seção CRUD (só gestores) ───────────────────────────────────── */}
-      {!isBarber && (
+      {/* ── Seção CRUD (gestor ou barbeiro com canManageTenant) ─────────── */}
+      {canManage && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
           {/* Cabeçalho + filtro */}
@@ -431,7 +434,7 @@ export default function ComissaoTab({ periodo, isBarber }) {
           <span className={s.kpiLabel}>Total Comissões</span>
           <span className={s.kpiValue} style={{ color: '#7c3aed' }}>{fmtR(totalComissao)}</span>
         </div>
-        {totalFaturamento > 0 && !isBarber && (
+        {totalFaturamento > 0 && canManage && (
           <div className={s.kpiCard}>
             <span className={s.kpiLabel}>% sobre Faturamento</span>
             <span className={s.kpiValue} style={{ color: '#f59e0b' }}>
@@ -442,7 +445,7 @@ export default function ComissaoTab({ periodo, isBarber }) {
       </div>
 
       {/* ── Gráficos ────────────────────────────────────────────────────── */}
-      {!isBarber && filteredResults.length > 1 && (
+      {canManage && filteredResults.length > 1 && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <div className="card">
             <div className="card-body">
@@ -475,7 +478,7 @@ export default function ComissaoTab({ periodo, isBarber }) {
             <table className="data-table">
               <thead>
                 <tr>
-                  {!isBarber && <th>#</th>}
+                  {canManage && <th>#</th>}
                   <th>Profissional</th>
                   <th style={{ textAlign: 'center' }}>Atendimentos</th>
                   <th style={{ textAlign: 'right'  }}>Faturamento</th>
@@ -489,7 +492,7 @@ export default function ComissaoTab({ periodo, isBarber }) {
                   const hasComissao = isFixed ? b.commissionValue > 0 : b.percentual > 0;
                   return (
                     <tr key={b.id}>
-                      {!isBarber && (
+                      {canManage && (
                         <td style={{ textAlign: 'center', fontSize: '1rem' }}>{MEDALS[i] || i + 1}</td>
                       )}
                       <td style={{ fontWeight: 600 }}>{b.nome}</td>

@@ -35,7 +35,8 @@ const ABAS = [
 
 export default function Financeiro() {
   const { user } = useContext(AuthContext);
-  const isBarber = !!user?.isBarber;
+  const isBarber    = !!user?.isBarber;
+  const permissions = user?.permissions || {};
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ export default function Financeiro() {
     navigate(`/${slug}/financeiro?tab=${value}`, { replace: true });
   };
 
-  const tabProps = { periodo, isBarber };
+  const tabProps = { periodo, isBarber, permissions };
 
   function renderAba() {
     switch (aba) {
