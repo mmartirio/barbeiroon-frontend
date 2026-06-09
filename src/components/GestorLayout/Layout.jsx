@@ -168,8 +168,31 @@ function GestorWhatsAppModal({ onClose }) {
 export default function Layout() {
   const { user, logout } = useGestorAuth();
   const navigate = useNavigate();
-  const [open,       setOpen]       = useState(false);
-  const [showWaModal, setShowWaModal] = useState(false);
+  const [open,         setOpen]         = useState(false);
+  const [showWaModal,  setShowWaModal]  = useState(false);
+  const [waEnabled,    setWaEnabled]    = useState(true);
+  const [waToggling,   setWaToggling]   = useState(false);
+
+  useEffect(() => {
+    fetch('/api/gestor/settings', { headers: { Authorization: `Bearer ${GESTOR_TOKEN()}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setWaEnabled(d.whatsappNotificationsEnabled !== false); })
+      .catch(() => {});
+  }, []);
+
+  async function toggleWaNotifications() {
+    setWaToggling(true);
+    try {
+      const r = await fetch('/api/gestor/settings', {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${GESTOR_TOKEN()}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ whatsappNotificationsEnabled: !waEnabled }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok) setWaEnabled(d.whatsappNotificationsEnabled !== false);
+    } catch { /* noop */ }
+    setWaToggling(false);
+  }
 
   function handleLogout() { logout(); navigate('/gestor'); }
 
@@ -192,6 +215,25 @@ export default function Layout() {
           <button className="nav-item" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
             onClick={() => { setOpen(false); setShowWaModal(true); }}>
             <RiWhatsappLine size={18} /><span>WhatsApp</span>
+          </button>
+          <button
+            className="nav-item"
+            disabled={waToggling}
+            onClick={toggleWaNotifications}
+            title={waEnabled ? 'Clique para desativar notificações WhatsApp para as barbearias' : 'Clique para ativar notificações WhatsApp para as barbearias'}
+            style={{ background: 'none', border: 'none', cursor: waToggling ? 'wait' : 'pointer', width: '100%', textAlign: 'left', opacity: waToggling ? 0.6 : 1 }}
+          >
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: 18, height: 18, borderRadius: 999, flexShrink: 0,
+              background: waEnabled ? '#16a34a' : '#6b7280',
+              fontSize: 10, color: '#fff', fontWeight: 700,
+            }}>
+              {waEnabled ? '✓' : '✕'}
+            </span>
+            <span style={{ color: waEnabled ? 'var(--color)' : '#6b7280' }}>
+              Notif. WA {waEnabled ? 'ON' : 'OFF'}
+            </span>
           </button>
         </nav>
 
