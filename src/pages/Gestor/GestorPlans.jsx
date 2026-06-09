@@ -30,7 +30,7 @@ const FEATURES = [
   { key: 'comissoes',             label: 'Comissões de profissionais' },
   { key: 'planos_servico',        label: 'Planos de serviço para clientes' },
   { key: 'promocoes',             label: 'Promoções e descontos' },
-  { key: 'grupos_permissao',      label: 'Grupos de permissão' },
+  { key: 'grupos_permissao',      label: 'Grupos de permissão',                    base: true },
   { key: 'tela_cliente',          label: 'Tela do cliente' },
   { key: 'suporte',               label: 'Suporte técnico integrado',          base: true },
 ];

@@ -56,7 +56,7 @@ export default function UsuarioCadastro() {
   }, [preview]);
 
   useEffect(() => {
-    fetch('/api/group?limit=100', { headers: { Authorization: `Bearer ${tok()}` } })
+    fetch('/api/group/for-assign?limit=100', { headers: { Authorization: `Bearer ${tok()}` } })
       .then(r => r.json()).catch(() => ({}))
       .then(d => setGroups(d.groups || d.data || []));
   }, []);
@@ -70,6 +70,7 @@ export default function UsuarioCadastro() {
     if (!form.email.trim()) { setError('E-mail obrigatório'); return; }
     if (!form.password)     { setError('Senha obrigatória'); return; }
     if (form.password.length < 6) { setError('Senha deve ter mínimo 6 caracteres'); return; }
+    if (!form.groupId)      { setError('Grupo obrigatório'); return; }
     setLoading(true);
     try {
       // Enviar como multipart/form-data se houver foto, senão enviar JSON
@@ -155,9 +156,9 @@ export default function UsuarioCadastro() {
               <input className="form-input" type="password" placeholder="Mín. 6 caracteres" value={form.password} onChange={e => set('password', e.target.value)} />
             </div>
             <div className="form-group">
-              <label className="form-label">Grupo</label>
-              <select className="form-input" value={form.groupId} onChange={e => set('groupId', e.target.value)}>
-                <option value="">Sem grupo</option>
+              <label className="form-label">Grupo *</label>
+              <select className="form-input" value={form.groupId} onChange={e => set('groupId', e.target.value)} required>
+                <option value="">Selecione um grupo</option>
                 {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
               </select>
             </div>

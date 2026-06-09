@@ -95,7 +95,7 @@ function AppRoutes() {
           <Route path="/:slug/servico-cadastro"       element={<PrivateRoute perm="canManageServices"><ServicoCadastro /></PrivateRoute>} />
           <Route path="/:slug/usuario-lista"          element={<PrivateRoute perm="canViewUsers"><UsuarioLista /></PrivateRoute>} />
           <Route path="/:slug/usuario-cadastro"       element={<PrivateRoute perm="canCreateUser"><UsuarioCadastro /></PrivateRoute>} />
-          <Route path="/:slug/grupo"                  element={<PrivateRoute perm="canManageGroups" feature="Grupos de permissão"><Grupo /></PrivateRoute>} />
+          <Route path="/:slug/grupo"                  element={<PrivateRoute perm="canManageGroups"><Grupo /></PrivateRoute>} />
           <Route path="/:slug/agenda"                 element={<PrivateRoute perm="canViewAgenda"><Agenda /></PrivateRoute>} />
           <Route path="/:slug/agenda-regras"          element={<PrivateRoute perm="canViewAgenda"><AgendaRegras /></PrivateRoute>} />
           <Route path="/:slug/disponibilidade"        element={<PrivateRoute perm="canCreateAppointment"><Disponibilidade /></PrivateRoute>} />
