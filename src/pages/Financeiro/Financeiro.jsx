@@ -8,7 +8,6 @@ import ReceitasTab   from './tabs/ReceitasTab';
 import DespesasTab   from './tabs/DespesasTab';
 import ComissaoTab   from './tabs/ComissaoTab';
 import FluxoCaixaTab from './tabs/FluxoCaixaTab';
-import RelatoriosTab from './tabs/RelatoriosTab';
 import RankingTab    from './tabs/RankingTab';
 import ProdutosTab   from './tabs/ProdutosTab';
 
@@ -30,7 +29,6 @@ const ABAS = [
   { label: 'Fluxo de Caixa', value: 'fluxo' },
   { label: 'Ranking',        value: 'ranking' },
   { label: 'Produtos',       value: 'produtos' },
-  { label: 'Relatórios',     value: 'relatorios' },
 ];
 
 export default function Financeiro() {
@@ -60,7 +58,6 @@ export default function Financeiro() {
       case 'fluxo':       return <FluxoCaixaTab {...tabProps} />;
       case 'ranking':     return <RankingTab    {...tabProps} />;
       case 'produtos':    return <ProdutosTab   {...tabProps} />;
-      case 'relatorios':  return <RelatoriosTab />;
       default:            return <ResumoTab     {...tabProps} />;
     }
   }

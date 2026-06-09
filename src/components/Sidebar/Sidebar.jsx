@@ -237,6 +237,7 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
           } />}
           {p('canManageServices') && <NavItem to={`/${slug}/promocoes`} icon={<FiTag size={15} />} label="Promoções" />}
           {p('canViewReports') && <NavItem to={`/${slug}/financeiro`} icon={<FiDollarSign size={15} />} label="Financeiro" />}
+          {p('canViewReports') && <NavItem to={`/${slug}/relatorios`} icon={<FiBarChart2 size={15} />} label="Relatórios" />}
 
           <li className={s.divider} />
 
