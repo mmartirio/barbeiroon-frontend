@@ -9,7 +9,6 @@ const FEATURES = [
   // Recursos base — incluídos em todos os planos (não editáveis)
   { key: 'dashboard',             label: 'Dashboard',                              base: true },
   { key: 'agendamento_painel',    label: 'Agendamento pelo painel',                base: true },
-  { key: 'conflito_horario',      label: 'Validação de conflito de horário',       base: true },
   { key: 'expediente',            label: 'Configuração de expediente',             base: true },
   { key: 'cadastro_clientes',     label: 'Cadastro de clientes',                   base: true },
   { key: 'lista_clientes',        label: 'Lista e busca de clientes',              base: true },
@@ -18,7 +17,6 @@ const FEATURES = [
   { key: 'dados_empresa',         label: 'Dados da empresa editáveis',             base: true },
   // Recursos selecionáveis por plano
   { key: 'agendamento_publico',   label: 'Agendamento online por clientes' },
-  { key: 'historico_cliente',     label: 'Histórico do cliente' },
   { key: 'clientes_agendados',    label: 'Clientes agendados por período' },
   { key: 'upload_logo',           label: 'Upload de logo e imagem de fundo' },
   { key: 'whatsapp_barbearia',    label: 'Notificações WhatsApp para a barbearia' },
