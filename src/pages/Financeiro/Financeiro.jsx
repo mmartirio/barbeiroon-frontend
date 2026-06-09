@@ -35,11 +35,14 @@ export default function Financeiro() {
   const { user } = useContext(AuthContext);
   const isBarber    = !!user?.isBarber;
   const permissions = user?.permissions || {};
+  const planFeatures = user?.planFeatures || [];
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { slug } = useParams();
   const aba = searchParams.get('tab') || 'resumo';
+
+  const hasFeature = (label) => planFeatures.length === 0 || planFeatures.includes(label);
 
   const [periodo, setPeriodo] = useState('mensal');
 
@@ -49,7 +52,23 @@ export default function Financeiro() {
 
   const tabProps = { periodo, isBarber, permissions };
 
+  const TAB_FEATURES = {
+    comissao: 'Comissões de profissionais',
+    produtos:  'Gestão de Produtos e Estoque',
+  };
+
   function renderAba() {
+    const requiredFeature = TAB_FEATURES[aba];
+    if (requiredFeature && !hasFeature(requiredFeature)) {
+      return (
+        <div style={{ background:'rgba(220,38,38,0.08)', border:'1px solid #dc2626', borderRadius:'var(--radius-sm)', padding:'1rem 1.25rem', color:'var(--danger,#dc2626)', fontSize:'0.875rem' }}>
+          🔒 <strong>{requiredFeature}</strong> não está disponível no seu plano atual.{' '}
+          <button onClick={() => setAba('resumo')} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--accent)', textDecoration:'underline', fontSize:'inherit' }}>
+            Ir para Resumo
+          </button>
+        </div>
+      );
+    }
     switch (aba) {
       case 'resumo':      return <ResumoTab     {...tabProps} />;
       case 'receitas':    return <ReceitasTab   {...tabProps} />;

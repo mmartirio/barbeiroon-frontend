@@ -95,21 +95,21 @@ function AppRoutes() {
           <Route path="/:slug/servico-cadastro"       element={<PrivateRoute perm="canManageServices"><ServicoCadastro /></PrivateRoute>} />
           <Route path="/:slug/usuario-lista"          element={<PrivateRoute perm="canViewUsers"><UsuarioLista /></PrivateRoute>} />
           <Route path="/:slug/usuario-cadastro"       element={<PrivateRoute perm="canCreateUser"><UsuarioCadastro /></PrivateRoute>} />
-          <Route path="/:slug/grupo"                  element={<PrivateRoute perm="canManageGroups"><Grupo /></PrivateRoute>} />
+          <Route path="/:slug/grupo"                  element={<PrivateRoute perm="canManageGroups" feature="Grupos de permissão"><Grupo /></PrivateRoute>} />
           <Route path="/:slug/agenda"                 element={<PrivateRoute perm="canViewAgenda"><Agenda /></PrivateRoute>} />
           <Route path="/:slug/agenda-regras"          element={<PrivateRoute perm="canViewAgenda"><AgendaRegras /></PrivateRoute>} />
           <Route path="/:slug/disponibilidade"        element={<PrivateRoute perm="canCreateAppointment"><Disponibilidade /></PrivateRoute>} />
-          <Route path="/:slug/promocoes"              element={<PrivateRoute perm="canManageServices"><Promocoes /></PrivateRoute>} />
-          <Route path="/:slug/planos-servico"         element={<PrivateRoute perm="canManageServices"><PlanoServico /></PrivateRoute>} />
-          <Route path="/:slug/relatorios"             element={<PrivateRoute perm="canViewReports"><Relatorios /></PrivateRoute>} />
-          <Route path="/:slug/financeiro"             element={<PrivateRoute perm="canViewReports"><Financeiro /></PrivateRoute>} />
-          <Route path="/:slug/vendas"                  element={<PrivateRoute><Vendas /></PrivateRoute>} />
-          <Route path="/:slug/produtos-lista"         element={<PrivateRoute><ProdutosLista /></PrivateRoute>} />
-          <Route path="/:slug/produtos-cadastro"      element={<PrivateRoute><ProdutosCadastro /></PrivateRoute>} />
-          <Route path="/:slug/produtos-cadastro/:id"  element={<PrivateRoute><ProdutosCadastro /></PrivateRoute>} />
+          <Route path="/:slug/promocoes"              element={<PrivateRoute perm="canManageServices" feature="Promoções e descontos"><Promocoes /></PrivateRoute>} />
+          <Route path="/:slug/planos-servico"         element={<PrivateRoute perm="canManageServices" feature="Planos de serviço para clientes"><PlanoServico /></PrivateRoute>} />
+          <Route path="/:slug/relatorios"             element={<PrivateRoute perm="canViewReports" feature="Relatórios avançados"><Relatorios /></PrivateRoute>} />
+          <Route path="/:slug/financeiro"             element={<PrivateRoute perm="canViewReports" feature="Módulo Financeiro"><Financeiro /></PrivateRoute>} />
+          <Route path="/:slug/vendas"                  element={<PrivateRoute feature="Vendas de Produtos"><Vendas /></PrivateRoute>} />
+          <Route path="/:slug/produtos-lista"         element={<PrivateRoute feature="Gestão de Produtos e Estoque"><ProdutosLista /></PrivateRoute>} />
+          <Route path="/:slug/produtos-cadastro"      element={<PrivateRoute feature="Gestão de Produtos e Estoque"><ProdutosCadastro /></PrivateRoute>} />
+          <Route path="/:slug/produtos-cadastro/:id"  element={<PrivateRoute feature="Gestão de Produtos e Estoque"><ProdutosCadastro /></PrivateRoute>} />
           <Route path="/:slug/perfil"                 element={<PrivateRoute><Perfil /></PrivateRoute>} />
           <Route path="/:slug/conta"                  element={<PrivateRoute perm="canManageTenant"><Conta /></PrivateRoute>} />
-          <Route path="/:slug/tela-cliente"           element={<PrivateRoute perm="canViewCustomers"><TelaCliente /></PrivateRoute>} />
+          <Route path="/:slug/tela-cliente"           element={<PrivateRoute perm="canViewCustomers" feature="Tela do cliente"><TelaCliente /></PrivateRoute>} />
           <Route path="/:slug/primeiro-acesso"        element={<PrivateRoute><PrimeiroAcesso /></PrivateRoute>} />
 
           {/* Legacy redirects — keep old bookmarks working */}

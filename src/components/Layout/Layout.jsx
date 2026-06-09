@@ -8,6 +8,11 @@ import AnnouncementBanner from '../AnnouncementBanner/AnnouncementBanner';
 const tok = () => sessionStorage.getItem('token');
 
 function LayoutInner({ children, title }) {
+  const [flash, setFlash] = useState(() => {
+    const msg = sessionStorage.getItem('featureFlash');
+    if (msg) { sessionStorage.removeItem('featureFlash'); return msg; }
+    return '';
+  });
   const [suporteOpen,  setSuporteOpen]  = useState(false);
   const [whatsappOpen, setWhatsappOpen] = useState(false);
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar();
@@ -142,6 +147,12 @@ function LayoutInner({ children, title }) {
         </div>
         <div className={s.content}>
           {title && <h1 className={s.pageTitle}>{title}</h1>}
+          {flash && (
+            <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'rgba(220,38,38,0.1)', border:'1px solid #dc2626', borderRadius:'var(--radius-sm)', padding:'0.75rem 1rem', marginBottom:'1rem', color:'var(--danger,#dc2626)', fontSize:'0.875rem' }}>
+              <span style={{ flex:1 }}>🔒 {flash}</span>
+              <button onClick={() => setFlash('')} style={{ background:'none', border:'none', cursor:'pointer', color:'inherit', fontSize:'1rem', lineHeight:1 }}>✕</button>
+            </div>
+          )}
           {children}
         </div>
       </main>

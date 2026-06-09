@@ -195,7 +195,7 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
           )}
 
           {canUsers && (
-            <SubMenu icon={<FiUser size={15} />} label="Usuários" menuKey="users" open={openMenus.users} onToggle={toggle}>
+            <SubMenu icon={<FiActivity size={15} />} label="Usuários" menuKey="users" open={openMenus.users} onToggle={toggle}>
               {p('canCreateUser')    && <SubItem to={`/${slug}/usuario-cadastro`} icon={<FiUserPlus size={14} />}  label="Cadastrar" />}
               {p('canViewUsers')     && <SubItem to={`/${slug}/usuario-lista`}    icon={<FiList size={14} />}      label="Lista de Usuários" />}
               {p('canManageGroups') && <SubItem to={`/${slug}/grupo`}             icon={<FiBriefcase size={14} />} label="Grupo" />}
@@ -225,7 +225,7 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
             <SubItem to={`/${slug}/produtos-lista`}    icon={<FiList size={14} />}       label="Listar" />
           </SubMenu>
 
-          {p('canManageServices') && <NavItem to={`/${slug}/planos-servico`} icon={<FiPackage size={15} />}  label={
+          {p('canManageServices') && <NavItem to={`/${slug}/planos-servico`} icon={<FiAward size={15} />}  label={
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <span>Planos</span>
               {pendingPlanCount > 0 && (

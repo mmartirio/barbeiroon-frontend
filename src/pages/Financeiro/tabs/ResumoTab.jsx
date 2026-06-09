@@ -170,46 +170,52 @@ export default function ResumoTab({ periodo }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
       {/* KPIs Financeiros */}
-      <div>
-        <h4 style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Financeiro</h4>
-        <div className={s.kpiGrid}>
-          {kpisFinanceiros.map(k => (
-            <div key={k.label} className={s.kpiCard}>
-              <span className={s.kpiLabel}>{k.label}</span>
-              <span className={s.kpiValue} style={{ color: k.color }}>{k.value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* KPIs Atendimentos */}
-      <div>
-        <h4 style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Atendimentos</h4>
-        <div className={s.kpiGrid}>
-          {kpisAtendimentos.map(k => (
-            <div key={k.label} className={s.kpiCard}>
-              <span className={s.kpiLabel}>{k.label}</span>
-              <span className={s.kpiValue} style={{ color: k.color }}>{k.value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* KPIs Produtos */}
-      {produtos && (
-        <div>
-          <h4 style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Produtos</h4>
+      <div className="card" style={{ background: 'var(--bg-card)' }}>
+        <div className="card-body">
+          <h4 style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Financeiro</h4>
           <div className={s.kpiGrid}>
-            {[
-              { label: 'Total em Produtos',  value: fmtR(produtos.totalVendas),                                                                   color: 'var(--success)' },
-              { label: 'Itens Vendidos',     value: fmtN((produtos.data || []).reduce((a, r) => a + Number(r.quantidade_vendida || 0), 0)),        color: '#7c3aed' },
-              { label: 'Transações',         value: fmtN((produtos.data || []).length),                                                           color: '#2563eb' },
-            ].map(k => (
+            {kpisFinanceiros.map(k => (
               <div key={k.label} className={s.kpiCard}>
                 <span className={s.kpiLabel}>{k.label}</span>
                 <span className={s.kpiValue} style={{ color: k.color }}>{k.value}</span>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* KPIs Atendimentos */}
+      <div className="card" style={{ background: 'var(--bg-card)' }}>
+        <div className="card-body">
+          <h4 style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Atendimentos</h4>
+          <div className={s.kpiGrid}>
+            {kpisAtendimentos.map(k => (
+              <div key={k.label} className={s.kpiCard}>
+                <span className={s.kpiLabel}>{k.label}</span>
+                <span className={s.kpiValue} style={{ color: k.color }}>{k.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* KPIs Produtos */}
+      {produtos && (
+        <div className="card" style={{ background: 'var(--bg-card)' }}>
+          <div className="card-body">
+            <h4 style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Produtos</h4>
+            <div className={s.kpiGrid}>
+              {[
+                { label: 'Total em Produtos',  value: fmtR(produtos.totalVendas),                                                                   color: 'var(--success)' },
+                { label: 'Itens Vendidos',     value: fmtN((produtos.data || []).reduce((a, r) => a + Number(r.quantidade_vendida || 0), 0)),        color: '#7c3aed' },
+                { label: 'Transações',         value: fmtN((produtos.data || []).length),                                                           color: '#2563eb' },
+              ].map(k => (
+                <div key={k.label} className={s.kpiCard}>
+                  <span className={s.kpiLabel}>{k.label}</span>
+                  <span className={s.kpiValue} style={{ color: k.color }}>{k.value}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
