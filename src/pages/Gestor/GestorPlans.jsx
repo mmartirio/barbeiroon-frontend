@@ -6,27 +6,36 @@ import {
 import { useGestorAuth } from '../../context/GestorAuthContext';
 
 const FEATURES = [
-  { key: 'agendamento_painel',    label: 'Agendamento pelo painel' },
+  // Recursos base — incluídos em todos os planos (não editáveis)
+  { key: 'dashboard',             label: 'Dashboard',                              base: true },
+  { key: 'agendamento_painel',    label: 'Agendamento pelo painel',                base: true },
+  { key: 'conflito_horario',      label: 'Validação de conflito de horário',       base: true },
+  { key: 'expediente',            label: 'Configuração de expediente',             base: true },
+  { key: 'cadastro_clientes',     label: 'Cadastro de clientes',                   base: true },
+  { key: 'lista_clientes',        label: 'Lista e busca de clientes',              base: true },
+  { key: 'cadastro_servicos',     label: 'Cadastro de serviços',                   base: true },
+  { key: 'lista_servicos',        label: 'Lista e filtro de serviços',             base: true },
+  { key: 'dados_empresa',         label: 'Dados da empresa editáveis',             base: true },
+  // Recursos selecionáveis por plano
   { key: 'agendamento_publico',   label: 'Agendamento online por clientes' },
-  { key: 'conflito_horario',      label: 'Validação de conflito de horário' },
-  { key: 'expediente',            label: 'Configuração de expediente' },
-  { key: 'clientes_agendados',    label: 'Clientes agendados por período' },
-  { key: 'cadastro_clientes',     label: 'Cadastro de clientes' },
-  { key: 'lista_clientes',        label: 'Lista e busca de clientes' },
   { key: 'historico_cliente',     label: 'Histórico do cliente' },
-  { key: 'cadastro_servicos',     label: 'Cadastro de serviços' },
-  { key: 'lista_servicos',        label: 'Lista e filtro de serviços' },
+  { key: 'clientes_agendados',    label: 'Clientes agendados por período' },
+  { key: 'upload_logo',           label: 'Upload de logo e imagem de fundo' },
   { key: 'whatsapp_barbearia',    label: 'Notificações WhatsApp para a barbearia' },
   { key: 'whatsapp_cliente',      label: 'Confirmação WhatsApp para o cliente' },
   { key: 'alertas_pendentes',     label: 'Alertas de solicitações pendentes' },
   { key: 'multiplos_usuarios',    label: 'Múltiplos usuários e profissionais' },
-  { key: 'upload_logo',           label: 'Upload de logo e imagem de fundo' },
-  { key: 'dados_empresa',         label: 'Dados da empresa editáveis' },
   { key: 'relatorios',            label: 'Relatórios avançados' },
+  { key: 'financeiro',            label: 'Módulo Financeiro' },
+  { key: 'produtos',              label: 'Gestão de Produtos e Estoque' },
+  { key: 'vendas_produtos',       label: 'Vendas de Produtos' },
+  { key: 'comissoes',             label: 'Comissões de profissionais' },
+  { key: 'planos_servico',        label: 'Planos de serviço para clientes' },
   { key: 'promocoes',             label: 'Promoções e descontos' },
   { key: 'grupos_permissao',      label: 'Grupos de permissão' },
   { key: 'agenda_visual',         label: 'Agenda visual' },
   { key: 'tela_cliente',          label: 'Tela do cliente' },
+  { key: 'suporte',               label: 'Suporte técnico integrado' },
 ];
 
 const EMPTY_FORM = {
@@ -335,8 +344,8 @@ export default function GestorPlans() {
                     borderRadius: 'var(--radius-sm)',
                     border: '1px solid var(--border)',
                   }}>
-                    {FEATURES.map(({ key, label }) => {
-                      const checked = form.features.includes(label);
+                    {FEATURES.map(({ key, label, base }) => {
+                      const checked = base || form.features.includes(label);
                       return (
                         <label
                           key={key}
@@ -346,17 +355,20 @@ export default function GestorPlans() {
                             gap: '0.5rem',
                             padding: '0.35rem 0.5rem',
                             borderRadius: 'var(--radius-xs)',
-                            cursor: 'pointer',
-                            background: checked ? 'rgba(124,58,237,0.12)' : 'transparent',
+                            cursor: base ? 'default' : 'pointer',
+                            background: base
+                              ? 'rgba(100,100,100,0.08)'
+                              : checked ? 'rgba(124,58,237,0.12)' : 'transparent',
                             transition: 'background 0.15s',
                             fontSize: '0.8rem',
                             userSelect: 'none',
+                            opacity: base ? 0.65 : 1,
                           }}
                         >
                           <span style={{
                             width: 16, height: 16, borderRadius: 4,
-                            border: `1.5px solid ${checked ? 'var(--accent)' : 'var(--border)'}`,
-                            background: checked ? 'var(--accent)' : 'transparent',
+                            border: `1.5px solid ${checked ? (base ? 'var(--color-muted)' : 'var(--accent)') : 'var(--border)'}`,
+                            background: checked ? (base ? 'var(--color-muted)' : 'var(--accent)') : 'transparent',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             flexShrink: 0, transition: 'all 0.15s',
                           }}>
@@ -365,16 +377,22 @@ export default function GestorPlans() {
                           <input
                             type="checkbox"
                             checked={checked}
-                            onChange={() => toggleFeature(label)}
+                            disabled={base}
+                            onChange={() => !base && toggleFeature(label)}
                             style={{ display: 'none' }}
                           />
                           {label}
+                          {base && (
+                            <span style={{ fontSize: '0.65rem', color: 'var(--color-muted)', marginLeft: 'auto', fontWeight: 600 }}>
+                              padrão
+                            </span>
+                          )}
                         </label>
                       );
                     })}
                   </div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.25rem', display: 'block' }}>
-                    {form.features.length} de {FEATURES.length} recursos selecionados
+                    {form.features.length} de {FEATURES.filter(f => !f.base).length} recursos selecionados
                   </span>
                 </div>
 
