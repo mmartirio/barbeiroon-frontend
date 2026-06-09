@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FiRefreshCw, FiSearch, FiActivity, FiUsers, FiScissors, FiCalendar, FiList, FiBarChart2 } from 'react-icons/fi';
+import { FiRefreshCw, FiSearch, FiActivity, FiUsers, FiScissors, FiCalendar, FiList, FiBarChart2, FiServer, FiWifi, FiWifiOff, FiHardDrive, FiCpu, FiAlertTriangle } from 'react-icons/fi';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { useGestorAuth } from '../../context/GestorAuthContext';
@@ -50,6 +50,197 @@ function Card({ children, title, style = {} }) {
     );
 }
 
+// ── VPS Monitor ─────────────────────────────────────────────────────────────
+
+function ProgressBar({ pct, warn = 75, danger = 90 }) {
+    const color = pct >= danger ? '#ef4444' : pct >= warn ? '#f59e0b' : '#22c55e';
+    return (
+        <div style={{ width: '100%', height: 10, background: 'var(--border)', borderRadius: 6, overflow: 'hidden', marginTop: 6 }}>
+            <div style={{ width: `${Math.min(pct, 100)}%`, height: '100%', background: color, borderRadius: 6, transition: 'width 0.4s ease' }} />
+        </div>
+    );
+}
+
+function VpsPanel({ api }) {
+    const [stats,      setStats]      = useState(null);
+    const [loading,    setLoading]    = useState(true);
+    const [restarting, setRestarting] = useState(false);
+    const [msg,        setMsg]        = useState('');
+    const intervalRef = useRef(null);
+
+    const load = useCallback(async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const d = await api('/vps/stats');
+            setStats(d);
+        } catch { /* silent */ }
+        finally { if (!silent) setLoading(false); }
+    }, [api]);
+
+    useEffect(() => {
+        load();
+        intervalRef.current = setInterval(() => load(true), 30000);
+        return () => clearInterval(intervalRef.current);
+    }, [load]);
+
+    const handleRestart = async () => {
+        if (!window.confirm('Tem certeza? Todos os containers serão reiniciados. O sistema ficará indisponível por alguns segundos.')) return;
+        setRestarting(true);
+        setMsg('');
+        try {
+            const d = await api('/vps/docker-restart', { method: 'POST' });
+            setMsg(d.message || 'Reiniciado com sucesso.');
+            setTimeout(() => load(true), 5000);
+        } catch (e) {
+            setMsg('Erro: ' + (e.message || 'falha ao reiniciar'));
+        } finally {
+            setRestarting(false);
+        }
+    };
+
+    if (loading) return <p style={{ color: 'var(--color-muted)', padding: 32 }}>Carregando dados do servidor...</p>;
+    if (!stats)  return <p style={{ color: '#f87171', padding: 32 }}>Não foi possível obter dados do servidor.</p>;
+
+    const highMemContainer = stats.docker.find(c => c.memPerc >= 90);
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Status cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+
+                {/* Internet */}
+                <div style={{ background: 'var(--bg-card)', border: `1px solid ${stats.internet ? '#22c55e44' : '#ef444444'}`, borderRadius: 10, padding: '16px 18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                        {stats.internet ? <FiWifi size={18} color="#22c55e" /> : <FiWifiOff size={18} color="#ef4444" />}
+                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Internet</span>
+                    </div>
+                    <span style={{ fontWeight: 700, fontSize: '1.05rem', color: stats.internet ? '#22c55e' : '#ef4444' }}>
+                        {stats.internet ? 'Online' : 'Offline'}
+                    </span>
+                </div>
+
+                {/* Disco */}
+                {stats.disk && (
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                            <FiHardDrive size={18} color="#60a5fa" />
+                            <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Armazenamento</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                            <span style={{ fontWeight: 700, fontSize: '1.3rem', color: stats.disk.pct >= 90 ? '#ef4444' : stats.disk.pct >= 75 ? '#f59e0b' : 'var(--color)' }}>{stats.disk.pct}%</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>{stats.disk.used} / {stats.disk.size}</span>
+                        </div>
+                        <ProgressBar pct={stats.disk.pct} />
+                        <p style={{ fontSize: '0.72rem', color: 'var(--color-muted)', marginTop: 4 }}>Livre: {stats.disk.avail}</p>
+                    </div>
+                )}
+
+                {/* Memória */}
+                {stats.memory && (
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                            <FiCpu size={18} color="#a78bfa" />
+                            <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Memória RAM</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                            <span style={{ fontWeight: 700, fontSize: '1.3rem', color: stats.memory.pct >= 90 ? '#ef4444' : stats.memory.pct >= 75 ? '#f59e0b' : 'var(--color)' }}>{stats.memory.pct}%</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>{stats.memory.used} MB / {stats.memory.total} MB</span>
+                        </div>
+                        <ProgressBar pct={stats.memory.pct} />
+                        <p style={{ fontSize: '0.72rem', color: 'var(--color-muted)', marginTop: 4 }}>Livre: {stats.memory.avail} MB</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Alerta 90% memória */}
+            {highMemContainer && (
+                <div style={{ background: '#ef444415', border: '1px solid #ef4444', borderRadius: 8, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <FiAlertTriangle size={18} color="#ef4444" />
+                    <span style={{ color: '#ef4444', fontWeight: 600, flex: 1 }}>
+                        Container <strong>{highMemContainer.name}</strong> está usando {highMemContainer.memPerc.toFixed(1)}% de memória (≥ 90%)!
+                    </span>
+                    <button
+                        onClick={handleRestart}
+                        disabled={restarting}
+                        style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 16px', fontWeight: 700, cursor: restarting ? 'not-allowed' : 'pointer', opacity: restarting ? 0.7 : 1 }}
+                    >
+                        {restarting ? 'Reiniciando...' : '⟳ Reiniciar Containers'}
+                    </button>
+                </div>
+            )}
+
+            {/* Docker containers */}
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', borderBottom: '1px solid var(--border)' }}>
+                    <h3 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Docker Containers ({stats.docker.length})
+                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        {msg && <span style={{ fontSize: '0.8rem', color: msg.startsWith('Erro') ? '#f87171' : '#4ade80' }}>{msg}</span>}
+                        <button onClick={() => load()} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '5px 12px', color: 'var(--color-muted)', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <FiRefreshCw size={11} /> Atualizar
+                        </button>
+                        <button
+                            onClick={handleRestart}
+                            disabled={restarting}
+                            style={{ background: '#dc262615', border: '1px solid #dc2626', borderRadius: 6, padding: '5px 12px', color: '#f87171', cursor: restarting ? 'not-allowed' : 'pointer', fontSize: '0.8rem', fontWeight: 600, opacity: restarting ? 0.7 : 1 }}
+                        >
+                            {restarting ? 'Reiniciando...' : '⟳ Reiniciar todos'}
+                        </button>
+                    </div>
+                </div>
+
+                {stats.docker.length === 0 ? (
+                    <p style={{ textAlign: 'center', padding: 24, color: 'var(--color-muted)', fontSize: '0.85rem' }}>
+                        Nenhum container encontrado. Verifique se o socket Docker está montado no container da API.
+                    </p>
+                ) : (
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border)' }}>
+                                {['Container', 'CPU', 'Memória', 'Uso Memória', ''].map(h => (
+                                    <th key={h} style={{ padding: '9px 14px', textAlign: h === '' ? 'center' : 'left', fontWeight: 600, fontSize: '0.72rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {stats.docker.map((c, i) => (
+                                <tr key={i} style={{ borderBottom: '1px solid var(--border)', background: c.memPerc >= 90 ? 'rgba(239,68,68,0.05)' : 'transparent' }}>
+                                    <td style={{ padding: '10px 14px', fontWeight: 600, fontSize: '0.85rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
+                                            {c.name}
+                                        </div>
+                                    </td>
+                                    <td style={{ padding: '10px 14px', fontSize: '0.84rem', color: 'var(--color-muted)' }}>{c.cpuPerc}</td>
+                                    <td style={{ padding: '10px 14px', fontSize: '0.84rem', color: 'var(--color-muted)' }}>{c.memUsage}</td>
+                                    <td style={{ padding: '10px 14px', minWidth: 140 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
+                                                <div style={{ width: `${Math.min(c.memPerc, 100)}%`, height: '100%', background: c.memPerc >= 90 ? '#ef4444' : c.memPerc >= 75 ? '#f59e0b' : '#22c55e', borderRadius: 3 }} />
+                                            </div>
+                                            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: c.memPerc >= 90 ? '#ef4444' : c.memPerc >= 75 ? '#f59e0b' : 'var(--color-muted)', minWidth: 38 }}>{c.memPerc.toFixed(1)}%</span>
+                                        </div>
+                                    </td>
+                                    <td style={{ padding: '10px 14px', textAlign: 'center' }}>
+                                        {c.memPerc >= 90 && <FiAlertTriangle size={14} color="#ef4444" title="Uso crítico de memória" />}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
+
+            <p style={{ fontSize: '0.72rem', color: 'var(--color-muted)', marginTop: 0 }}>
+                Atualizado: {new Date(stats.ts).toLocaleTimeString('pt-BR')} · Auto-refresh 30s
+            </p>
+        </div>
+    );
+}
+
+// ── Gestor Monitor principal ─────────────────────────────────────────────────
+
 export default function GestorMonitor() {
     const { authFetch } = useGestorAuth();
 
@@ -67,6 +258,7 @@ export default function GestorMonitor() {
     const [activeFilter, setActiveFilter] = useState('');
     const [expanded, setExpanded] = useState(null);
     const [view, setView] = useState('table');
+    const [mainTab, setMainTab] = useState('tenants');
     const intervalRef = useRef(null);
 
     const load = useCallback(async (silent = false) => {
@@ -171,11 +363,31 @@ export default function GestorMonitor() {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
-                <div>
-                    <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0 }}>Monitoramento</h2>
-                    {lastUpdate && <p style={{ fontSize: '0.73rem', color: 'var(--color-muted)', margin: '3px 0 0' }}>Atualizado: {lastUpdate.toLocaleTimeString('pt-BR')} · Auto-refresh 30s</p>}
-                </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+                <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0 }}>Monitoramento</h2>
+            </div>
+
+            {/* Abas principais */}
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: 20, gap: 0 }}>
+                {[
+                    { key: 'tenants', icon: FiUsers,  label: 'Empresas' },
+                    { key: 'vps',     icon: FiServer, label: 'VPS / Servidor' },
+                ].map(({ key, icon: Icon, label }) => (
+                    <button key={key} onClick={() => setMainTab(key)} style={{
+                        display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px', border: 'none', borderBottom: `2px solid ${mainTab === key ? 'var(--accent)' : 'transparent'}`,
+                        background: 'none', cursor: 'pointer', fontSize: '0.88rem', fontWeight: mainTab === key ? 700 : 400,
+                        color: mainTab === key ? 'var(--accent)' : 'var(--color-muted)', marginBottom: -1,
+                    }}>
+                        <Icon size={14} /> {label}
+                    </button>
+                ))}
+            </div>
+
+            {mainTab === 'vps' && <VpsPanel api={api} />}
+
+            {mainTab === 'tenants' && (<>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+                {lastUpdate && <p style={{ fontSize: '0.73rem', color: 'var(--color-muted)', margin: 0 }}>Atualizado: {lastUpdate.toLocaleTimeString('pt-BR')} · Auto-refresh 30s</p>}
                 <div style={{ display: 'flex', gap: 8 }}>
                     <div style={{ display: 'flex', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
                         <button onClick={() => setView('table')} style={{ padding: '7px 14px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem', background: view === 'table' ? 'rgba(37,99,235,0.2)' : 'transparent', color: view === 'table' ? 'var(--accent)' : 'var(--color-muted)', fontWeight: view === 'table' ? 600 : 400 }}>
@@ -317,6 +529,8 @@ export default function GestorMonitor() {
             )}
 
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </>
+            )}
         </div>
     );
 }

@@ -72,6 +72,8 @@ function LayoutInner({ children, title }) {
     }
   };
 
+  const [waAlert, setWaAlert] = useState(false);
+
   const closeModal = () => {
     setWhatsappOpen(false);
     setTab('qr');
@@ -83,9 +85,48 @@ function LayoutInner({ children, title }) {
     if (whatsappOpen && tab === 'qr') fetchQr();
   }, [whatsappOpen, tab, fetchQr]);
 
+  useEffect(() => {
+    const t = tok();
+    if (!t) return;
+    fetch('/api/whatsapp/status', { headers: { Authorization: `Bearer ${t}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.configured && !d?.connected) setWaAlert(true); })
+      .catch(() => {});
+  }, []);
+
   return (
-    <div className={s.shell}>
+    <div className={s.shell} style={waAlert ? { paddingTop: '2.5rem' } : undefined}>
       <AnnouncementBanner />
+      {waAlert && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9000,
+          background: '#f59e0b', color: '#1c1917',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: '0.75rem', padding: '0.6rem 1rem',
+          fontSize: '0.875rem', fontWeight: 600,
+          flexWrap: 'wrap',
+        }}>
+          <span>⚠️ WhatsApp desconectado. Conecte via QR Code para continuar recebendo notificações.</span>
+          <button
+            onClick={() => { setWaAlert(false); setWhatsappOpen(true); }}
+            style={{
+              background: '#1c1917', color: '#fff', border: 'none', borderRadius: 99,
+              padding: '0.3rem 0.9rem', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+            }}
+          >
+            Conectar agora
+          </button>
+          <button
+            onClick={() => setWaAlert(false)}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: '#1c1917', fontWeight: 700, fontSize: '1rem', lineHeight: 1,
+              padding: '0 0.25rem',
+            }}
+            aria-label="Fechar alerta"
+          >✕</button>
+        </div>
+      )}
       <Sidebar
         onWhatsApp={() => setWhatsappOpen(true)}
         onSupport={() => setSuporteOpen(true)}

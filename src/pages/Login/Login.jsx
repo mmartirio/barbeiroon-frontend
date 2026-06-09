@@ -5,6 +5,13 @@ import { useAuth } from '../../context/AuthContext';
 import { BiometricService } from '../../services/biometricService';
 import s from './Login.module.css';
 
+function jwtIsValid(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 > Date.now();
+  } catch { return false; }
+}
+
 export default function Login() {
   const { login } = useAuth();
   const navigate  = useNavigate();
@@ -21,20 +28,20 @@ export default function Login() {
   const [bioEnabled,   setBioEnabled]   = useState(false);
   const [bioLoading,   setBioLoading]   = useState(false);
   const [showBioOffer, setShowBioOffer] = useState(false);
-  const [pendingData,  setPendingData]  = useState(null); // {token, slug, mustSetup, email, password, name}
+  const [pendingData,  setPendingData]  = useState(null);
 
   // ─── Verificação inicial de biometria ─────────────────────────────────────
 
   useEffect(() => {
-    const supported = BiometricService.isSupported();
-    const enabled   = BiometricService.isEnabled();
-    setBioSupported(supported);
-    setBioEnabled(enabled);
-    // Biometria habilitada: exibe o botão na tela — sem auto-login.
-    // O usuário deve clicar para autenticar.
+    (async () => {
+      const supported = await BiometricService.isSupported();
+      const enabled   = BiometricService.isEnabled();
+      setBioSupported(supported);
+      setBioEnabled(enabled);
+    })();
   }, []);
 
-  // ─── Login biométrico (Credential Management API) ─────────────────────────
+  // ─── Login biométrico (WebAuthn) ──────────────────────────────────────────
 
   const handleBiometricLogin = async () => {
     setBioLoading(true);
@@ -43,24 +50,16 @@ export default function Login() {
       const creds = await BiometricService.authenticate();
       if (!creds) { setBioLoading(false); return; } // cancelado pelo usuário
 
-      // Usa as credenciais recuperadas para autenticar
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: creds.email, password: creds.password }),
-      });
-      const d = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        // Credencial inválida — força senha manualmente
+      if (!creds.token || !jwtIsValid(creds.token)) {
         BiometricService.clear();
         setBioEnabled(false);
-        setError('Sessão expirada. Faça login com sua senha.');
+        setError('Sessão expirada. Faça login com sua senha para reativar a biometria.');
         setBioLoading(false);
         return;
       }
-      login(d.token);
-      const slug = d.tenant?.slug;
-      navigate(d.mustSetup ? `/${slug}/primeiro-acesso` : `/${slug}/dashboard`, { replace: true });
+
+      login(creds.token);
+      navigate(creds.slug ? `/${creds.slug}/dashboard` : '/', { replace: true });
     } catch (err) {
       setError('Falha na autenticação biométrica. Use sua senha.');
     } finally {
@@ -90,15 +89,15 @@ export default function Login() {
 
       // Oferece biometria se suportado e ainda não configurado
       if (bioSupported && !bioEnabled) {
-        setPendingData({ token: d.token, slug: d.tenant?.slug, mustSetup: d.mustSetup, email, password, name: d.user?.name });
+        setPendingData({ token: d.token, slug: d.tenant?.slug, mustSetup: d.mustSetup, email, name: d.user?.name });
         setShowBioOffer(true);
         setLoading(false);
         return;
       }
 
-      // Se já estava habilitada, atualiza credencial salva
+      // Se já estava habilitada, atualiza apenas o token (sem re-registrar a credencial)
       if (bioSupported && bioEnabled) {
-        await BiometricService.saveCredentials({ email: email.toLowerCase().trim(), password, name: d.user?.name, token: d.token });
+        BiometricService.updateToken({ token: d.token, slug: d.tenant?.slug });
       }
 
       login(d.token);
@@ -115,13 +114,13 @@ export default function Login() {
 
   const handleBioAccept = async () => {
     if (!pendingData) return;
-    await BiometricService.saveCredentials({
-      email:    pendingData.email.toLowerCase().trim(),
-      password: pendingData.password,
-      name:     pendingData.name,
-      token:    pendingData.token,
+    const saved = await BiometricService.saveCredentials({
+      email: pendingData.email.toLowerCase().trim(),
+      name:  pendingData.name,
+      token: pendingData.token,
+      slug:  pendingData.slug,
     });
-    setBioEnabled(true);
+    if (saved) setBioEnabled(true);
     login(pendingData.token);
     navigate(pendingData.mustSetup ? `/${pendingData.slug}/primeiro-acesso` : `/${pendingData.slug}/dashboard`, { replace: true });
   };
