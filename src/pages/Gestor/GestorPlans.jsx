@@ -33,7 +33,6 @@ const FEATURES = [
   { key: 'planos_servico',        label: 'Planos de serviço para clientes' },
   { key: 'promocoes',             label: 'Promoções e descontos' },
   { key: 'grupos_permissao',      label: 'Grupos de permissão' },
-  { key: 'agenda_visual',         label: 'Agenda visual' },
   { key: 'tela_cliente',          label: 'Tela do cliente' },
   { key: 'suporte',               label: 'Suporte técnico integrado',          base: true },
 ];
