@@ -95,7 +95,7 @@ function LayoutInner({ children, title }) {
     if (!t) return;
     fetch('/api/whatsapp/status', { headers: { Authorization: `Bearer ${t}` } })
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.configured && !d?.connected) setWaAlert(true); })
+      .then(d => { if (d?.configured && !d?.connected && d?.notificationsEnabled !== false) setWaAlert(true); })
       .catch(() => {});
   }, []);
 
