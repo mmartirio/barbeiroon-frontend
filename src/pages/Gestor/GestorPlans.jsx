@@ -294,7 +294,11 @@ export default function GestorPlans() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.75rem' }}>
                   <div className="form-group">
                     <label className="form-label">Ordem</label>
-                    <input className="form-input" type="number" min="0" value={form.sortOrder} onChange={setField('sortOrder')} />
+                    <select className="form-input" value={String(form.sortOrder)} onChange={setField('sortOrder')}>
+                      {Array.from({ length: plans.length + 1 }, (_, i) => (
+                        <option key={i} value={String(i)}>{i + 1}ª posição</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Status</label>
