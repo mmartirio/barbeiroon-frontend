@@ -35,7 +35,7 @@ const FEATURES = [
   { key: 'grupos_permissao',      label: 'Grupos de permissão' },
   { key: 'agenda_visual',         label: 'Agenda visual' },
   { key: 'tela_cliente',          label: 'Tela do cliente' },
-  { key: 'suporte',               label: 'Suporte técnico integrado' },
+  { key: 'suporte',               label: 'Suporte técnico integrado',          base: true },
 ];
 
 const EMPTY_FORM = {
