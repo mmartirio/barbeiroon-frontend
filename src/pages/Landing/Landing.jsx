@@ -361,7 +361,7 @@ export default function Landing() {
               }}
             >✕</button>
             <video
-              src="/v%C3%ADdeo%20promocional%20barbeiroon.mp4"
+              src="/uploads/video-barbeiroon.mp4"
               controls
               autoPlay
               style={{ width: '100%', display: 'block', maxHeight: '80vh' }}
