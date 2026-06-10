@@ -75,6 +75,7 @@ const scrollTo = (id) => {
 
 export default function Landing() {
   const [menuOpen,     setMenuOpen]     = useState(false);
+  const [showVideo,    setShowVideo]    = useState(false);
   const [plans,        setPlans]        = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [priceView,    setPriceView]    = useState('monthly');
@@ -170,7 +171,7 @@ export default function Landing() {
               <a href="#planos" className="btn-hero-primary">
                 Começar agora <RiArrowRightLine />
               </a>
-              <button className="btn-hero-outline">
+              <button className="btn-hero-outline" onClick={() => setShowVideo(true)}>
                 <div className="btn-play-circle">
                   <RiPlayCircleLine size={12} />
                 </div>
@@ -333,6 +334,41 @@ export default function Landing() {
 
         </div>
       </footer>
+
+      {/* ── Modal de vídeo ── */}
+      {showVideo && (
+        <div
+          onClick={() => setShowVideo(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.88)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ position: 'relative', width: '100%', maxWidth: 900, borderRadius: 12, overflow: 'hidden', background: '#000' }}
+          >
+            <button
+              onClick={() => setShowVideo(false)}
+              style={{
+                position: 'absolute', top: 10, right: 12, zIndex: 1,
+                background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: 99,
+                color: '#fff', fontSize: '1.25rem', lineHeight: 1,
+                width: 34, height: 34, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
+            <video
+              src="/v%C3%ADdeo%20promocional%20barbeiroon.mp4"
+              controls
+              autoPlay
+              style={{ width: '100%', display: 'block', maxHeight: '80vh' }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
