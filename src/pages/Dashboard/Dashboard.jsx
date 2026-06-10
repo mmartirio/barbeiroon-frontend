@@ -90,7 +90,7 @@ export default function Dashboard() {
       {/* ── Hero mobile ──────────────────────────────────── */}
       <div className={s.mobileHero}>
         <div>
-          <p className={s.mobileHeroTitle}>Painel do Administrador</p>
+          <p className={s.mobileHeroTitle}>Painel do Barbeiro</p>
           <p className={s.mobileHeroSub}>
             Bem-vindo de volta{user?.name ? `, ${user.name}` : ''}! Aqui está o resumo de hoje.
           </p>
