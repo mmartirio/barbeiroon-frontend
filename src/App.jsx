@@ -35,6 +35,7 @@ const PlanoServico       = lazy(() => import('./pages/PlanoServico/PlanoServico'
 const ProdutosLista      = lazy(() => import('./pages/Produtos/ProdutosLista'));
 const ProdutosCadastro   = lazy(() => import('./pages/Produtos/ProdutosCadastro'));
 const Vendas             = lazy(() => import('./pages/Vendas/Vendas'));
+const AtendimentoAvulso  = lazy(() => import('./pages/AtendimentoAvulso/AtendimentoAvulso'));
 
 const Fallback = () => <div className="app-loading">Carregando...</div>;
 
@@ -111,6 +112,7 @@ function AppRoutes() {
           <Route path="/:slug/conta"                  element={<PrivateRoute perm="canManageTenant"><Conta /></PrivateRoute>} />
           <Route path="/:slug/tela-cliente"           element={<PrivateRoute perm="canViewCustomers" feature="Tela do cliente"><TelaCliente /></PrivateRoute>} />
           <Route path="/:slug/primeiro-acesso"        element={<PrivateRoute><PrimeiroAcesso /></PrivateRoute>} />
+          <Route path="/:slug/atendimento-avulso"    element={<PrivateRoute perm="canCreateAppointment"><AtendimentoAvulso /></PrivateRoute>} />
 
           {/* Legacy redirects — keep old bookmarks working */}
           <Route path="/dashboard"              element={<LegacyRedirect path="dashboard" />} />

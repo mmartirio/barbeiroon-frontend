@@ -7,7 +7,7 @@ import {
   FiUser, FiUserPlus, FiList, FiMonitor, FiBriefcase,
   FiSettings, FiLogOut, FiMenu, FiX,
   FiChevronDown, FiChevronRight, FiSmartphone, FiTag,
-  FiPlusCircle, FiAlertCircle, FiClock, FiHelpCircle,
+  FiPlusCircle, FiAlertCircle, FiClock, FiHelpCircle, FiZap,
   FiSun, FiMoon, FiSliders, FiPackage, FiDollarSign,
   FiTrendingUp, FiTrendingDown, FiAward, FiActivity, FiShoppingCart,
   FiCheckSquare, FiLink,
@@ -186,6 +186,9 @@ export default function Sidebar({ onWhatsApp, onSupport, externalOpen, onExterna
         <ul className={s.nav}>
           {canDash && <NavItem to={`/${slug}/dashboard`} icon={<FiGrid size={15} />} label="Painel Principal" />}
           {p('canViewCustomers') && <NavItem to={`/${slug}/tela-cliente`} icon={<FiLink size={15} />} label="Meu Link" />}
+          {p('canCreateAppointment') && (
+            <NavItem to={`/${slug}/atendimento-avulso`} icon={<FiZap size={15} />} label="Atend. Avulso" />
+          )}
 
           {canClients && (
             <SubMenu icon={<FiUsers size={15} />} label="Clientes" menuKey="clients" open={openMenus.clients} onToggle={toggle}>
