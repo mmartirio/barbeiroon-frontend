@@ -13,12 +13,13 @@ export default function Dashboard() {
   const { slug } = useParams();
   const { user } = useAuth();
   const tenantSlug = slug || user?.tenantSlug || '';
-  const [stats,      setStats]      = useState(null);
-  const [pending,    setPending]    = useState(0);
-  const [nextAppt,   setNextAppt]   = useState(null);
-  const [freeSlots,  setFreeSlots]  = useState(null);
-  const [vendidos,   setVendidos]   = useState(null);
-  const [loading,    setLoading]    = useState(true);
+  const [stats,            setStats]          = useState(null);
+  const [pending,          setPending]        = useState(0);
+  const [nextAppt,         setNextAppt]       = useState(null);
+  const [freeSlots,        setFreeSlots]      = useState(null);
+  const [vendidos,         setVendidos]       = useState(null);
+  const [faturamentoBruto, setFaturamentoBruto] = useState(null);
+  const [loading,          setLoading]        = useState(true);
   const [bdModal,    setBdModal]    = useState(false);
   const [svcModal,   setSvcModal]   = useState(false);
 
@@ -31,12 +32,13 @@ export default function Dashboard() {
       const h = { Authorization: `Bearer ${tok()}`, 'Cache-Control': 'no-cache' };
       const today = new Date().toISOString().split('T')[0];
       const callPending = canSeePending && !pendingBlocked.current;
-      const [sRes, pRes, ownRes, slotRes, prodRes] = await Promise.all([
+      const [sRes, pRes, ownRes, slotRes, prodRes, fatRes] = await Promise.all([
         fetch('/api/dashboard/stats', { headers: h, cache: 'no-cache' }),
         callPending ? fetch('/api/appointment/requests/pending/own', { headers: h, cache: 'no-cache' }) : Promise.resolve(null),
         fetch('/api/appointment/own', { headers: h, cache: 'no-cache' }),
         fetch(`/api/agenda/horarios-livres?periodo=diario&data=${today}`, { headers: h, cache: 'no-cache' }),
         vendasBlocked.current ? Promise.resolve(null) : fetch('/api/produtos/vendas?periodo=mensal', { headers: h, cache: 'no-cache' }),
+        fetch('/api/financeiro/resumo?periodo=mensal', { headers: h, cache: 'no-cache' }),
       ]);
       const sd   = await sRes.json().catch(() => ({}));
       if (pRes?.status === 403) pendingBlocked.current = true;
@@ -46,6 +48,10 @@ export default function Dashboard() {
       if (prodRes && !prodRes.ok) vendasBlocked.current = true;
       const prod = prodRes?.ok ? await prodRes.json().catch(() => ({})) : {};
       if (prodRes?.ok) setVendidos((prod.data || []).reduce((s, r) => s + Number(r.quantidade_vendida || 0), 0));
+      if (fatRes?.ok) {
+        const fd = await fatRes.json().catch(() => ({}));
+        setFaturamentoBruto(fd.faturamentoBruto ?? fd.faturamentoServicos ?? null);
+      }
       setStats(sd.stats || sd);
       setPending((pd.requests || pd.data || []).length);
       const dias = sld.data || [];
@@ -81,7 +87,7 @@ export default function Dashboard() {
   const STATS = [
     { label: 'Total de Clientes',   value: st.totalClients      ?? '—', icon: FiUsers,      color: '#7c3aed' },
     { label: 'Agendamentos Hoje',   value: st.totalAppointments ?? '—', icon: FiCalendar,   color: '#7c3aed' },
-    { label: 'Faturamento Mensal',  value: fmtP(st.monthlyRevenue),     icon: FiDollarSign, color: '#f59e0b' },
+    { label: 'Faturamento Mensal',  value: fmtP(faturamentoBruto ?? st.monthlyRevenue), icon: FiDollarSign, color: '#f59e0b', onClick: () => navigate(`/${tenantSlug}/financeiro?tab=resumo`) },
     { label: 'Serviços Realizados', value: st.servicesPerformed ?? '—', icon: FiScissors,   color: '#f59e0b' },
   ];
 
@@ -126,8 +132,8 @@ export default function Dashboard() {
         <>
           {/* ── Stats ─────────────────────────────────────── */}
           <div className={s.statsGrid}>
-            {STATS.map(({ label, value, icon: Icon, color }) => (
-              <div key={label} className={s.statCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+            {STATS.map(({ label, value, icon: Icon, color, onClick }) => (
+              <div key={label} className={s.statCard} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', cursor: onClick ? 'pointer' : undefined }} onClick={onClick}>
                 <div className={s.statIcon} style={{ background: `${color}22`, color }}>
                   <Icon size={17} />
                 </div>
