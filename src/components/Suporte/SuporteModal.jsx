@@ -14,7 +14,7 @@ const CATEGORIES = [
   { key: 'other',        label: '🔧 Outro problema' },
 ];
 
-const FAQ = {
+const FAQ_FALLBACK = {
   login: [
     { sender: 'bot', content: 'Vou te ajudar com o problema de login. Verifique os itens abaixo:' },
     { sender: 'bot', content: '✅ Você está usando o e-mail correto?\n✅ O Caps Lock está desativado?\n✅ Tentou clicar em "Esqueceu sua senha?" na tela de login?' },
@@ -58,8 +58,16 @@ export default function SuporteModal({ onClose }) {
   const [description, setDesc] = useState('');
   const [ticketId, setTicketId] = useState(null);
   const [sending, setSending]   = useState(false);
+  const [faq, setFaq]           = useState(FAQ_FALLBACK);
   const bottomRef = useRef(null);
   const modalRef  = useRef(null);
+
+  useEffect(() => {
+    fetch('/api/support/faq', { headers: { Authorization: `Bearer ${tok()}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && typeof d === 'object') setFaq(d); })
+      .catch(() => {});
+  }, []);
 
   // ── Drag state ────────────────────────────────────────────
   const [pos, setPos]       = useState(null); // null = CSS default (bottom-right)
@@ -114,7 +122,7 @@ export default function SuporteModal({ onClose }) {
   const selectCategory = (cat) => {
     setCategory(cat);
     addMsg({ sender: 'user', content: cat.label });
-    const faqMsgs = FAQ[cat.key] || FAQ.other;
+    const faqMsgs = faq[cat.key] || faq.other || FAQ_FALLBACK.other;
     let delay = 400;
     faqMsgs.forEach(m => { setTimeout(() => addMsg(m), delay); delay += 600; });
     setTimeout(() => {

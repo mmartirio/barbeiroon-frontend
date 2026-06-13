@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FiRefreshCw, FiMessageSquare, FiX, FiSend, FiDownload } from 'react-icons/fi';
+import { FiRefreshCw, FiMessageSquare, FiX, FiSend, FiDownload, FiEdit2, FiPlus, FiTrash2, FiSave } from 'react-icons/fi';
 
 const SUPPORT_WA = import.meta.env.VITE_SUPPORT_WA || '5579991071656';
 
@@ -46,7 +46,66 @@ export default function GestorSupport() {
   const [resolveText, setResolveText] = useState('');
   const [showResolve, setShowResolve] = useState(false);
   const [reports,  setReports]  = useState(null);
-  const [view,     setView]     = useState('list'); // list | detail | reports
+  const [view,     setView]     = useState('list'); // list | detail | reports | bot
+  const [faq,      setFaq]      = useState(null);
+  const [faqSaving, setFaqSaving] = useState(false);
+  const [faqMsg,    setFaqMsg]    = useState('');
+
+  const CATEGORY_LABELS_BOT = [
+    { key: 'login',         label: 'Login / Acesso' },
+    { key: 'whatsapp',      label: 'WhatsApp' },
+    { key: 'agendamento',   label: 'Agendamentos' },
+    { key: 'clientes',      label: 'Clientes / Usuários' },
+    { key: 'configuracoes', label: 'Configurações' },
+    { key: 'pagamento',     label: 'Pagamento / Cobrança' },
+    { key: 'other',         label: 'Outro' },
+  ];
+
+  const openBotEditor = async () => {
+    const r = await fetch('/api/gestor/support/faq', { headers: { Authorization: `Bearer ${gTok()}` } });
+    const d = await r.json();
+    setFaq(d);
+    setFaqMsg('');
+    setView('bot');
+  };
+
+  const updateMsg = (cat, idx, value) => {
+    setFaq(prev => {
+      const msgs = [...(prev[cat] || [])];
+      msgs[idx] = { sender: 'bot', content: value };
+      return { ...prev, [cat]: msgs };
+    });
+  };
+
+  const addMsg = (cat) => {
+    setFaq(prev => ({ ...prev, [cat]: [...(prev[cat] || []), { sender: 'bot', content: '' }] }));
+  };
+
+  const removeMsg = (cat, idx) => {
+    setFaq(prev => {
+      const msgs = [...(prev[cat] || [])];
+      msgs.splice(idx, 1);
+      return { ...prev, [cat]: msgs };
+    });
+  };
+
+  const saveFaqEdits = async () => {
+    setFaqSaving(true);
+    setFaqMsg('');
+    try {
+      const r = await fetch('/api/gestor/support/faq', {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${gTok()}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(faq),
+      });
+      const d = await r.json();
+      setFaqMsg(r.ok ? '✅ FAQ salvo com sucesso!' : `❌ ${d.message}`);
+    } catch {
+      setFaqMsg('❌ Erro ao salvar FAQ.');
+    } finally {
+      setFaqSaving(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -149,6 +208,7 @@ export default function GestorSupport() {
       {/* Toolbar */}
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, flex: 1 }}>Mesa de Chamados</h2>
+        <button className="btn btn-ghost btn-sm" onClick={openBotEditor}><FiEdit2 size={13} /> Editar Bot</button>
         <button className="btn btn-ghost btn-sm" onClick={loadReports}><FiMessageSquare size={13} /> Relatórios</button>
         <button className="btn btn-ghost btn-sm" onClick={exportCsv}><FiDownload size={13} /> Exportar CSV</button>
         <button className="btn btn-ghost btn-sm" onClick={load}><FiRefreshCw size={13} /> Atualizar</button>
@@ -316,6 +376,70 @@ export default function GestorSupport() {
             </div>
           ))}
         </div>
+      </div>
+    </div>
+  );
+
+  /* ── BOT EDITOR ── */
+  if (view === 'bot' && faq) return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <button className="btn btn-ghost btn-sm" onClick={() => setView('list')}>← Voltar</button>
+        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, flex: 1 }}>Mensagens do Chatbot</h2>
+        <button className="btn btn-primary btn-sm" onClick={saveFaqEdits} disabled={faqSaving}>
+          {faqSaving ? 'Salvando...' : <><FiSave size={13} /> Salvar tudo</>}
+        </button>
+      </div>
+
+      {faqMsg && (
+        <p style={{ margin: 0, fontSize: '0.85rem', color: faqMsg.startsWith('✅') ? 'var(--success)' : 'var(--danger)' }}>
+          {faqMsg}
+        </p>
+      )}
+
+      {CATEGORY_LABELS_BOT.map(({ key, label }) => (
+        <div key={key} className="card">
+          <div className="card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h3 className="card-title" style={{ margin: 0, fontSize: '0.9rem' }}>{label}</h3>
+            <button className="btn btn-ghost btn-sm" onClick={() => addMsg(key)} title="Adicionar mensagem">
+              <FiPlus size={13} /> Adicionar
+            </button>
+          </div>
+          <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            {(faq[key] || []).length === 0 && (
+              <p style={{ color: 'var(--color-muted)', fontSize: '0.82rem', margin: 0 }}>Sem mensagens. Clique em "Adicionar".</p>
+            )}
+            {(faq[key] || []).map((msg, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: '0.4rem', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)', paddingTop: '0.5rem', minWidth: 20, textAlign: 'right' }}>
+                  {idx + 1}.
+                </span>
+                <textarea
+                  className="form-input"
+                  rows={Math.max(2, msg.content.split('\n').length)}
+                  value={msg.content}
+                  onChange={e => updateMsg(key, idx, e.target.value)}
+                  style={{ flex: 1, resize: 'vertical', fontSize: '0.83rem', fontFamily: 'inherit', lineHeight: 1.5 }}
+                  placeholder="Texto da mensagem do bot..."
+                />
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => removeMsg(key, idx)}
+                  title="Remover mensagem"
+                  style={{ color: 'var(--danger)', padding: '0.3rem' }}
+                >
+                  <FiTrash2 size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button className="btn btn-primary" onClick={saveFaqEdits} disabled={faqSaving}>
+          {faqSaving ? 'Salvando...' : <><FiSave size={14} /> Salvar tudo</>}
+        </button>
       </div>
     </div>
   );
