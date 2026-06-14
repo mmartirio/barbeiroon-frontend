@@ -49,6 +49,7 @@ export default function AtendimentoAvulso() {
   const canManage = !!(user?.permissions?.canManageTenant || user?.permissions?.canViewAppointments);
 
   const [phone, setPhone] = useState('');
+  const [noPhone, setNoPhone] = useState(false);
   const [customerStatus, setCustomerStatus] = useState('idle'); // idle | searching | found | not_found
   const [customerName, setCustomerName] = useState('');
   const [newName, setNewName] = useState('');
@@ -164,6 +165,7 @@ export default function AtendimentoAvulso() {
 
   const resetForm = () => {
     setPhone('');
+    setNoPhone(false);
     setCustomerStatus('idle');
     setCustomerName('');
     setNewName('');
@@ -176,16 +178,38 @@ export default function AtendimentoAvulso() {
     else setProfessionalId('');
   };
 
+  const handleNoPhoneToggle = () => {
+    setNoPhone(v => {
+      if (!v) {
+        // Ativando "sem número": limpa campos de telefone
+        setPhone('');
+        setCustomerStatus('idle');
+        setCustomerName('');
+        setSuggestions([]);
+        setShowDropdown(false);
+      } else {
+        // Desativando: limpa nome avulso
+        setNewName('');
+        setNewBirth('');
+      }
+      return !v;
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    const raw = phone.replace(/\D/g, '');
-    if (!raw) { setError('Telefone é obrigatório.'); return; }
-    if (customerStatus === 'not_found' && !newName.trim()) {
-      setError('Nome do cliente é obrigatório para novo cadastro.');
-      return;
+    if (!noPhone) {
+      const raw = phone.replace(/\D/g, '');
+      if (!raw) { setError('Telefone é obrigatório.'); return; }
+      if (customerStatus === 'not_found' && !newName.trim()) {
+        setError('Nome do cliente é obrigatório para novo cadastro.');
+        return;
+      }
+    } else {
+      if (!newName.trim()) { setError('Nome do cliente é obrigatório.'); return; }
     }
     if (!serviceId) { setError('Selecione um serviço.'); return; }
     if (!professionalId) { setError('Selecione um profissional.'); return; }
@@ -194,15 +218,23 @@ export default function AtendimentoAvulso() {
     setLoading(true);
     try {
       const body = {
-        customerPhone: raw,
         serviceId: Number(serviceId),
         professionalId: Number(professionalId),
         date,
       };
-      if (customerStatus === 'not_found') {
+
+      if (noPhone) {
+        body.noPhone = true;
         body.customerName = newName.trim();
         const bd = birthToApi(newBirth);
         if (bd) body.customerBirthDate = bd;
+      } else {
+        body.customerPhone = phone.replace(/\D/g, '');
+        if (customerStatus === 'not_found') {
+          body.customerName = newName.trim();
+          const bd = birthToApi(newBirth);
+          if (bd) body.customerBirthDate = bd;
+        }
       }
 
       const r = await fetch('/api/appointment/walk-in', {
@@ -237,17 +269,41 @@ export default function AtendimentoAvulso() {
 
             {/* Telefone com autocomplete */}
             <div className="form-group">
-              <label className="form-label">Telefone do cliente *</label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                <label className="form-label" style={{ margin: 0 }}>Telefone do cliente *</label>
+                <button
+                  type="button"
+                  onClick={handleNoPhoneToggle}
+                  style={{
+                    background: noPhone ? 'var(--accent)' : 'var(--bg-input)',
+                    border: `1px solid ${noPhone ? 'var(--accent)' : 'var(--border)'}`,
+                    borderRadius: 'var(--radius-xs)',
+                    color: noPhone ? '#000' : 'var(--color-muted)',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    padding: '0.2rem 0.6rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  Sem número
+                </button>
+              </div>
               <div ref={wrapperRef} style={{ position: 'relative' }}>
                 <input
                   className="form-input"
-                  placeholder="(11) 99999-9999"
-                  value={phone}
+                  placeholder={noPhone ? 'Atendimento sem número' : '(11) 99999-9999'}
+                  value={noPhone ? '' : phone}
                   onChange={handlePhoneChange}
-                  onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
+                  onFocus={() => !noPhone && suggestions.length > 0 && setShowDropdown(true)}
                   maxLength={15}
                   autoComplete="off"
-                  style={{ width: '100%', paddingRight: customerStatus === 'searching' ? '2.5rem' : undefined }}
+                  disabled={noPhone}
+                  style={{
+                    width: '100%',
+                    paddingRight: customerStatus === 'searching' ? '2.5rem' : undefined,
+                    opacity: noPhone ? 0.5 : 1,
+                  }}
                 />
 
                 {customerStatus === 'searching' && (
@@ -323,15 +379,23 @@ export default function AtendimentoAvulso() {
             </div>
 
             {/* Campos de novo cliente */}
-            {customerStatus === 'not_found' && (
+            {(customerStatus === 'not_found' || noPhone) && (
               <>
                 <div className="form-group">
-                  <label className="form-label">Nome completo *</label>
+                  <label className="form-label">
+                    Nome completo *
+                    {noPhone && (
+                      <span style={{ marginLeft: '0.4rem', fontSize: '0.72rem', color: 'var(--color-muted)', fontWeight: 400 }}>
+                        (sem número)
+                      </span>
+                    )}
+                  </label>
                   <input
                     className="form-input"
                     placeholder="Nome do cliente"
                     value={newName}
                     onChange={e => setNewName(e.target.value)}
+                    autoFocus={noPhone}
                   />
                 </div>
                 <div className="form-group">
