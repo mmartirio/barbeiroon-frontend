@@ -42,7 +42,15 @@ export default function Financeiro() {
   const { slug } = useParams();
   const aba = searchParams.get('tab') || 'resumo';
 
-  const hasFeature = (label) => planFeatures.length === 0 || planFeatures.includes(label);
+  // Se o plano tiver algum financeiro.* configurado, só mostra as tabs permitidas.
+  // Se não tiver nenhum financeiro.*, mostra todas (retrocompatível).
+  const finFeatures = planFeatures.filter(f => f.startsWith('financeiro.'));
+  const hasTabFeature = (tabValue) => {
+    if (finFeatures.length === 0) return true;
+    return planFeatures.includes(`financeiro.${tabValue}`);
+  };
+
+  const visibleAbas = ABAS.filter(a => hasTabFeature(a.value));
 
   const [periodo, setPeriodo] = useState('mensal');
 
@@ -50,26 +58,26 @@ export default function Financeiro() {
     navigate(`/${slug}/financeiro?tab=${value}`, { replace: true });
   };
 
+  // Se a aba atual não está disponível no plano, redireciona para a primeira disponível
+  const abaAtual = visibleAbas.find(a => a.value === aba)
+    ? aba
+    : (visibleAbas[0]?.value || 'resumo');
+
+  if (abaAtual !== aba) {
+    navigate(`/${slug}/financeiro?tab=${abaAtual}`, { replace: true });
+  }
+
   const tabProps = { periodo, isBarber, permissions };
 
-  const TAB_FEATURES = {
-    comissao: 'Comissões de profissionais',
-    produtos:  'Gestão de Produtos e Estoque',
-  };
-
   function renderAba() {
-    const requiredFeature = TAB_FEATURES[aba];
-    if (requiredFeature && !hasFeature(requiredFeature)) {
+    if (!hasTabFeature(abaAtual)) {
       return (
         <div style={{ background:'rgba(220,38,38,0.08)', border:'1px solid #dc2626', borderRadius:'var(--radius-sm)', padding:'1rem 1.25rem', color:'var(--danger,#dc2626)', fontSize:'0.875rem' }}>
-          🔒 <strong>{requiredFeature}</strong> não está disponível no seu plano atual.{' '}
-          <button onClick={() => setAba('resumo')} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--accent)', textDecoration:'underline', fontSize:'inherit' }}>
-            Ir para Resumo
-          </button>
+          🔒 Esta seção não está disponível no seu plano atual.
         </div>
       );
     }
-    switch (aba) {
+    switch (abaAtual) {
       case 'resumo':      return <ResumoTab     {...tabProps} />;
       case 'receitas':    return <ReceitasTab   {...tabProps} />;
       case 'despesas':    return <DespesasTab   {...tabProps} />;
@@ -85,10 +93,10 @@ export default function Financeiro() {
     <Layout title="Financeiro">
       {/* Abas */}
       <div className={s.tabs}>
-        {ABAS.map(a => (
+        {visibleAbas.map(a => (
           <button
             key={a.value}
-            className={`${s.tab} ${aba === a.value ? s.tabActive : ''}`}
+            className={`${s.tab} ${abaAtual === a.value ? s.tabActive : ''}`}
             onClick={() => setAba(a.value)}
           >
             {a.label}
