@@ -13,22 +13,11 @@ const EMPTY_FORM = {
 };
 
 const Field = ({ label, children }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-    <label style={{ fontSize: '0.78rem', color: 'var(--color-muted)', fontWeight: 600 }}>{label}</label>
+  <div className="form-group">
+    <label className="form-label">{label}</label>
     {children}
   </div>
 );
-
-const inputStyle = {
-  background: 'var(--bg-input)',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-xs)',
-  color: 'var(--color)',
-  fontSize: '0.875rem',
-  padding: '0.5rem 0.65rem',
-  width: '100%',
-  boxSizing: 'border-box',
-};
 
 export default function ProdutosCadastro() {
   const navigate = useNavigate();
@@ -135,7 +124,7 @@ export default function ProdutosCadastro() {
             <div style={{ gridColumn: '1 / -1' }}>
               <Field label="Nome *">
                 <input
-                  style={inputStyle}
+                  className="form-input"
                   value={form.nome}
                   onChange={e => set('nome', e.target.value)}
                   placeholder="Nome do produto"
@@ -149,7 +138,8 @@ export default function ProdutosCadastro() {
               <Field label="Código de Barras">
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input
-                    style={{ ...inputStyle, fontFamily: 'monospace', flex: 1 }}
+                    className="form-input"
+                    style={{ fontFamily: 'monospace', flex: 1 }}
                     value={form.codigoBarras}
                     onChange={e => set('codigoBarras', e.target.value)}
                     onBlur={e => { if (e.target.value && !isEdit) buscarBarcode(e.target.value); }}
@@ -175,38 +165,39 @@ export default function ProdutosCadastro() {
             </div>
 
             <Field label="Fabricante">
-              <input style={inputStyle} value={form.fabricante} onChange={e => set('fabricante', e.target.value)} placeholder="Ex: L'Oreal" />
+              <input className="form-input" value={form.fabricante} onChange={e => set('fabricante', e.target.value)} placeholder="Ex: L'Oreal" />
             </Field>
 
             <Field label="Peso / Volume">
-              <input style={inputStyle} value={form.peso} onChange={e => set('peso', e.target.value)} placeholder="Ex: 300ml" />
+              <input className="form-input" value={form.peso} onChange={e => set('peso', e.target.value)} placeholder="Ex: 300ml" />
             </Field>
 
             <Field label="Quantidade em Estoque">
-              <input style={inputStyle} type="number" min="0" value={form.quantidade} onChange={e => set('quantidade', e.target.value)} placeholder="0" />
+              <input className="form-input" type="number" min="0" value={form.quantidade} onChange={e => set('quantidade', e.target.value)} placeholder="0" />
             </Field>
 
             <Field label="Preço de Custo (R$)">
-              <input style={inputStyle} type="number" min="0" step="0.01" value={form.preco} onChange={e => set('preco', e.target.value)} placeholder="0,00" />
+              <input className="form-input" type="number" min="0" step="0.01" value={form.preco} onChange={e => set('preco', e.target.value)} placeholder="0,00" />
             </Field>
 
             <Field label="Preço de Venda (R$)">
-              <input style={inputStyle} type="number" min="0" step="0.01" value={form.precoVenda} onChange={e => set('precoVenda', e.target.value)} placeholder="0,00" />
+              <input className="form-input" type="number" min="0" step="0.01" value={form.precoVenda} onChange={e => set('precoVenda', e.target.value)} placeholder="0,00" />
             </Field>
 
             <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
               <Field label="Data de Fabricação">
-                <input style={inputStyle} type="date" value={form.dataFabricacao} onChange={e => set('dataFabricacao', e.target.value)} />
+                <input className="form-input" type="date" value={form.dataFabricacao} onChange={e => set('dataFabricacao', e.target.value)} />
               </Field>
               <Field label="Data de Validade">
-                <input style={inputStyle} type="date" value={form.dataValidade} onChange={e => set('dataValidade', e.target.value)} />
+                <input className="form-input" type="date" value={form.dataValidade} onChange={e => set('dataValidade', e.target.value)} />
               </Field>
             </div>
 
             <div style={{ gridColumn: '1 / -1' }}>
               <Field label="Descrição / Observações">
                 <textarea
-                  style={{ ...inputStyle, resize: 'vertical', minHeight: 72 }}
+                  className="form-input"
+                  style={{ resize: 'vertical', minHeight: 72 }}
                   value={form.descricao}
                   onChange={e => set('descricao', e.target.value)}
                   rows={3}

@@ -77,13 +77,13 @@ export default function ProdutosLista() {
 
       {/* Barra de ações */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ flex: 1, minWidth: 200, display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)', padding: '0.45rem 0.75rem' }}>
-          <FiSearch size={14} style={{ color: 'var(--color-muted)', flexShrink: 0 }} />
+        <div className="search-wrap" style={{ flex: 1, minWidth: 200 }}>
+          <FiSearch size={14} />
           <input
+            className="search-input"
             value={busca}
             onChange={e => setBusca(e.target.value)}
             placeholder="Buscar por nome, fabricante..."
-            style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--color)', fontSize: '0.875rem', flex: 1 }}
           />
         </div>
         <button
@@ -109,7 +109,7 @@ export default function ProdutosLista() {
       ) : produtos.length === 0 ? (
         <div className="empty-state"><p>Nenhum produto encontrado.</p></div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <div className="table-wrap">
           <table className="data-table">
             <thead>
               <tr>

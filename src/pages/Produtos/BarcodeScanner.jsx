@@ -49,7 +49,7 @@ export default function BarcodeScanner({ onResult, onClose }) {
         ) : (
           <video
             ref={videoRef}
-            style={{ width: '100%', borderRadius: 8, border: '2px solid #2563eb' }}
+            style={{ width: '100%', borderRadius: 8, border: '2px solid var(--accent)' }}
             autoPlay
             muted
             playsInline
@@ -59,8 +59,8 @@ export default function BarcodeScanner({ onResult, onClose }) {
         {!erro && (
           <div style={{
             position: 'absolute', top: '50%', left: '10%', right: '10%',
-            height: 2, background: 'rgba(37,99,235,0.8)', transform: 'translateY(-50%)',
-            boxShadow: '0 0 8px rgba(37,99,235,0.9)',
+            height: 2, background: 'var(--accent)', transform: 'translateY(-50%)',
+            boxShadow: '0 0 8px var(--accent)',
           }} />
         )}
       </div>
