@@ -103,6 +103,7 @@ export default function ResumoTab({ periodo }) {
   const kpisAtendimentos = [
     { label: 'Total Agendamentos', value: fmtN(resumo.qtdTotal),       color: 'var(--color)' },
     { label: 'Concluídos',         value: fmtN(resumo.qtdConcluidos),  color: 'var(--success)' },
+    { label: 'Avulsos',            value: `${fmtN(resumo.qtdAvulsos || 0)} · ${fmtR(resumo.totalAvulsos || 0)}`, color: '#0891b2' },
     { label: 'Agendados',          value: fmtN(resumo.qtdAgendados),   color: '#2563eb' },
     { label: 'Pendentes',          value: fmtN(resumo.qtdPendentes),   color: '#f59e0b' },
     { label: 'Cancelados',         value: fmtN(resumo.qtdCancelados),  color: '#dc2626' },
