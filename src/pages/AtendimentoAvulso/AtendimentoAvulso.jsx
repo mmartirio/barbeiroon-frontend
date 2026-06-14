@@ -271,23 +271,39 @@ export default function AtendimentoAvulso() {
             <div className="form-group">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                 <label className="form-label" style={{ margin: 0 }}>Telefone do cliente *</label>
-                <button
-                  type="button"
-                  onClick={handleNoPhoneToggle}
-                  style={{
-                    background: noPhone ? 'var(--accent)' : 'var(--bg-input)',
-                    border: `1px solid ${noPhone ? 'var(--accent)' : 'var(--border)'}`,
-                    borderRadius: 'var(--radius-xs)',
-                    color: noPhone ? '#000' : 'var(--color-muted)',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    padding: '0.2rem 0.6rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  Sem número
-                </button>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', cursor: 'pointer', userSelect: 'none' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: noPhone ? 'var(--accent)' : 'var(--color-muted)', transition: 'color 0.2s' }}>
+                    Sem número
+                  </span>
+                  <span
+                    onClick={handleNoPhoneToggle}
+                    role="switch"
+                    aria-checked={noPhone}
+                    style={{
+                      display: 'inline-block',
+                      width: 36,
+                      height: 20,
+                      borderRadius: 10,
+                      background: noPhone ? 'var(--accent)' : 'var(--border)',
+                      position: 'relative',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span style={{
+                      position: 'absolute',
+                      top: 2,
+                      left: noPhone ? 18 : 2,
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      background: '#fff',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.35)',
+                      transition: 'left 0.2s',
+                    }} />
+                  </span>
+                </label>
               </div>
               <div ref={wrapperRef} style={{ position: 'relative' }}>
                 <input
