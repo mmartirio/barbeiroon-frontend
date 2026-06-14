@@ -27,12 +27,27 @@ export function AuthProvider({ children }) {
     idleTimer.current = setTimeout(logout, IDLE_MS);
   }, [logout]);
 
+  const refreshPlanFeatures = useCallback(async () => {
+    const token = sessionStorage.getItem('token');
+    if (!token) return;
+    try {
+      const res = await fetch('/api/auth/me/features', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const { planFeatures } = await res.json();
+        setUser(prev => prev ? { ...prev, planFeatures } : prev);
+      }
+    } catch {}
+  }, []);
+
   const login = useCallback((token) => {
     sessionStorage.setItem('token', token);
     const decoded = parseJwt(token);
     setUser(decoded);
     resetIdle();
-  }, [resetIdle]);
+    refreshPlanFeatures();
+  }, [resetIdle, refreshPlanFeatures]);
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
@@ -41,12 +56,13 @@ export function AuthProvider({ children }) {
       if (decoded && decoded.exp * 1000 > Date.now()) {
         setUser(decoded);
         resetIdle();
+        refreshPlanFeatures();
       } else {
         sessionStorage.removeItem('token');
       }
     }
     setAuthReady(true);
-  }, [resetIdle]);
+  }, [resetIdle, refreshPlanFeatures]);
 
   useEffect(() => {
     const original = window.fetch;
